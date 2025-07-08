@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "677054697948",
+    "project_id": "togetherdo-c9179",
+    "storage_bucket": "togetherdo-c9179.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:677054697948:android:cafcf10cff8575d06dff19",
+        "android_client_info": {
+          "package_name": "com.example.togetherdo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCO_H1SuQ5e9nwg9RbuI_TuysZoV_PKWjw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
