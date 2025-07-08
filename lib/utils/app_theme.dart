@@ -2,103 +2,62 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static const _primaryColor = Color(0xFF6750A4);
-
-  static ThemeData get lightTheme {
-    return ThemeData(
+  static final themes = <String, ThemeData>{
+    'Light': ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: _primaryColor,
+        seedColor: Color(0xFF6750A4),
         brightness: Brightness.light,
       ),
       textTheme: GoogleFonts.interTextTheme(),
-      appBarTheme: const AppBarTheme(
-        centerTitle: true,
-        elevation: 0,
-        scrolledUnderElevation: 1,
+    ),
+    'Matrix': ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.dark(
+        primary: Color(0xFF00FF41),
+        secondary: Color(0xFF003B00),
+        surface: Color(0xFF222B22),
       ),
-      cardTheme: const CardThemeData(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
-        ),
+      scaffoldBackgroundColor: Color(0xFF101010),
+      textTheme: GoogleFonts.sourceCodeProTextTheme(
+        ThemeData.dark().textTheme,
+      ).apply(bodyColor: Color(0xFF00FF41), displayColor: Color(0xFF00FF41)),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Color(0xFF003B00),
+        foregroundColor: Color(0xFF00FF41),
       ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        ),
+    ),
+    'Neo': ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.dark(
+        primary: Color(0xFF00E5FF),
+        secondary: Color(0xFFFF00E5),
+        surface: Color(0xFF23263A),
       ),
-      inputDecorationTheme: InputDecorationTheme(
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        filled: true,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
+      scaffoldBackgroundColor: Color(0xFF181A20),
+      textTheme: GoogleFonts.orbitronTextTheme(
+        ThemeData.dark().textTheme,
+      ).apply(bodyColor: Color(0xFF00E5FF), displayColor: Color(0xFFFF00E5)),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Color(0xFF23263A),
+        foregroundColor: Color(0xFF00E5FF),
       ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
-        ),
-      ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        type: BottomNavigationBarType.fixed,
-        elevation: 8,
-      ),
-    );
-  }
-
-  static ThemeData get darkTheme {
-    return ThemeData(
+    ),
+    'Summer': ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: _primaryColor,
-        brightness: Brightness.dark,
+        seedColor: Color(0xFFFFC107),
+        brightness: Brightness.light,
+        primary: Color(0xFFFFC107),
+        secondary: Color(0xFFFF7043),
+        surface: Color(0xFFFFECB3),
       ),
-      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
-      appBarTheme: const AppBarTheme(
-        centerTitle: true,
-        elevation: 0,
-        scrolledUnderElevation: 1,
+      scaffoldBackgroundColor: Color(0xFFFFF8E1),
+      textTheme: GoogleFonts.pacificoTextTheme(),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Color(0xFFFFC107),
+        foregroundColor: Color(0xFF6D4C41),
       ),
-      cardTheme: const CardThemeData(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
-        ),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        filled: true,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
-      ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
-        ),
-      ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        type: BottomNavigationBarType.fixed,
-        elevation: 8,
-      ),
-    );
-  }
+    ),
+  };
 }

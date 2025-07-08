@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
-import '../../widgets/theme/theme_switch_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   final Widget child;
@@ -48,10 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context, authState) {
         if (authState is AuthAuthenticated) {
           return Scaffold(
-            appBar: AppBar(
-              title: const Text('TogetherDo'),
-              actions: [const ThemeSwitchWidget(), const SizedBox(width: 16)],
-            ),
+            appBar: AppBar(title: const Text('TogetherDo')),
             body: widget.child,
             bottomNavigationBar: NavigationBar(
               selectedIndex: _currentIndex,
@@ -82,6 +77,14 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           );
+        }
+
+        // Redirect zur Login-Seite, wenn nicht authentifiziert
+        if (authState is AuthUnauthenticated) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.go('/login');
+          });
+          return const SizedBox.shrink();
         }
 
         // Fallback für nicht authentifizierte Benutzer

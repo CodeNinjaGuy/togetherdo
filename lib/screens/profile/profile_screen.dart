@@ -4,6 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
 import '../../blocs/auth/auth_state.dart';
+import '../../blocs/theme/theme_bloc.dart';
+import '../../blocs/theme/theme_event.dart';
+import '../../blocs/theme/theme_state.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -189,6 +192,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
 
                   const SizedBox(height: 32),
+
+                  // Theme-Auswahl Dropdown
+                  BlocBuilder<ThemeBloc, ThemeState>(
+                    builder: (context, themeState) {
+                      String currentTheme = 'Light';
+                      if (themeState is ThemeLoadSuccess) {
+                        currentTheme = themeState.themeName;
+                      } else if (themeState is ThemeChangedSuccess) {
+                        currentTheme = themeState.themeName;
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: DropdownButtonFormField<String>(
+                          value: currentTheme,
+                          decoration: const InputDecoration(
+                            labelText: 'Theme',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: ['Light', 'Matrix', 'Neo', 'Summer']
+                              .map(
+                                (theme) => DropdownMenuItem(
+                                  value: theme,
+                                  child: Text(theme),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              context.read<ThemeBloc>().add(
+                                ThemeChanged(value),
+                              );
+                            }
+                          },
+                        ),
+                      );
+                    },
+                  ),
 
                   // Actions
                   if (_isEditing) ...[

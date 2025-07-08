@@ -12,12 +12,17 @@ class ThemeInitial extends ThemeState {
 }
 
 class ThemeLoadSuccess extends ThemeState {
-  final bool isDarkMode;
-
-  const ThemeLoadSuccess({required this.isDarkMode});
-
+  final String themeName;
+  const ThemeLoadSuccess({required this.themeName});
   @override
-  List<Object?> get props => [isDarkMode];
+  List<Object?> get props => [themeName];
+}
+
+class ThemeChangedSuccess extends ThemeState {
+  final String themeName;
+  const ThemeChangedSuccess({required this.themeName});
+  @override
+  List<Object?> get props => [themeName];
 }
 
 class ThemeToggleSuccess extends ThemeState {

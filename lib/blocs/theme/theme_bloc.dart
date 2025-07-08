@@ -4,11 +4,11 @@ import 'theme_event.dart';
 import 'theme_state.dart';
 
 class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
-  static const String _themeKey = 'theme_mode';
+  static const String _themeKey = 'theme_name';
 
   ThemeBloc() : super(const ThemeInitial()) {
     on<ThemeLoadRequested>(_onThemeLoadRequested);
-    on<ThemeToggleRequested>(_onThemeToggleRequested);
+    on<ThemeChanged>(_onThemeChanged);
   }
 
   Future<void> _onThemeLoadRequested(
@@ -17,35 +17,23 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final isDarkMode = prefs.getBool(_themeKey) ?? false;
-      emit(ThemeLoadSuccess(isDarkMode: isDarkMode));
+      final themeName = prefs.getString(_themeKey) ?? 'Light';
+      emit(ThemeLoadSuccess(themeName: themeName));
     } catch (e) {
-      // Fallback auf Light Mode bei Fehler
-      emit(const ThemeLoadSuccess(isDarkMode: false));
+      emit(const ThemeLoadSuccess(themeName: 'Light'));
     }
   }
 
-  Future<void> _onThemeToggleRequested(
-    ThemeToggleRequested event,
+  Future<void> _onThemeChanged(
+    ThemeChanged event,
     Emitter<ThemeState> emit,
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final currentMode = prefs.getBool(_themeKey) ?? false;
-      final newMode = !currentMode;
-
-      await prefs.setBool(_themeKey, newMode);
-      emit(ThemeToggleSuccess(isDarkMode: newMode));
+      await prefs.setString(_themeKey, event.themeName);
+      emit(ThemeChangedSuccess(themeName: event.themeName));
     } catch (e) {
-      // Bei Fehler: Toggle basierend auf aktuellem State
-      final currentState = state;
-      if (currentState is ThemeLoadSuccess) {
-        emit(ThemeToggleSuccess(isDarkMode: !currentState.isDarkMode));
-      } else if (currentState is ThemeToggleSuccess) {
-        emit(ThemeToggleSuccess(isDarkMode: !currentState.isDarkMode));
-      } else {
-        emit(const ThemeToggleSuccess(isDarkMode: true));
-      }
+      emit(ThemeChangedSuccess(themeName: event.themeName));
     }
   }
 }

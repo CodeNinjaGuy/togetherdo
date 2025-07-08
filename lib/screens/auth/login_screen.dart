@@ -179,27 +179,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
 
                     const SizedBox(height: 24),
-
-                    // Demo Login
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            Text(
-                              'Demo-Login',
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'E-Mail: test@example.com\nPasswort: password',
-                              style: Theme.of(context).textTheme.bodySmall,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),

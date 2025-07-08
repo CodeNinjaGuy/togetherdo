@@ -14,3 +14,11 @@ class ThemeToggleRequested extends ThemeEvent {
 class ThemeLoadRequested extends ThemeEvent {
   const ThemeLoadRequested();
 }
+
+class ThemeChanged extends ThemeEvent {
+  final String themeName;
+  const ThemeChanged(this.themeName);
+
+  @override
+  List<Object?> get props => [themeName];
+}

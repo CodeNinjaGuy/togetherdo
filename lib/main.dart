@@ -89,20 +89,18 @@ class TogetherDoAppView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeBloc, ThemeState>(
       builder: (context, themeState) {
-        bool isDarkMode = false;
-
+        String themeName = 'Light';
         if (themeState is ThemeLoadSuccess) {
-          isDarkMode = themeState.isDarkMode;
-        } else if (themeState is ThemeToggleSuccess) {
-          isDarkMode = themeState.isDarkMode;
+          themeName = themeState.themeName;
+        } else if (themeState is ThemeChangedSuccess) {
+          themeName = themeState.themeName;
         }
-
+        final themeData =
+            AppTheme.themes[themeName] ?? AppTheme.themes['Light'];
         return MaterialApp.router(
           title: 'TogetherDo',
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          theme: themeData,
           routerConfig: _router,
           builder: (context, child) {
             return BlocListener<AuthBloc, AuthState>(

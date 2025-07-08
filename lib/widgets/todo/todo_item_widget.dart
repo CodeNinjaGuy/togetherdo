@@ -223,7 +223,7 @@ class TodoItemWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _buildPriorityChip(context),
-                if (canEdit)
+                if (canComplete)
                   IconButton(
                     icon: const Icon(Icons.delete_outline),
                     onPressed: () => _showDeleteDialog(context),
