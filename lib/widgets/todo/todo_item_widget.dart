@@ -8,6 +8,8 @@ import '../../repositories/list_repository.dart';
 import '../../repositories/todo_repository.dart';
 import '../../models/todo_model.dart';
 import '../../models/list_model.dart';
+import '../../screens/chat/chat_screen.dart';
+import '../../repositories/chat_repository.dart';
 
 class TodoItemWidget extends StatelessWidget {
   final TodoModel todo;
@@ -228,6 +230,18 @@ class TodoItemWidget extends StatelessWidget {
                     icon: const Icon(Icons.delete_outline),
                     onPressed: () => _showDeleteDialog(context),
                   ),
+                IconButton(
+                  icon: const Icon(Icons.chat_bubble_outline),
+                  tooltip: 'Chat zum Todo',
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ChatScreen(todoId: todo.id, todoTitle: todo.title),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),
@@ -302,6 +316,10 @@ class TodoItemWidget extends StatelessWidget {
           ),
           TextButton(
             onPressed: () async {
+              // Zuerst Chat löschen
+              await (context.read<ChatRepository>() as FirestoreChatRepository)
+                  .deleteAllMessages(todo.id);
+              // Dann Todo löschen
               await (context.read<TodoRepository>() as FirebaseTodoRepository)
                   .deleteTodo(todo.id);
               if (!context.mounted) return;

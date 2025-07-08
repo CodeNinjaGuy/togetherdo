@@ -16,6 +16,7 @@ import 'repositories/auth_repository.dart';
 import 'repositories/todo_repository.dart';
 import 'repositories/shopping_repository.dart';
 import 'repositories/list_repository.dart';
+import 'repositories/chat_repository.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/home/home_screen.dart';
@@ -29,7 +30,28 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const TogetherDoApp());
+  runApp(
+    MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<AuthRepository>(
+          create: (context) => FirebaseAuthRepository(),
+        ),
+        RepositoryProvider<TodoRepository>(
+          create: (context) => FirebaseTodoRepository(),
+        ),
+        RepositoryProvider<ShoppingRepository>(
+          create: (context) => FirebaseShoppingRepository(),
+        ),
+        RepositoryProvider<ListRepository>(
+          create: (context) => FirebaseListRepository(),
+        ),
+        RepositoryProvider<ChatRepository>(
+          create: (context) => FirestoreChatRepository(),
+        ),
+      ],
+      child: const TogetherDoApp(),
+    ),
+  );
 }
 
 class TogetherDoApp extends StatelessWidget {
