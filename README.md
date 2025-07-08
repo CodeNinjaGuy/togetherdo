@@ -50,22 +50,22 @@ Eine moderne Flutter-App für die Verwaltung von Todos und Einkaufslisten mit Ec
 - **Bearbeitungsberechtigung**: Kontrolle über wer was bearbeiten darf
 - Besitzer können Listen löschen, Mitglieder können verlassen
 
+### 💬 Chat pro Todo
+- Jeder Todo-Eintrag hat einen eigenen Chatraum
+- Chat-Icon im Todo-Listeneintrag öffnet den ChatScreen
+- Nachrichten werden in Echtzeit synchronisiert (Firestore)
+- Beim Löschen eines Todos wird auch der zugehörige Chat gelöscht
+
 ### 👤 Benutzerverwaltung
 - Registrierung und Login über Firebase Auth
 - Profilverwaltung mit Avatar-Upload (Firebase Storage)
 - Sichere Authentifizierung
 - Benutzerprofile mit Anzeigename
 
-### 🎨 Moderne UI/UX
-- Material Design 3
-- Responsive Design für Web, iOS und Android
-- **Dark/Light Theme Support** mit manuellem Toggle
-  - Theme-Switch in der App-Bar
-  - Automatische Speicherung der Präferenz
-  - Sofortige Theme-Umschaltung
-- Intuitive Navigation
-- **Echtzeit-Updates** ohne manuelles Neuladen
-- **Visuelle Hinweise** für Nur-Lese-Modi
+### 🎨 Moderne UI/UX (erweitert)
+- Theme-Auswahl: Vier Themes (Light, Matrix, Neo, Summer) mit optimierten Kontrastfarben für beste Lesbarkeit
+- Kategorie-Auswahl beim Todo-Erstellen als Dropdown mit den wichtigsten Kategorien (Arbeit, Privat, Einkaufen, Haushalt, Gesundheit, Lernen, Sonstiges, Benutzerdefiniert)
+- Alle Listen- und Todo-Ansichten sind für Kontrast und Lesbarkeit optimiert
 
 ## Technische Architektur
 
@@ -81,6 +81,7 @@ Eine moderne Flutter-App für die Verwaltung von Todos und Einkaufslisten mit Ec
 - **TodoModel**: Todos mit Priorität, Fälligkeit, Zuweisungen und "Erledigt von"-Information (zugeordnet zu Listen)
 - **ShoppingItemModel**: Einkaufslisten-Items mit Menge (zugeordnet zu Listen)
 - **ShareModel**: Geteilte Listen mit Codes und Mitgliedern
+- **ChatMessageModel**: Nachrichten mit todoId, userId, userName, message, timestamp
 
 ### Repository Pattern
 - Abstrakte Repository-Interfaces
@@ -176,6 +177,9 @@ Die App verwendet Firebase für:
 - Client-seitige Validierung für bessere UX
 - Echtzeit-Updates der Berechtigungen und Zuweisungen
 
+### ✅ Konsistente Berechtigungen
+- Erledigen und Löschen von Todos ist nur für berechtigte Nutzer möglich (Besitzer oder zugewiesene Person)
+
 ## Projektstruktur
 
 ```
@@ -212,6 +216,10 @@ lib/
 ├── firebase_options.dart  # Firebase-Konfiguration
 └── main.dart        # App-Einstiegspunkt
 ```
+
+### 🔌 Architektur (erweitert)
+- **ChatRepository**: Firestore-Implementierung für Chat pro Todo
+- Chat-Provider global eingebunden (Provider-Fix)
 
 ## Responsive Design
 
