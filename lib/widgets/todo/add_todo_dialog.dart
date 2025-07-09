@@ -161,167 +161,183 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Titel',
-                  hintText: 'Was muss erledigt werden?',
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Titel ist erforderlich';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Beschreibung (optional)',
-                  hintText: 'Weitere Details...',
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              // Ersetze das TextFormField für Kategorie durch ein Dropdown mit den wichtigsten Kategorien und optionaler benutzerdefinierter Eingabe.
-              DropdownButtonFormField<String>(
-                value: _selectedCategory,
-                decoration: const InputDecoration(
-                  labelText: 'Kategorie (optional)',
-                  hintText: 'Kategorie auswählen',
-                ),
-                items: _categories
-                    .map(
-                      (cat) => DropdownMenuItem(value: cat, child: Text(cat)),
-                    )
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedCategory = value;
-                    if (value != 'Benutzerdefiniert') {
-                      _customCategory = null;
-                    }
-                  });
-                },
-              ),
-              if (_selectedCategory == 'Benutzerdefiniert')
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 TextFormField(
+                  controller: _titleController,
                   decoration: const InputDecoration(
-                    labelText: 'Eigene Kategorie',
-                    hintText: 'z.B. Hobby, Projekt ...',
+                    labelText: 'Titel',
+                    hintText: 'Was muss erledigt werden?',
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      _customCategory = value;
-                    });
-                  },
-                ),
-              const SizedBox(height: 16),
-
-              // Zuweisung
-              if (_availableUsers.isNotEmpty) ...[
-                DropdownButtonFormField<String>(
-                  value: _selectedUserId,
-                  decoration: const InputDecoration(
-                    labelText: 'Zuweisung (optional)',
-                    hintText: 'Wem soll das Todo zugewiesen werden?',
-                  ),
-                  items: [
-                    const DropdownMenuItem<String>(
-                      value: null,
-                      child: Text('Keine Zuweisung (alle können erledigen)'),
-                    ),
-                    ..._availableUsers.map((user) {
-                      return DropdownMenuItem<String>(
-                        value: user['id'],
-                        child: Text(user['name']!),
-                      );
-                    }),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedUserId = value;
-                      _selectedUserName = value != null
-                          ? _availableUsers.firstWhere(
-                              (u) => u['id'] == value,
-                            )['name']
-                          : null;
-                    });
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Titel ist erforderlich';
+                    }
+                    return null;
                   },
                 ),
                 const SizedBox(height: 16),
-              ],
-
-              // Priorität
-              DropdownButtonFormField<TodoPriority>(
-                value: _priority,
-                decoration: const InputDecoration(labelText: 'Priorität'),
-                items: TodoPriority.values.map((priority) {
-                  String label;
-                  switch (priority) {
-                    case TodoPriority.high:
-                      label = 'Hoch';
-                      break;
-                    case TodoPriority.medium:
-                      label = 'Mittel';
-                      break;
-                    case TodoPriority.low:
-                      label = 'Niedrig';
-                      break;
-                  }
-                  return DropdownMenuItem(value: priority, child: Text(label));
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
+                TextFormField(
+                  controller: _descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Beschreibung (optional)',
+                    hintText: 'Weitere Details...',
+                  ),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+                // Ersetze das TextFormField für Kategorie durch ein Dropdown mit den wichtigsten Kategorien und optionaler benutzerdefinierter Eingabe.
+                DropdownButtonFormField<String>(
+                  value: _selectedCategory,
+                  decoration: const InputDecoration(
+                    labelText: 'Kategorie (optional)',
+                    hintText: 'Kategorie auswählen',
+                  ),
+                  isExpanded: true,
+                  items: _categories
+                      .map(
+                        (cat) => DropdownMenuItem(
+                          value: cat,
+                          child: Text(cat, overflow: TextOverflow.ellipsis),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
                     setState(() {
-                      _priority = value;
+                      _selectedCategory = value;
+                      if (value != 'Benutzerdefiniert') {
+                        _customCategory = null;
+                      }
                     });
-                  }
-                },
-              ),
-              const SizedBox(height: 16),
+                  },
+                ),
+                if (_selectedCategory == 'Benutzerdefiniert')
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'Eigene Kategorie',
+                      hintText: 'z.B. Hobby, Projekt ...',
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _customCategory = value;
+                      });
+                    },
+                  ),
+                const SizedBox(height: 16),
 
-              // Fälligkeitsdatum
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      readOnly: true,
-                      decoration: InputDecoration(
-                        labelText: 'Fälligkeitsdatum (optional)',
-                        hintText: _selectedDate != null
-                            ? DateFormat('dd.MM.yyyy').format(_selectedDate!)
-                            : 'Datum auswählen',
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.calendar_today),
-                          onPressed: _selectDate,
-                        ),
-                      ),
+                // Zuweisung
+                if (_availableUsers.isNotEmpty) ...[
+                  DropdownButtonFormField<String>(
+                    value: _selectedUserId,
+                    decoration: const InputDecoration(
+                      labelText: 'Zuweisung (optional)',
+                      hintText: 'Wem soll das Todo zugewiesen werden?',
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextFormField(
-                      readOnly: true,
-                      decoration: InputDecoration(
-                        labelText: 'Uhrzeit (optional)',
-                        hintText: _selectedTime != null
-                            ? _selectedTime!.format(context)
-                            : 'Zeit auswählen',
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.access_time),
-                          onPressed: _selectTime,
-                        ),
+                    isExpanded: true,
+                    items: [
+                      const DropdownMenuItem<String>(
+                        value: null,
+                        child: Text('Keine Zuweisung'),
                       ),
-                    ),
+                      ..._availableUsers.map((user) {
+                        return DropdownMenuItem<String>(
+                          value: user['id'],
+                          child: Text(
+                            user['name']!,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      }),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedUserId = value;
+                        _selectedUserName = value != null
+                            ? _availableUsers.firstWhere(
+                                (u) => u['id'] == value,
+                              )['name']
+                            : null;
+                      });
+                    },
                   ),
+                  const SizedBox(height: 16),
                 ],
-              ),
-            ],
+
+                // Priorität
+                DropdownButtonFormField<TodoPriority>(
+                  value: _priority,
+                  decoration: const InputDecoration(labelText: 'Priorität'),
+                  isExpanded: true,
+                  items: TodoPriority.values.map((priority) {
+                    String label;
+                    switch (priority) {
+                      case TodoPriority.high:
+                        label = 'Hoch';
+                        break;
+                      case TodoPriority.medium:
+                        label = 'Mittel';
+                        break;
+                      case TodoPriority.low:
+                        label = 'Niedrig';
+                        break;
+                    }
+                    return DropdownMenuItem(
+                      value: priority,
+                      child: Text(label),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _priority = value;
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Fälligkeitsdatum
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: 'Fälligkeitsdatum (optional)',
+                          hintText: _selectedDate != null
+                              ? DateFormat('dd.MM.yyyy').format(_selectedDate!)
+                              : 'Datum auswählen',
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.calendar_today),
+                            onPressed: _selectDate,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextFormField(
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: 'Uhrzeit (optional)',
+                          hintText: _selectedTime != null
+                              ? _selectedTime!.format(context)
+                              : 'Zeit auswählen',
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.access_time),
+                            onPressed: _selectTime,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

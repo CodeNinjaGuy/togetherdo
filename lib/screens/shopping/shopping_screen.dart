@@ -42,8 +42,8 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Einkaufsliste')),
-      body: StreamBuilder<ListModel?>(
-        stream: Stream.fromFuture(_listRepository.getListById(widget.listId)),
+      body: FutureBuilder<ListModel?>(
+        future: _listRepository.getListById(widget.listId),
         builder: (context, listSnapshot) {
           if (listSnapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -188,8 +188,8 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
           );
         },
       ),
-      floatingActionButton: StreamBuilder<ListModel?>(
-        stream: Stream.fromFuture(_listRepository.getListById(widget.listId)),
+      floatingActionButton: FutureBuilder<ListModel?>(
+        future: _listRepository.getListById(widget.listId),
         builder: (context, listSnapshot) {
           if (listSnapshot.connectionState == ConnectionState.waiting) {
             return const SizedBox.shrink();

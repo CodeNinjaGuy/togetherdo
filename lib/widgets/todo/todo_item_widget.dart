@@ -107,6 +107,7 @@ class TodoItemWidget extends StatelessWidget {
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 if (todo.description.isNotEmpty)
                   Text(
@@ -144,16 +145,19 @@ class TodoItemWidget extends StatelessWidget {
                               : Colors.blue.shade700,
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          isAssignedToMe
-                              ? 'Dir zugewiesen'
-                              : 'Zugewiesen an ${todo.assignedToUserName ?? 'Unbekannt'}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: isAssignedToMe
-                                ? Colors.green.shade700
-                                : Colors.blue.shade700,
-                            fontWeight: FontWeight.w500,
+                        Flexible(
+                          child: Text(
+                            isAssignedToMe
+                                ? 'Dir zugewiesen'
+                                : 'Zugewiesen an ${todo.assignedToUserName ?? 'Unbekannt'}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isAssignedToMe
+                                  ? Colors.green.shade700
+                                  : Colors.blue.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -170,7 +174,7 @@ class TodoItemWidget extends StatelessWidget {
                         color: Theme.of(context).colorScheme.primary,
                       ),
                       const SizedBox(width: 4),
-                      Expanded(
+                      Flexible(
                         child: Text(
                           'Erledigt von ${todo.completedByUserName}',
                           style: TextStyle(
@@ -194,12 +198,15 @@ class TodoItemWidget extends StatelessWidget {
                         color: _getDueDateColor(context),
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        DateFormat('dd.MM.yyyy HH:mm').format(todo.dueDate!),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: _getDueDateColor(context),
-                          fontWeight: FontWeight.w500,
+                      Flexible(
+                        child: Text(
+                          DateFormat('dd.MM.yyyy HH:mm').format(todo.dueDate!),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: _getDueDateColor(context),
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
