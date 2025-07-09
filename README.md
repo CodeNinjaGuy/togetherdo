@@ -52,7 +52,10 @@ Eine moderne Flutter-App für die Verwaltung von Todos und Einkaufslisten mit Ec
 
 ### 💬 Chat pro Todo
 - Jeder Todo-Eintrag hat einen eigenen Chatraum
-- Chat-Icon im Todo-Listeneintrag öffnet den ChatScreen
+- **Chat-Symbol nur bei zusätzlichen Teilnehmern** - Intelligente Anzeige basierend auf Teilnehmerzahl
+- **Badge-Counter für ungelesene Nachrichten** - Rote Badge-Anzeige mit Anzahl
+- **Echtzeit-Updates** der ungelesenen Nachrichten
+- **Automatische Markierung als gelesen** beim Öffnen des Chats
 - Nachrichten werden in Echtzeit synchronisiert (Firestore)
 - Beim Löschen eines Todos wird auch der zugehörige Chat gelöscht
 
@@ -63,25 +66,23 @@ Eine moderne Flutter-App für die Verwaltung von Todos und Einkaufslisten mit Ec
 - Benutzerprofile mit Anzeigename
 
 ### 🎨 Moderne UI/UX (erweitert)
-- Theme-Auswahl: Vier Themes (Light, Matrix, Neo, Summer) mit optimierten Kontrastfarben für beste Lesbarkeit
+- **9 wunderschöne Themes**: Light, Matrix, Neo, Summer, Aurora, Sunset, Ocean, Forest, Galaxy
+  - **Aurora**: Nordlichter-inspiriert mit grünen und blauen Akzenten
+  - **Sunset**: Warme Orange- und Rottöne für gemütliche Atmosphäre
+  - **Ocean**: Beruhigende Blau- und Türkistöne
+  - **Forest**: Natürliche Grüntöne für eine frische Umgebung
+  - **Galaxy**: Mystische Lila- und Violettöne für kosmische Atmosphäre
 - Kategorie-Auswahl beim Todo-Erstellen als Dropdown mit den wichtigsten Kategorien (Arbeit, Privat, Einkaufen, Haushalt, Gesundheit, Lernen, Sonstiges, Benutzerdefiniert)
 - Alle Listen- und Todo-Ansichten sind für Kontrast und Lesbarkeit optimiert
 - **Responsives Split-View-Layout:**
   - Automatische Umschaltung zwischen einspaltigem Layout (Mobil) und Split-View (macOS/iPad/Desktop)
   - Split-View zeigt links die Listenübersicht, rechts die Details (z.B. Todos, Chat)
   - Moderne, adaptive UI für alle Bildschirmgrößen
-- **9 wunderschöne Themes:**
-  - Light, Matrix, Neo, Summer, Aurora, Sunset, Ocean, Forest, Galaxy
-  - Jedes Theme mit einzigartigen Farben, Schriften und Stilen
-  - Aurora: Nordlichter-inspiriert mit grünen und blauen Akzenten
-  - Sunset: Warme Orange- und Rottöne für gemütliche Atmosphäre
-  - Ocean: Beruhigende Blau- und Türkistöne
-  - Forest: Natürliche Grüntöne für eine frische Umgebung
-  - Galaxy: Mystische Lila- und Violettöne für kosmische Atmosphäre
 - **Badge-Counter für ungelesene Chat-Nachrichten:**
   - Rote Badge-Anzeige am Chat-Icon bei ungelesenen Nachrichten
   - Automatische Markierung als gelesen beim Öffnen des Chats
   - Echtzeit-Updates der ungelesenen Nachrichtenanzahl
+  - **Intelligente Chat-Sichtbarkeit**: Chat-Symbol nur bei zusätzlichen Teilnehmern
 
 ## Technische Architektur
 
@@ -97,12 +98,13 @@ Eine moderne Flutter-App für die Verwaltung von Todos und Einkaufslisten mit Ec
 - **TodoModel**: Todos mit Priorität, Fälligkeit, Zuweisungen und "Erledigt von"-Information (zugeordnet zu Listen)
 - **ShoppingItemModel**: Einkaufslisten-Items mit Menge (zugeordnet zu Listen)
 - **ShareModel**: Geteilte Listen mit Codes und Mitgliedern
-- **ChatMessageModel**: Nachrichten mit todoId, userId, userName, message, timestamp
+- **ChatMessageModel**: Nachrichten mit todoId, userId, userName, message, timestamp und isRead-Status
 
 ### Repository Pattern
 - Abstrakte Repository-Interfaces
 - **Firebase-Implementierungen** für Produktion
 - Mock-Implementierungen für Entwicklung
+- **Stream-basierte APIs** für Echtzeit-Updates
 
 ### Firebase-Integration
 - **Firebase Auth**: Sichere Benutzerauthentifizierung
@@ -145,6 +147,7 @@ Die App verwendet Firebase für:
 - `todos`: Todo-Items
 - `shopping_items`: Einkaufslisten-Items
 - `shares`: Geteilte Listen
+- `chatMessages`: Chat-Nachrichten pro Todo
 
 ## Echtzeit-Features
 
@@ -153,6 +156,8 @@ Die App verwendet Firebase für:
 - **Einkaufslisten**: Gekaufte Items werden sofort synchronisiert
 - **Listen-Management**: Neue Listen und Mitglieder werden sofort sichtbar
 - **Sharing**: Beitritte und Verlassen werden sofort übertragen
+- **Chat-System**: Nachrichten und Badge-Counter werden in Echtzeit aktualisiert
+- **Teilnehmer-Prüfung**: Chat-Symbol erscheint/verschwindet sofort bei Teilnehmer-Änderungen
 
 ### Stream-basierte Architektur
 - Firestore-Streams für Echtzeit-Updates
