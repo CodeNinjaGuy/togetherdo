@@ -18,9 +18,25 @@ class _ChatScreenState extends State<ChatScreen> {
   final _controller = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    _markMessagesAsRead();
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _markMessagesAsRead() async {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      await context.read<ChatRepository>().markAsRead(
+        widget.todoId,
+        authState.user.id,
+      );
+    }
   }
 
   void _sendMessage() async {
@@ -82,8 +98,10 @@ class _ChatScreenState extends State<ChatScreen> {
                           color: isMe
                               ? Theme.of(
                                   context,
-                                ).colorScheme.primary.withOpacity(0.2)
-                              : Theme.of(context).colorScheme.surfaceVariant,
+                                ).colorScheme.primary.withValues(alpha: 0.2)
+                              : Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Column(

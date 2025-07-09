@@ -66,6 +66,22 @@ Eine moderne Flutter-App für die Verwaltung von Todos und Einkaufslisten mit Ec
 - Theme-Auswahl: Vier Themes (Light, Matrix, Neo, Summer) mit optimierten Kontrastfarben für beste Lesbarkeit
 - Kategorie-Auswahl beim Todo-Erstellen als Dropdown mit den wichtigsten Kategorien (Arbeit, Privat, Einkaufen, Haushalt, Gesundheit, Lernen, Sonstiges, Benutzerdefiniert)
 - Alle Listen- und Todo-Ansichten sind für Kontrast und Lesbarkeit optimiert
+- **Responsives Split-View-Layout:**
+  - Automatische Umschaltung zwischen einspaltigem Layout (Mobil) und Split-View (macOS/iPad/Desktop)
+  - Split-View zeigt links die Listenübersicht, rechts die Details (z.B. Todos, Chat)
+  - Moderne, adaptive UI für alle Bildschirmgrößen
+- **9 wunderschöne Themes:**
+  - Light, Matrix, Neo, Summer, Aurora, Sunset, Ocean, Forest, Galaxy
+  - Jedes Theme mit einzigartigen Farben, Schriften und Stilen
+  - Aurora: Nordlichter-inspiriert mit grünen und blauen Akzenten
+  - Sunset: Warme Orange- und Rottöne für gemütliche Atmosphäre
+  - Ocean: Beruhigende Blau- und Türkistöne
+  - Forest: Natürliche Grüntöne für eine frische Umgebung
+  - Galaxy: Mystische Lila- und Violettöne für kosmische Atmosphäre
+- **Badge-Counter für ungelesene Chat-Nachrichten:**
+  - Rote Badge-Anzeige am Chat-Icon bei ungelesenen Nachrichten
+  - Automatische Markierung als gelesen beim Öffnen des Chats
+  - Echtzeit-Updates der ungelesenen Nachrichtenanzahl
 
 ## Technische Architektur
 

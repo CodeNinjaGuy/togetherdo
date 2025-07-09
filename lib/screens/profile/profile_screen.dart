@@ -210,14 +210,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             labelText: 'Theme',
                             border: OutlineInputBorder(),
                           ),
-                          items: ['Light', 'Matrix', 'Neo', 'Summer']
-                              .map(
-                                (theme) => DropdownMenuItem(
-                                  value: theme,
-                                  child: Text(theme),
-                                ),
-                              )
-                              .toList(),
+                          items:
+                              [
+                                    'Light',
+                                    'Matrix',
+                                    'Neo',
+                                    'Summer',
+                                    'Aurora',
+                                    'Sunset',
+                                    'Ocean',
+                                    'Forest',
+                                    'Galaxy',
+                                  ]
+                                  .map(
+                                    (theme) => DropdownMenuItem(
+                                      value: theme,
+                                      child: Text(theme),
+                                    ),
+                                  )
+                                  .toList(),
                           onChanged: (value) {
                             if (value != null) {
                               context.read<ThemeBloc>().add(

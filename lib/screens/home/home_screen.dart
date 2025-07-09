@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
+import '../../widgets/responsive_scaffold.dart';
+import '../lists/lists_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Widget child;
@@ -45,9 +47,22 @@ class _HomeScreenState extends State<HomeScreen> {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, authState) {
         if (authState is AuthAuthenticated) {
+          final width = MediaQuery.of(context).size.width;
+          final bool isWide = width >= 800;
+          final location = GoRouterState.of(context).uri.path;
+          final bool showSplitView =
+              isWide &&
+              (location.startsWith('/todo/') ||
+                  location.startsWith('/shopping/'));
+
           return Scaffold(
             appBar: AppBar(title: const Text('TogetherDo')),
-            body: widget.child,
+            body: showSplitView
+                ? ResponsiveScaffold(
+                    leftChild: const ListsScreen(),
+                    rightChild: widget.child,
+                  )
+                : widget.child,
             bottomNavigationBar: NavigationBar(
               selectedIndex: _currentIndex,
               onDestinationSelected: (index) {

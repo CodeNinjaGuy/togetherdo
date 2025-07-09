@@ -16,6 +16,7 @@ abstract class ListRepository {
   Future<void> leaveList(String listId, String userId);
   Future<ListModel?> getListByCode(String code);
   Future<ListModel?> getListById(String listId);
+  Stream<ListModel?> getListByIdStream(String listId);
 }
 
 class MockListRepository implements ListRepository {
@@ -143,6 +144,12 @@ class MockListRepository implements ListRepository {
     } catch (e) {
       return null;
     }
+  }
+
+  @override
+  Stream<ListModel?> getListByIdStream(String listId) {
+    // Für Mock-Repository: Simuliere Stream mit Future
+    return Stream.fromFuture(getListById(listId));
   }
 }
 
@@ -281,5 +288,15 @@ class FirebaseListRepository implements ListRepository {
     final doc = await _firestore.collection('lists').doc(listId).get();
     if (!doc.exists) return null;
     return ListModel.fromJson(doc.data()!);
+  }
+
+  @override
+  Stream<ListModel?> getListByIdStream(String listId) {
+    return _firestore.collection('lists').doc(listId).snapshots().map((
+      snapshot,
+    ) {
+      if (!snapshot.exists) return null;
+      return ListModel.fromJson(snapshot.data()!);
+    });
   }
 }

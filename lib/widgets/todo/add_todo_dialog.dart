@@ -31,6 +31,22 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
   String? _selectedUserName;
   List<Map<String, String>> _availableUsers = [];
 
+  // Ersetze das TextFormField für Kategorie durch ein Dropdown mit den wichtigsten Kategorien und optionaler benutzerdefinierter Eingabe.
+
+  // Definiere die wichtigsten Kategorien oben in der State-Klasse:
+  final List<String> _categories = [
+    'Arbeit',
+    'Privat',
+    'Einkaufen',
+    'Haushalt',
+    'Gesundheit',
+    'Lernen',
+    'Sonstiges',
+    'Benutzerdefiniert',
+  ];
+  String? _selectedCategory;
+  String? _customCategory;
+
   @override
   void initState() {
     super.initState();
@@ -122,9 +138,11 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
             dueDate: dueDate,
             priority: _priority,
             userId: authState.user.id,
-            category: _categoryController.text.trim().isEmpty
-                ? null
-                : _categoryController.text.trim(),
+            category: (_selectedCategory == 'Benutzerdefiniert')
+                ? _customCategory?.trim().isEmpty == true
+                      ? null
+                      : _customCategory?.trim()
+                : _selectedCategory,
             listId: widget.listId,
             assignedToUserId: _selectedUserId,
             assignedToUserName: _selectedUserName,
@@ -169,13 +187,39 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
                 maxLines: 3,
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _categoryController,
+              // Ersetze das TextFormField für Kategorie durch ein Dropdown mit den wichtigsten Kategorien und optionaler benutzerdefinierter Eingabe.
+              DropdownButtonFormField<String>(
+                value: _selectedCategory,
                 decoration: const InputDecoration(
                   labelText: 'Kategorie (optional)',
-                  hintText: 'z.B. Arbeit, Privat, Einkaufen',
+                  hintText: 'Kategorie auswählen',
                 ),
+                items: _categories
+                    .map(
+                      (cat) => DropdownMenuItem(value: cat, child: Text(cat)),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCategory = value;
+                    if (value != 'Benutzerdefiniert') {
+                      _customCategory = null;
+                    }
+                  });
+                },
               ),
+              if (_selectedCategory == 'Benutzerdefiniert')
+                TextFormField(
+                  decoration: const InputDecoration(
+                    labelText: 'Eigene Kategorie',
+                    hintText: 'z.B. Hobby, Projekt ...',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _customCategory = value;
+                    });
+                  },
+                ),
               const SizedBox(height: 16),
 
               // Zuweisung

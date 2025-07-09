@@ -104,7 +104,7 @@ class ListItemWidget extends StatelessWidget {
                                         size: 16,
                                         color: Theme.of(
                                           context,
-                                        ).colorScheme.primary,
+                                        ).colorScheme.onPrimaryContainer,
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
@@ -115,7 +115,7 @@ class ListItemWidget extends StatelessWidget {
                                             ?.copyWith(
                                               color: Theme.of(
                                                 context,
-                                              ).colorScheme.primary,
+                                              ).colorScheme.onPrimaryContainer,
                                               fontWeight: FontWeight.w600,
                                             ),
                                       ),
@@ -142,7 +142,7 @@ class ListItemWidget extends StatelessWidget {
                                         size: 16,
                                         color: Theme.of(
                                           context,
-                                        ).colorScheme.secondary,
+                                        ).colorScheme.onSecondaryContainer,
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
@@ -151,9 +151,9 @@ class ListItemWidget extends StatelessWidget {
                                             .textTheme
                                             .bodySmall
                                             ?.copyWith(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.secondary,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSecondaryContainer,
                                               fontWeight: FontWeight.w600,
                                             ),
                                       ),
@@ -290,30 +290,43 @@ class ListItemWidget extends StatelessWidget {
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 4),
-                    Text(
-                      'Besitzer: ${list.ownerName}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    Expanded(
+                      child: Text(
+                        'Besitzer: ${list.ownerName}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const Spacer(),
-                    if (list.shareCode != null) ...[
+                  ],
+                ),
+                if (list.shareCode != null) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
                       Icon(
                         Icons.qr_code,
                         size: 16,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        'Code: ${list.shareCode}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontFamily: 'monospace',
+                      Expanded(
+                        child: Text(
+                          'Code: ${list.shareCode}',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                                fontFamily: 'monospace',
+                              ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
-                  ],
-                ),
+                  ),
+                ],
                 const SizedBox(height: 4),
                 Row(
                   children: [

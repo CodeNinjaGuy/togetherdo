@@ -19,11 +19,8 @@ class TodoItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<ListModel?>(
-      stream: Stream.fromFuture(
-        (context.read<ListRepository>() as FirebaseListRepository).getListById(
-          todo.listId,
-        ),
-      ),
+      stream: (context.read<ListRepository>() as FirebaseListRepository)
+          .getListByIdStream(todo.listId),
       builder: (context, listSnapshot) {
         final list = listSnapshot.data;
         final authState = context.read<AuthBloc>().state;
@@ -34,6 +31,13 @@ class TodoItemWidget extends StatelessWidget {
         final isOwner = list?.ownerId == currentUserId;
         final isMember = list?.memberIds.contains(currentUserId) == true;
         final canEdit = isOwner || (isMember && (list?.allowEdit ?? true));
+
+        // Prüfe, ob es zusätzliche Teilnehmer gibt (außer dem aktuellen Benutzer)
+        final hasOtherParticipants =
+            list != null &&
+            (list.memberIds.length > 1 ||
+                (list.memberIds.length == 1 &&
+                    !list.memberIds.contains(currentUserId)));
 
         // Berechtigung für das Erledigen des Todos
         final canComplete =
@@ -166,12 +170,15 @@ class TodoItemWidget extends StatelessWidget {
                         color: Theme.of(context).colorScheme.primary,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        'Erledigt von ${todo.completedByUserName}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w500,
+                      Expanded(
+                        child: Text(
+                          'Erledigt von ${todo.completedByUserName}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -230,18 +237,68 @@ class TodoItemWidget extends StatelessWidget {
                     icon: const Icon(Icons.delete_outline),
                     onPressed: () => _showDeleteDialog(context),
                   ),
-                IconButton(
-                  icon: const Icon(Icons.chat_bubble_outline),
-                  tooltip: 'Chat zum Todo',
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ChatScreen(todoId: todo.id, todoTitle: todo.title),
-                      ),
-                    );
-                  },
-                ),
+                if (hasOtherParticipants)
+                  StreamBuilder<int>(
+                    stream:
+                        (context.read<ChatRepository>()
+                                as FirestoreChatRepository)
+                            .getUnreadCount(todo.id, currentUserId),
+                    builder: (context, unreadSnapshot) {
+                      final unreadCount = unreadSnapshot.data ?? 0;
+                      return Stack(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.chat_bubble_outline),
+                            tooltip: 'Chat zum Todo',
+                            onPressed: () async {
+                              // Markiere Nachrichten als gelesen beim Öffnen
+                              await (context.read<ChatRepository>()
+                                      as FirestoreChatRepository)
+                                  .markAsRead(todo.id, currentUserId);
+                              if (!context.mounted) return;
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ChatScreen(
+                                    todoId: todo.id,
+                                    todoTitle: todo.title,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          if (unreadCount > 0)
+                            Positioned(
+                              right: 8,
+                              top: 8,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.error,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                constraints: const BoxConstraints(
+                                  minWidth: 16,
+                                  minHeight: 16,
+                                ),
+                                child: Text(
+                                  unreadCount > 99
+                                      ? '99+'
+                                      : unreadCount.toString(),
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onError,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
               ],
             ),
           ),
