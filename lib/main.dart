@@ -12,6 +12,7 @@ import 'blocs/list/list_bloc.dart';
 import 'blocs/theme/theme_bloc.dart';
 import 'blocs/theme/theme_event.dart';
 import 'blocs/theme/theme_state.dart';
+import 'blocs/notification/notification_bloc.dart';
 import 'repositories/auth_repository.dart';
 import 'repositories/todo_repository.dart';
 import 'repositories/shopping_repository.dart';
@@ -26,10 +27,15 @@ import 'screens/shopping/shopping_screen.dart';
 import 'screens/lists/lists_screen.dart';
 import 'utils/app_theme.dart';
 import 'firebase_options.dart';
+import 'services/messaging_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Messaging Service initialisieren
+  await MessagingService().initialize();
+
   runApp(
     MultiRepositoryProvider(
       providers: [
@@ -96,6 +102,9 @@ class TogetherDoApp extends StatelessWidget {
           ),
           BlocProvider<ThemeBloc>(
             create: (context) => ThemeBloc()..add(const ThemeLoadRequested()),
+          ),
+          BlocProvider<NotificationBloc>(
+            create: (context) => NotificationBloc(),
           ),
         ],
         child: TogetherDoAppView(),

@@ -87,9 +87,11 @@ class TodoItemWidget extends StatelessWidget {
                               ? currentUser?.displayName
                               : null,
                         );
-                        await (context.read<TodoRepository>()
-                                as FirebaseTodoRepository)
-                            .updateTodo(updatedTodo);
+                        if (context.mounted) {
+                          await (context.read<TodoRepository>()
+                                  as FirebaseTodoRepository)
+                              .updateTodo(updatedTodo);
+                        }
                       }
                     }
                   : null,
@@ -262,15 +264,16 @@ class TodoItemWidget extends StatelessWidget {
                               await (context.read<ChatRepository>()
                                       as FirestoreChatRepository)
                                   .markAsRead(todo.id, currentUserId);
-                              if (!context.mounted) return;
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => ChatScreen(
-                                    todoId: todo.id,
-                                    todoTitle: todo.title,
+                              if (context.mounted) {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatScreen(
+                                      todoId: todo.id,
+                                      todoTitle: todo.title,
+                                    ),
                                   ),
-                                ),
-                              );
+                                );
+                              }
                             },
                           ),
                           if (unreadCount > 0)
@@ -381,9 +384,11 @@ class TodoItemWidget extends StatelessWidget {
           TextButton(
             onPressed: () async {
               // Zuerst Chat löschen
+              if (!context.mounted) return;
               await (context.read<ChatRepository>() as FirestoreChatRepository)
                   .deleteAllMessages(todo.id);
               // Dann Todo löschen
+              if (!context.mounted) return;
               await (context.read<TodoRepository>() as FirebaseTodoRepository)
                   .deleteTodo(todo.id);
               if (!context.mounted) return;

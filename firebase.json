@@ -1,1 +1,45 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"togetherdo-c9179","appId":"1:677054697948:android:cafcf10cff8575d06dff19","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"togetherdo-c9179","appId":"1:677054697948:ios:a83e32a5ee5a108f6dff19","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"macos":{"default":{"projectId":"togetherdo-c9179","appId":"1:677054697948:ios:a83e32a5ee5a108f6dff19","uploadDebugSymbols":false,"fileOutput":"macos/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"togetherdo-c9179","configurations":{"android":"1:677054697948:android:cafcf10cff8575d06dff19","ios":"1:677054697948:ios:a83e32a5ee5a108f6dff19","macos":"1:677054697948:ios:a83e32a5ee5a108f6dff19","web":"1:677054697948:web:c90caeb32e67821a6dff19","windows":"1:677054697948:web:382a6b4c9cf88b236dff19"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "togetherdo-c9179",
+          "appId": "1:677054697948:android:cafcf10cff8575d06dff19",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "togetherdo-c9179",
+          "appId": "1:677054697948:ios:a83e32a5ee5a108f6dff19",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "togetherdo-c9179",
+          "appId": "1:677054697948:ios:a83e32a5ee5a108f6dff19",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "togetherdo-c9179",
+          "configurations": {
+            "android": "1:677054697948:android:cafcf10cff8575d06dff19",
+            "ios": "1:677054697948:ios:a83e32a5ee5a108f6dff19",
+            "macos": "1:677054697948:ios:a83e32a5ee5a108f6dff19",
+            "web": "1:677054697948:web:c90caeb32e67821a6dff19",
+            "windows": "1:677054697948:web:382a6b4c9cf88b236dff19"
+          }
+        }
+      }
+    }
+  },
+  "functions": {
+    "source": "functions",
+    "region": "europe-west1"
+  }
+}

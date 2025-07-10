@@ -56,6 +56,19 @@ Eine moderne Flutter-App für die Verwaltung von Todos und Einkaufslisten mit Ec
 - Nachrichten werden in Echtzeit synchronisiert (Firestore)
 - Beim Löschen eines Todos wird auch der zugehörige Chat gelöscht
 
+### 🔔 Push-Benachrichtigungen
+- **Cloud Functions** für automatische Push-Benachrichtigungen
+- **Benachrichtigungseinstellungen** im Profil-Screen
+- **Todo-Benachrichtigungen**:
+  - Neues Todo erstellt
+  - Todo erledigt
+  - Todo gelöscht
+- **Member-Benachrichtigungen**:
+  - Neuer Member beigetreten
+  - Member verlassen
+- **Intelligente Benachrichtigungen**: Nur andere Mitglieder erhalten Benachrichtigungen
+- **FCM Token-Management**: Automatische Token-Aktualisierung in Firestore
+
 ### 👤 Benutzerverwaltung
 - Registrierung und Login über Firebase Auth
 - Profilverwaltung mit Avatar-Upload (Firebase Storage)
@@ -108,6 +121,8 @@ Eine moderne Flutter-App für die Verwaltung von Todos und Einkaufslisten mit Ec
 - **Firebase Auth**: Sichere Benutzerauthentifizierung
 - **Cloud Firestore**: Echtzeit-Datenbank mit Streams
 - **Firebase Storage**: Avatar-Upload (geplant)
+- **Firebase Cloud Functions**: Automatische Push-Benachrichtigungen
+- **Firebase Cloud Messaging**: Push-Benachrichtigungen für alle Plattformen
 - **Echtzeit-Synchronisation**: Alle Änderungen werden sofort übertragen
 
 ## Installation
@@ -140,11 +155,12 @@ Die App verwendet Firebase für:
 - **Storage**: Avatar-Upload (in Entwicklung)
 
 ### Firestore Collections
-- `users`: Benutzerprofile
+- `users`: Benutzerprofile (mit FCM Token)
 - `lists`: Todo- und Einkaufslisten (mit Bearbeitungsberechtigung)
 - `todos`: Todo-Items
 - `shopping_items`: Einkaufslisten-Items
 - `shares`: Geteilte Listen
+- `chat_messages`: Chat-Nachrichten pro Todo
 
 ## Echtzeit-Features
 
