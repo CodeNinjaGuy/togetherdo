@@ -65,7 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _uploadAvatar() {
-    // TODO: Implement avatar upload
+    // Avatar-Upload wird in einer späteren Version implementiert
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Avatar-Upload wird später implementiert')),
     );
@@ -416,21 +416,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 try {
                                   await MessagingService()
                                       .sendTestNotification();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Test-Benachrichtigung gesendet!',
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Test-Benachrichtigung gesendet!',
+                                        ),
+                                        backgroundColor: Colors.green,
                                       ),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
+                                    );
+                                  }
                                 } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Fehler: $e'),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Fehler: $e'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
                                 }
                               },
                               icon: const Icon(Icons.send),

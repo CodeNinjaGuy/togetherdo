@@ -219,9 +219,17 @@ class MessagingService {
           presentSound: true,
         );
 
+    const DarwinNotificationDetails macOSPlatformChannelSpecifics =
+        DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
+
     const NotificationDetails platformChannelSpecifics = NotificationDetails(
       android: androidPlatformChannelSpecifics,
       iOS: iOSPlatformChannelSpecifics,
+      macOS: macOSPlatformChannelSpecifics,
     );
 
     await _localNotifications.show(
@@ -262,9 +270,17 @@ class MessagingService {
           presentSound: true,
         );
 
+    const DarwinNotificationDetails macOSPlatformChannelSpecifics =
+        DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
+
     const NotificationDetails platformChannelSpecifics = NotificationDetails(
       android: androidPlatformChannelSpecifics,
       iOS: iOSPlatformChannelSpecifics,
+      macOS: macOSPlatformChannelSpecifics,
     );
 
     await _localNotifications.show(
@@ -305,9 +321,17 @@ class MessagingService {
           presentSound: true,
         );
 
+    const DarwinNotificationDetails macOSPlatformChannelSpecifics =
+        DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
+
     const NotificationDetails platformChannelSpecifics = NotificationDetails(
       android: androidPlatformChannelSpecifics,
       iOS: iOSPlatformChannelSpecifics,
+      macOS: macOSPlatformChannelSpecifics,
     );
 
     await _localNotifications.show(
@@ -341,9 +365,17 @@ class MessagingService {
           presentSound: true,
         );
 
+    const DarwinNotificationDetails macOSPlatformChannelSpecifics =
+        DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
+
     const NotificationDetails platformChannelSpecifics = NotificationDetails(
       android: androidPlatformChannelSpecifics,
       iOS: iOSPlatformChannelSpecifics,
+      macOS: macOSPlatformChannelSpecifics,
     );
 
     await _localNotifications.show(
@@ -353,5 +385,87 @@ class MessagingService {
       platformChannelSpecifics,
       payload: payload,
     );
+  }
+
+  /// Neue Funktion: Benachrichtigungseinstellungen aus SharedPreferences abrufen
+  Future<Map<String, bool>> getNotificationSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    return {
+      'todoCreated': prefs.getBool('notification_todo_created') ?? true,
+      'todoCompleted': prefs.getBool('notification_todo_completed') ?? true,
+      'todoDeleted': prefs.getBool('notification_todo_deleted') ?? true,
+      'memberAdded': prefs.getBool('notification_member_added') ?? true,
+      'memberRemoved': prefs.getBool('notification_member_removed') ?? true,
+    };
+  }
+
+  /// Neue Funktion: Prüfen ob lokale Benachrichtigung basierend auf Einstellungen angezeigt werden soll
+  Future<bool> shouldShowLocalNotification(String notificationType) async {
+    final settings = await getNotificationSettings();
+
+    switch (notificationType) {
+      case 'todo_created':
+        return settings['todoCreated'] ?? true;
+      case 'todo_completed':
+        return settings['todoCompleted'] ?? true;
+      case 'todo_deleted':
+        return settings['todoDeleted'] ?? true;
+      case 'member_added':
+        return settings['memberAdded'] ?? true;
+      case 'member_removed':
+        return settings['memberRemoved'] ?? true;
+      default:
+        return true; // Fallback
+    }
+  }
+
+  /// Neue Funktion: Plattformspezifisches Verhalten von Push-Benachrichtigungen
+  String getPlatformNotificationBehavior() {
+    if (Platform.isIOS) {
+      return '''
+📱 iOS Push-Benachrichtigungen:
+• App im Vordergrund: Keine Push-Benachrichtigungen (nur lokale)
+• App im Hintergrund: Push-Benachrichtigungen werden angezeigt
+• App geschlossen: Push-Benachrichtigungen werden angezeigt
+
+ℹ️ iOS zeigt keine Push-Benachrichtigungen an, wenn die App aktiv ist.
+''';
+    } else if (Platform.isMacOS) {
+      return '''
+🖥️ macOS Push-Benachrichtigungen:
+• App im Vordergrund: Push-Benachrichtigungen werden angezeigt ✅
+• App im Hintergrund: Push-Benachrichtigungen werden angezeigt
+• App geschlossen: Push-Benachrichtigungen werden angezeigt
+
+ℹ️ macOS zeigt Push-Benachrichtigungen auch bei aktiver App an.
+''';
+    } else if (Platform.isAndroid) {
+      return '''
+🤖 Android Push-Benachrichtigungen:
+• App im Vordergrund: Push-Benachrichtigungen werden angezeigt ✅
+• App im Hintergrund: Push-Benachrichtigungen werden angezeigt
+• App geschlossen: Push-Benachrichtigungen werden angezeigt
+
+ℹ️ Android zeigt Push-Benachrichtigungen immer an.
+''';
+    } else {
+      return '''
+🌐 Web Push-Benachrichtigungen:
+• Browser aktiv: Push-Benachrichtigungen werden angezeigt ✅
+• Browser im Hintergrund: Push-Benachrichtigungen werden angezeigt
+• Browser geschlossen: Push-Benachrichtigungen werden angezeigt
+
+ℹ️ Web zeigt Push-Benachrichtigungen immer an.
+''';
+    }
+  }
+
+  /// Neue Funktion: Prüfen ob Push-Benachrichtigungen im Vordergrund angezeigt werden
+  bool shouldShowForegroundNotifications() {
+    if (Platform.isIOS) {
+      return false; // iOS zeigt keine Push-Benachrichtigungen im Vordergrund
+    } else {
+      return true; // macOS, Android, Web zeigen Push-Benachrichtigungen im Vordergrund
+    }
   }
 }

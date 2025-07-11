@@ -1,5 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../models/notification_settings_model.dart';
 import 'notification_event.dart';
@@ -47,6 +50,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     try {
       final prefs = await SharedPreferences.getInstance();
 
+      // Lokale Einstellungen speichern
       await prefs.setBool(
         'notification_todo_created',
         event.settings.todoCreated,
@@ -68,9 +72,39 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
         event.settings.memberRemoved,
       );
 
+      // Einstellungen in Firestore speichern (für Cloud Functions)
+      await _saveSettingsToFirestore(event.settings);
+
       emit(NotificationLoadSuccess(event.settings));
     } catch (e) {
       emit(NotificationLoadFailure(e.toString()));
+    }
+  }
+
+  // Neue Funktion: Einstellungen in Firestore speichern
+  Future<void> _saveSettingsToFirestore(NotificationSettings settings) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .update({
+              'notificationSettings': {
+                'todoCreated': settings.todoCreated,
+                'todoCompleted': settings.todoCompleted,
+                'todoDeleted': settings.todoDeleted,
+                'memberAdded': settings.memberAdded,
+                'memberRemoved': settings.memberRemoved,
+              },
+            });
+        debugPrint('✅ Benachrichtigungseinstellungen in Firestore gespeichert');
+      }
+    } catch (e) {
+      debugPrint(
+        '❌ Fehler beim Speichern der Benachrichtigungseinstellungen in Firestore: $e',
+      );
+      // Fehler nicht weiterwerfen, da lokale Speicherung bereits funktioniert
     }
   }
 }
