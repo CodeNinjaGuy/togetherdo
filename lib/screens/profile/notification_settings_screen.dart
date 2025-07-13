@@ -159,6 +159,62 @@ class _NotificationSettingsScreenState
                 _updateSettings(settings.copyWith(chatMessage: value)),
           ),
 
+          const SizedBox(height: 24),
+
+          // Einkaufslisten-Benachrichtigungen
+          const Text(
+            'Einkaufslisten-Benachrichtigungen',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 16),
+
+          _buildSwitchTile(
+            title: 'Neues Einkaufsitem',
+            subtitle:
+                'Benachrichtigung, wenn ein neues Item zur Einkaufsliste hinzugefügt wird',
+            value: settings.shoppingItemCreated,
+            onChanged: (value) =>
+                _updateSettings(settings.copyWith(shoppingItemCreated: value)),
+          ),
+
+          _buildSwitchTile(
+            title: 'Einkaufsitem erledigt',
+            subtitle:
+                'Benachrichtigung, wenn ein Item als erledigt/gekauft markiert wird',
+            value: settings.shoppingItemPurchased,
+            onChanged: (value) => _updateSettings(
+              settings.copyWith(shoppingItemPurchased: value),
+            ),
+          ),
+
+          _buildSwitchTile(
+            title: 'Einkaufsitem gelöscht',
+            subtitle:
+                'Benachrichtigung, wenn ein Item aus der Einkaufsliste entfernt wird',
+            value: settings.shoppingItemDeleted,
+            onChanged: (value) =>
+                _updateSettings(settings.copyWith(shoppingItemDeleted: value)),
+          ),
+
+          _buildSwitchTile(
+            title: 'Neuer Member in Einkaufsliste',
+            subtitle:
+                'Benachrichtigung, wenn jemand der Einkaufsliste beitritt',
+            value: settings.shoppingMemberAdded,
+            onChanged: (value) =>
+                _updateSettings(settings.copyWith(shoppingMemberAdded: value)),
+          ),
+
+          _buildSwitchTile(
+            title: 'Member verlässt Einkaufsliste',
+            subtitle:
+                'Benachrichtigung, wenn jemand die Einkaufsliste verlässt',
+            value: settings.shoppingMemberRemoved,
+            onChanged: (value) => _updateSettings(
+              settings.copyWith(shoppingMemberRemoved: value),
+            ),
+          ),
+
           const SizedBox(height: 32),
 
           // Info Box
@@ -233,6 +289,16 @@ class _NotificationSettingsScreenState
         return Icons.person_remove;
       case 'Neue Chat-Nachricht':
         return Icons.chat;
+      case 'Neues Einkaufsitem':
+        return Icons.shopping_cart;
+      case 'Einkaufsitem erledigt':
+        return Icons.check_circle;
+      case 'Einkaufsitem gelöscht':
+        return Icons.delete;
+      case 'Neuer Member in Einkaufsliste':
+        return Icons.person_add;
+      case 'Member verlässt Einkaufsliste':
+        return Icons.person_remove;
       default:
         return Icons.notifications;
     }

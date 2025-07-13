@@ -69,4 +69,24 @@ class GlobalNavigator {
       debugPrint('❌ Router ist null');
     }
   }
+
+  /// Navigation zu Einkaufslisten
+  void navigateToShoppingList(String listId, [String? itemId]) {
+    debugPrint('🚀 Global Navigation zu Einkaufsliste: $listId, Item: $itemId');
+
+    if (_router != null) {
+      try {
+        String url = '/shopping/$listId';
+        if (itemId != null) {
+          url += '?highlight=$itemId';
+        }
+        debugPrint('🛒 Navigiere zu Einkaufsliste: $url');
+        _router!.push(url);
+      } catch (e) {
+        debugPrint('❌ Fehler bei Global Navigation: $e');
+      }
+    } else {
+      debugPrint('❌ Router ist null');
+    }
+  }
 }

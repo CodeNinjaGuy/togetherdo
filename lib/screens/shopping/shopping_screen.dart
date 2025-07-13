@@ -12,23 +12,45 @@ import '../../models/list_model.dart';
 
 class ShoppingScreen extends StatefulWidget {
   final String listId;
+  final String? highlightItemId;
 
-  const ShoppingScreen({super.key, required this.listId});
+  const ShoppingScreen({super.key, required this.listId, this.highlightItemId});
 
   @override
   State<ShoppingScreen> createState() => _ShoppingScreenState();
 }
 
 class _ShoppingScreenState extends State<ShoppingScreen> {
+  String? _highlightItemId;
   late final FirebaseShoppingRepository _shoppingRepository;
   late final FirebaseListRepository _listRepository;
 
   @override
   void initState() {
     super.initState();
+    _highlightItemId = widget.highlightItemId;
     _shoppingRepository =
         context.read<ShoppingRepository>() as FirebaseShoppingRepository;
     _listRepository = context.read<ListRepository>() as FirebaseListRepository;
+  }
+
+  @override
+  void didUpdateWidget(covariant ShoppingScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.highlightItemId != oldWidget.highlightItemId) {
+      print(
+        "HighlightItemId geändert: ${oldWidget.highlightItemId} -> ${widget.highlightItemId}",
+      );
+      setState(() {
+        _highlightItemId = widget.highlightItemId;
+      });
+    }
+  }
+
+  void _onHighlightEnd() {
+    setState(() {
+      _highlightItemId = null;
+    });
   }
 
   void _showAddItemDialog() {
@@ -168,7 +190,11 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                           ),
                           const SizedBox(height: 8),
                           ...pendingItems.map(
-                            (item) => ShoppingItemWidget(item: item),
+                            (item) => ShoppingItemWidget(
+                              item: item,
+                              highlight: _highlightItemId == item.id,
+                              onHighlightEnd: _onHighlightEnd,
+                            ),
                           ),
                           const SizedBox(height: 24),
                         ],
@@ -176,7 +202,11 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                           _buildSectionHeader('Gekauft', purchasedItems.length),
                           const SizedBox(height: 8),
                           ...purchasedItems.map(
-                            (item) => ShoppingItemWidget(item: item),
+                            (item) => ShoppingItemWidget(
+                              item: item,
+                              highlight: _highlightItemId == item.id,
+                              onHighlightEnd: _onHighlightEnd,
+                            ),
                           ),
                         ],
                       ],

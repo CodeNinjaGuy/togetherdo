@@ -95,16 +95,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
-            .update({
-              'notificationSettings': {
-                'todoCreated': settings.todoCreated,
-                'todoCompleted': settings.todoCompleted,
-                'todoDeleted': settings.todoDeleted,
-                'memberAdded': settings.memberAdded,
-                'memberRemoved': settings.memberRemoved,
-                'chatMessage': settings.chatMessage,
-              },
-            });
+            .update({'notificationSettings': settings.toMap()});
         debugPrint('✅ Benachrichtigungseinstellungen in Firestore gespeichert');
       }
     } catch (e) {

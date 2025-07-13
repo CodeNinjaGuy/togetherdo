@@ -49,6 +49,9 @@ void main() async {
     navigateToList: (listId) {
       GlobalNavigator().navigateToList(listId);
     },
+    navigateToShoppingList: (listId, [itemId]) {
+      GlobalNavigator().navigateToShoppingList(listId, itemId);
+    },
   );
 
   runApp(
@@ -214,7 +217,11 @@ class TogetherDoAppView extends StatelessWidget {
             path: '/shopping/:listId',
             builder: (context, state) {
               final listId = state.pathParameters['listId']!;
-              return ShoppingScreen(listId: listId);
+              final highlightItemId = state.uri.queryParameters['highlight'];
+              return ShoppingScreen(
+                listId: listId,
+                highlightItemId: highlightItemId,
+              );
             },
           ),
           GoRoute(

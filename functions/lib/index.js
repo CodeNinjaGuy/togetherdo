@@ -15,7 +15,12 @@ const NotificationTypes = {
   MEMBER_ADDED: 'member_added',
   MEMBER_REMOVED: 'member_removed',
   CHAT_MESSAGE: 'chat_message',
-  TEST: 'test'
+  TEST: 'test',
+  SHOPPING_ITEM_CREATED: 'shoppingItemCreated',
+  SHOPPING_ITEM_PURCHASED: 'shoppingItemPurchased',
+  SHOPPING_ITEM_DELETED: 'shoppingItemDeleted',
+  SHOPPING_MEMBER_ADDED: 'shoppingMemberAdded',
+  SHOPPING_MEMBER_REMOVED: 'shoppingMemberRemoved',
 };
 
 const defaultSettings = {
@@ -24,7 +29,12 @@ const defaultSettings = {
   [NotificationTypes.TODO_DELETED]: true,
   [NotificationTypes.MEMBER_ADDED]: true,
   [NotificationTypes.MEMBER_REMOVED]: true,
-  [NotificationTypes.CHAT_MESSAGE]: true
+  [NotificationTypes.CHAT_MESSAGE]: true,
+  [NotificationTypes.SHOPPING_ITEM_CREATED]: true,
+  [NotificationTypes.SHOPPING_ITEM_PURCHASED]: true,
+  [NotificationTypes.SHOPPING_ITEM_DELETED]: true,
+  [NotificationTypes.SHOPPING_MEMBER_ADDED]: true,
+  [NotificationTypes.SHOPPING_MEMBER_REMOVED]: true,
 };
 
 // 📋 Logging Utility
@@ -256,4 +266,90 @@ exports.sendTestNotification = onCall({ region: "europe-west3" }, async (request
 
   log.info("✅ Test-Benachrichtigung gesendet:", response);
   return { success: true, messageId: response, message: "Test-Benachrichtigung gesendet" };
+});
+
+// 🔷 onShoppingItemCreated
+exports.onShoppingItemCreated = onDocumentCreated({ region: "europe-west3", document: "shopping_items/{itemId}" }, async (event) => {
+  const itemData = event.data?.data();
+  if (!itemData) return log.error("Ungültige Shopping-Item-Daten");
+
+  const { userId, listId, name, assignedToUserId } = itemData;
+  if (!userId || !listId) return log.error("userId oder listId fehlt");
+
+  log.info(`✅ Neues Einkaufsitem: ${name}`);
+
+  const members = await getListMembers(listId);
+  if (!members) return;
+
+  let targets = assignedToUserId ? [assignedToUserId] : members;
+  let exclude = assignedToUserId ? [] : [userId];
+  let note = { title: "Neues Einkaufsitem", body: `${name} wurde ${assignedToUserId ? 'dir zugewiesen' : 'hinzugefügt'}` };
+
+  await sendNotification(targets, exclude, {
+    notification: note,
+    data: { type: NotificationTypes.SHOPPING_ITEM_CREATED, itemId: event.params.itemId, listId, createdBy: userId },
+  }, NotificationTypes.SHOPPING_ITEM_CREATED);
+});
+
+// 🔷 onShoppingItemPurchased
+exports.onShoppingItemPurchased = onDocumentUpdated({ region: "europe-west3", document: "shopping_items/{itemId}" }, async (event) => {
+  const before = event.data?.before.data();
+  const after = event.data?.after.data();
+  if (!before || !after) return log.error("Ungültige Daten");
+
+  if (!before.isPurchased && after.isPurchased) {
+    const { listId, name, purchasedByUserId, userId } = after;
+    const members = await getListMembers(listId);
+    if (!members) return;
+
+    await sendNotification(members, [purchasedByUserId || userId], {
+      notification: { title: "Einkaufsitem erledigt", body: `${name} wurde als erledigt/gekauft markiert` },
+      data: { type: NotificationTypes.SHOPPING_ITEM_PURCHASED, itemId: event.params.itemId, listId, purchasedBy: purchasedByUserId || userId },
+    }, NotificationTypes.SHOPPING_ITEM_PURCHASED);
+  }
+});
+
+// 🔷 onShoppingItemDeleted
+exports.onShoppingItemDeleted = onDocumentDeleted({ region: "europe-west3", document: "shopping_items/{itemId}" }, async (event) => {
+  const itemData = event.data?.data();
+  if (!itemData) return log.error("Ungültige Daten");
+
+  const { deletedByUserId, userId, listId, name } = itemData;
+  const members = await getListMembers(listId);
+  if (!members) return;
+
+  await sendNotification(members, [deletedByUserId || userId], {
+    notification: { title: "Einkaufsitem gelöscht", body: `${name} wurde gelöscht` },
+    data: { type: NotificationTypes.SHOPPING_ITEM_DELETED, itemId: event.params.itemId, listId, deletedBy: deletedByUserId || userId },
+  }, NotificationTypes.SHOPPING_ITEM_DELETED);
+});
+
+// 🔷 onShoppingListMemberAdded
+exports.onShoppingListMemberAdded = onDocumentUpdated({ region: "europe-west3", document: "lists/{listId}" }, async (event) => {
+  const before = event.data?.before.data();
+  const after = event.data?.after.data();
+  if (!before || !after) return log.error("Ungültige Daten");
+
+  const newMembers = (after.allUserIds || []).filter(m => !(before.allUserIds || []).includes(m));
+  if (newMembers.length === 0) return;
+
+  await sendNotification(before.allUserIds || [], newMembers, {
+    notification: { title: "Neuer Member in Einkaufsliste", body: `${newMembers.length} neuer Member ist der Einkaufsliste beigetreten` },
+    data: { type: NotificationTypes.SHOPPING_MEMBER_ADDED, listId: event.params.listId, newMembers: newMembers.join(",") },
+  }, NotificationTypes.SHOPPING_MEMBER_ADDED);
+});
+
+// 🔷 onShoppingListMemberRemoved
+exports.onShoppingListMemberRemoved = onDocumentUpdated({ region: "europe-west3", document: "lists/{listId}" }, async (event) => {
+  const before = event.data?.before.data();
+  const after = event.data?.after.data();
+  if (!before || !after) return log.error("Ungültige Daten");
+
+  const removedMembers = (before.allUserIds || []).filter(m => !(after.allUserIds || []).includes(m));
+  if (removedMembers.length === 0) return;
+
+  await sendNotification(after.allUserIds || [], removedMembers, {
+    notification: { title: "Member verlässt Einkaufsliste", body: `${removedMembers.length} Member hat die Einkaufsliste verlassen` },
+    data: { type: NotificationTypes.SHOPPING_MEMBER_REMOVED, listId: event.params.listId, removedMembers: removedMembers.join(",") },
+  }, NotificationTypes.SHOPPING_MEMBER_REMOVED);
 });

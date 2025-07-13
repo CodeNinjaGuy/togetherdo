@@ -77,4 +77,24 @@ class NavigationHelper {
       debugPrint('❌ NavigatorKey ist null');
     }
   }
+
+  /// Navigation zu Einkaufslisten
+  void navigateToShoppingList(String listId, [String? itemId]) {
+    debugPrint('🚀 Navigation zu Einkaufsliste: $listId');
+
+    if (_navigatorKey?.currentContext != null) {
+      final context = _navigatorKey!.currentContext!;
+      final router = GoRouter.of(context);
+
+      try {
+        debugPrint('🛒 Navigiere zu Einkaufsliste: /shopping/$listId');
+        router.push('/shopping/$listId');
+        // itemId kann für spätere Erweiterungen genutzt werden
+      } catch (e) {
+        debugPrint('❌ Fehler bei Navigation: $e');
+      }
+    } else {
+      debugPrint('❌ NavigatorKey ist null');
+    }
+  }
 }

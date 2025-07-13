@@ -24,6 +24,7 @@ class MessagingService {
   _navigateToChatCallback;
   Function(String todoId, String listId)? _navigateToTodoCallback;
   Function(String listId)? _navigateToListCallback;
+  Function(String listId, [String? itemId])? _navigateToShoppingListCallback;
 
   // Getter für den FCM Token
   String? get fcmToken => _fcmToken;
@@ -299,6 +300,13 @@ class MessagingService {
         case 'member_removed':
           _navigateToList(data);
           break;
+        case 'shoppingItemCreated':
+        case 'shoppingItemPurchased':
+        case 'shoppingItemDeleted':
+        case 'shoppingMemberAdded':
+        case 'shoppingMemberRemoved':
+          _navigateToShoppingList(data);
+          break;
         default:
           debugPrint('Unbekannter Nachrichten-Typ: $type');
       }
@@ -350,6 +358,19 @@ class MessagingService {
       debugPrint('Navigiere zu Liste: $listId');
       // Navigation wird über einen Global Navigator oder Callback behandelt
       _navigateToListCallback?.call(listId);
+    }
+  }
+
+  /// Navigation zu Einkaufslisten (und ggf. Item)
+  void _navigateToShoppingList(Map<String, dynamic> data) {
+    final listId = data['listId'];
+    final itemId = data['itemId'];
+
+    if (listId != null) {
+      debugPrint('Navigiere zu Einkaufsliste: $listId, Item: $itemId');
+      _navigateToShoppingListCallback?.call(listId, itemId);
+    } else {
+      debugPrint('❌ Fehlende Daten für Shopping-Listen-Navigation: listId');
     }
   }
 
@@ -627,10 +648,12 @@ class MessagingService {
     Function(String todoId, String listId, String todoTitle)? navigateToChat,
     Function(String todoId, String listId)? navigateToTodo,
     Function(String listId)? navigateToList,
+    Function(String listId, [String? itemId])? navigateToShoppingList,
   }) {
     _navigateToChatCallback = navigateToChat;
     _navigateToTodoCallback = navigateToTodo;
     _navigateToListCallback = navigateToList;
+    _navigateToShoppingListCallback = navigateToShoppingList;
   }
 
   /// Test-Navigation zu Chat (für Debugging)
