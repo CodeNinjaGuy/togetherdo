@@ -87,6 +87,9 @@ async function sendNotification(members, exclude, payload, notificationType = No
       },
     },
     apns: {
+      headers: {
+        'apns-priority': '10'
+      },
       payload: {
         aps: {
           alert: payload.notification,
@@ -237,6 +240,9 @@ exports.sendTestNotification = onCall({ region: "europe-west3" }, async (request
       },
     },
     apns: {
+      headers: {
+        'apns-priority': '10'
+      },
       payload: {
         aps: {
           alert: { title, body },
