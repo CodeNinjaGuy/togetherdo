@@ -28,6 +28,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       final memberAdded = prefs.getBool('notification_member_added') ?? true;
       final memberRemoved =
           prefs.getBool('notification_member_removed') ?? true;
+      final chatMessage = prefs.getBool('notification_chat_message') ?? true;
 
       final settings = NotificationSettings(
         todoCreated: todoCreated,
@@ -35,6 +36,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
         todoDeleted: todoDeleted,
         memberAdded: memberAdded,
         memberRemoved: memberRemoved,
+        chatMessage: chatMessage,
       );
 
       emit(NotificationLoadSuccess(settings));
@@ -71,6 +73,10 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
         'notification_member_removed',
         event.settings.memberRemoved,
       );
+      await prefs.setBool(
+        'notification_chat_message',
+        event.settings.chatMessage,
+      );
 
       // Einstellungen in Firestore speichern (für Cloud Functions)
       await _saveSettingsToFirestore(event.settings);
@@ -96,6 +102,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
                 'todoDeleted': settings.todoDeleted,
                 'memberAdded': settings.memberAdded,
                 'memberRemoved': settings.memberRemoved,
+                'chatMessage': settings.chatMessage,
               },
             });
         debugPrint('✅ Benachrichtigungseinstellungen in Firestore gespeichert');

@@ -66,6 +66,18 @@ export const onTodoCreated = onDocumentCreated({ region: 'europe-west3', documen
         listId: listId,
         createdBy: createdBy,
       },
+      android: {
+        notification: {
+          sound: 'notification_sound',
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: 'notification_sound.caf',
+          },
+        },
+      },
     });
     console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
   } catch (error) {
@@ -136,6 +148,18 @@ export const onTodoCompleted = onDocumentUpdated({ region: 'europe-west3', docum
           listId: listId,
           completedBy: completedBy,
         },
+        android: {
+          notification: {
+            sound: 'notification_sound',
+          },
+        },
+        apns: {
+          payload: {
+            aps: {
+              sound: 'notification_sound.caf',
+            },
+          },
+        },
       });
       console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
     }
@@ -203,6 +227,18 @@ export const onTodoDeleted = onDocumentDeleted({ region: 'europe-west3', documen
         listId: listId,
         deletedBy: deletedBy,
       },
+      android: {
+        notification: {
+          sound: 'notification_sound',
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: 'notification_sound.caf',
+          },
+        },
+      },
     });
     console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
   } catch (error) {
@@ -261,6 +297,18 @@ export const onListMemberAdded = onDocumentUpdated({ region: 'europe-west3', doc
           type: 'member_added',
           listId: listId,
           newMembers: newMembers.join(','),
+        },
+        android: {
+          notification: {
+            sound: 'notification_sound',
+          },
+        },
+        apns: {
+          payload: {
+            aps: {
+              sound: 'notification_sound.caf',
+            },
+          },
         },
       });
       console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
@@ -322,6 +370,18 @@ export const onListMemberRemoved = onDocumentUpdated({ region: 'europe-west3', d
           listId: listId,
           removedMembers: removedMembers.join(','),
         },
+        android: {
+          notification: {
+            sound: 'notification_sound',
+          },
+        },
+        apns: {
+          payload: {
+            aps: {
+              sound: 'notification_sound.caf',
+            },
+          },
+        },
       });
       console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
     }
@@ -350,6 +410,18 @@ export const sendTestNotification = onCall({
       data: {
         type: 'test',
         timestamp: Date.now().toString(),
+      },
+      android: {
+        notification: {
+          sound: 'notification_sound',
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: 'notification_sound.caf',
+          },
+        },
       },
       token: fcmToken,
     };

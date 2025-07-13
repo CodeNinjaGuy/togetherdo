@@ -141,6 +141,24 @@ class _NotificationSettingsScreenState
                 _updateSettings(settings.copyWith(memberRemoved: value)),
           ),
 
+          const SizedBox(height: 24),
+
+          // Chat-Benachrichtigungen
+          const Text(
+            'Chat-Benachrichtigungen',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 16),
+
+          _buildSwitchTile(
+            title: 'Neue Chat-Nachricht',
+            subtitle:
+                'Benachrichtigung wenn eine neue Nachricht im Todo-Chat gesendet wird',
+            value: settings.chatMessage,
+            onChanged: (value) =>
+                _updateSettings(settings.copyWith(chatMessage: value)),
+          ),
+
           const SizedBox(height: 32),
 
           // Info Box
@@ -213,6 +231,8 @@ class _NotificationSettingsScreenState
         return Icons.person_add;
       case 'Member verlassen':
         return Icons.person_remove;
+      case 'Neue Chat-Nachricht':
+        return Icons.chat;
       default:
         return Icons.notifications;
     }

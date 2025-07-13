@@ -4,6 +4,7 @@ class NotificationSettings {
   final bool todoDeleted;
   final bool memberAdded;
   final bool memberRemoved;
+  final bool chatMessage; // Neue Chat-Benachrichtigung
 
   const NotificationSettings({
     this.todoCreated = true,
@@ -11,6 +12,7 @@ class NotificationSettings {
     this.todoDeleted = true,
     this.memberAdded = true,
     this.memberRemoved = true,
+    this.chatMessage = true, // Standardmäßig aktiviert
   });
 
   NotificationSettings copyWith({
@@ -19,6 +21,7 @@ class NotificationSettings {
     bool? todoDeleted,
     bool? memberAdded,
     bool? memberRemoved,
+    bool? chatMessage,
   }) {
     return NotificationSettings(
       todoCreated: todoCreated ?? this.todoCreated,
@@ -26,6 +29,7 @@ class NotificationSettings {
       todoDeleted: todoDeleted ?? this.todoDeleted,
       memberAdded: memberAdded ?? this.memberAdded,
       memberRemoved: memberRemoved ?? this.memberRemoved,
+      chatMessage: chatMessage ?? this.chatMessage,
     );
   }
 
@@ -36,6 +40,7 @@ class NotificationSettings {
       'todoDeleted': todoDeleted,
       'memberAdded': memberAdded,
       'memberRemoved': memberRemoved,
+      'chatMessage': chatMessage,
     };
   }
 
@@ -46,12 +51,13 @@ class NotificationSettings {
       todoDeleted: map['todoDeleted'] ?? true,
       memberAdded: map['memberAdded'] ?? true,
       memberRemoved: map['memberRemoved'] ?? true,
+      chatMessage: map['chatMessage'] ?? true,
     );
   }
 
   @override
   String toString() {
-    return 'NotificationSettings(todoCreated: $todoCreated, todoCompleted: $todoCompleted, todoDeleted: $todoDeleted, memberAdded: $memberAdded, memberRemoved: $memberRemoved)';
+    return 'NotificationSettings(todoCreated: $todoCreated, todoCompleted: $todoCompleted, todoDeleted: $todoDeleted, memberAdded: $memberAdded, memberRemoved: $memberRemoved, chatMessage: $chatMessage)';
   }
 
   @override
@@ -62,7 +68,8 @@ class NotificationSettings {
         other.todoCompleted == todoCompleted &&
         other.todoDeleted == todoDeleted &&
         other.memberAdded == memberAdded &&
-        other.memberRemoved == memberRemoved;
+        other.memberRemoved == memberRemoved &&
+        other.chatMessage == chatMessage;
   }
 
   @override
@@ -71,6 +78,7 @@ class NotificationSettings {
         todoCompleted.hashCode ^
         todoDeleted.hashCode ^
         memberAdded.hashCode ^
-        memberRemoved.hashCode;
+        memberRemoved.hashCode ^
+        chatMessage.hashCode;
   }
 }

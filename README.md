@@ -62,12 +62,15 @@ Eine moderne Flutter-App für die Verwaltung von Todos und Einkaufslisten mit Ec
 - **Benutzerdefinierte Einstellungen**:
   - Todo-Benachrichtigungen: Neues Todo erstellt, Todo erledigt, Todo gelöscht
   - Member-Benachrichtigungen: Neuer Member beigetreten, Member verlassen
+  - Chat-Benachrichtigungen: Neue Chat-Nachricht im Todo-Chat
   - Jede Einstellung kann individuell aktiviert/deaktiviert werden
 - **Firestore-Integration**: Einstellungen werden in Firestore gespeichert und von Cloud Functions berücksichtigt
 - **Intelligente Filterung**: Nur Benutzer mit aktivierten Einstellungen erhalten Benachrichtigungen
 - **FCM Token-Management**: Automatische Token-Aktualisierung in Firestore
 - **Multi-Plattform Support**: iOS, Android, macOS mit APNs/FCM
 - **Test-Benachrichtigungen**: Lokale Test-Benachrichtigungen im Profil-Screen
+- **Benutzerdefinierte Sounds**: Eigene Notification-Sounds für alle Plattformen
+- **Sound-Tests**: Separate Buttons für Standard- und Custom-Sound Tests
 - **Echtzeit-Synchronisation**: Einstellungsänderungen werden sofort wirksam
 
 ### 👤 Benutzerverwaltung
@@ -84,14 +87,15 @@ Eine moderne Flutter-App für die Verwaltung von Todos und Einkaufslisten mit Ec
   - Automatische Umschaltung zwischen einspaltigem Layout (Mobil) und Split-View (macOS/iPad/Desktop)
   - Split-View zeigt links die Listenübersicht, rechts die Details (z.B. Todos, Chat)
   - Moderne, adaptive UI für alle Bildschirmgrößen
-- **9 wunderschöne Themes:**
-  - Light, Matrix, Neo, Summer, Aurora, Sunset, Ocean, Forest, Galaxy
+- **10 wunderschöne Themes:**
+  - Light, Matrix, Neo, Summer, Aurora, Sunset, Ocean, Forest, Galaxy, Fiberoptics25
   - Jedes Theme mit einzigartigen Farben, Schriften und Stilen
   - Aurora: Nordlichter-inspiriert mit grünen und blauen Akzenten
   - Sunset: Warme Orange- und Rottöne für gemütliche Atmosphäre
   - Ocean: Beruhigende Blau- und Türkistöne
   - Forest: Natürliche Grüntöne für eine frische Umgebung
   - Galaxy: Mystische Lila- und Violettöne für kosmische Atmosphäre
+  - **Fiberoptics25**: Technologie-inspiriertes Theme mit Orange-Rot, Blau und Akzentfarben aus dem FO25-Logo
 - **Badge-Counter für ungelesene Chat-Nachrichten:**
   - Rote Badge-Anzeige am Chat-Icon bei ungelesenen Nachrichten
   - Automatische Markierung als gelesen beim Öffnen des Chats
@@ -127,154 +131,18 @@ Eine moderne Flutter-App für die Verwaltung von Todos und Einkaufslisten mit Ec
 - **Firebase Cloud Messaging**: Push-Benachrichtigungen für alle Plattformen
 - **Echtzeit-Synchronisation**: Alle Änderungen werden sofort übertragen
 
-## Installation
-
-1. **Flutter installieren**
-   ```bash
-   flutter --version
-   ```
-
-2. **Firebase-Projekt einrichten**
-   - Firebase-Projekt erstellen
-   - Firebase CLI installieren
-   - `firebase_options.dart` konfigurieren
-
-3. **Dependencies installieren**
-   ```bash
-   flutter pub get
-   ```
-
-4. **App starten**
-   ```bash
-   flutter run
-   ```
-
-## Firebase-Konfiguration
-
-Die App verwendet Firebase für:
-- **Authentifizierung**: Registrierung und Login
-- **Datenbank**: Echtzeit-Synchronisation aller Listen und Items
-- **Storage**: Avatar-Upload (in Entwicklung)
-
-### Firestore Collections
-- `users`: Benutzerprofile (mit FCM Token und notificationSettings)
-- `lists`: Todo- und Einkaufslisten (mit Bearbeitungsberechtigung)
-- `todos`: Todo-Items
-- `shopping_items`: Einkaufslisten-Items
-- `shares`: Geteilte Listen
-- `chat_messages`: Chat-Nachrichten pro Todo
-
 ### Cloud Functions
 - **onTodoCreated**: Benachrichtigung bei neuem Todo (berücksichtigt Einstellungen)
 - **onTodoCompleted**: Benachrichtigung bei erledigtem Todo (berücksichtigt Einstellungen)
 - **onTodoDeleted**: Benachrichtigung bei gelöschtem Todo (berücksichtigt Einstellungen)
 - **onListMemberAdded**: Benachrichtigung bei neuem Member (berücksichtigt Einstellungen)
 - **onListMemberRemoved**: Benachrichtigung bei entferntem Member (berücksichtigt Einstellungen)
+- **onChatMessageCreated**: Benachrichtigung bei neuer Chat-Nachricht (berücksichtigt Einstellungen)
 - **sendTestNotification**: Test-Benachrichtigungen für Debugging
 
-## Echtzeit-Features
+## Installation
 
-### Live-Updates
-- **Todo-Listen**: Neue, bearbeitete und gelöschte Todos werden sofort angezeigt
-- **Einkaufslisten**: Gekaufte Items werden sofort synchronisiert
-- **Listen-Management**: Neue Listen und Mitglieder werden sofort sichtbar
-- **Sharing**: Beitritte und Verlassen werden sofort übertragen
-
-### Stream-basierte Architektur
-- Firestore-Streams für Echtzeit-Updates
-- Automatische UI-Aktualisierung
-- Effiziente Datenübertragung
-- Offline-Unterstützung
-
-## Bearbeitungsberechtigung & Todo-Zuweisungen
-
-### Bearbeitungsberechtigung
-- **Beim Erstellen**: Wähle aus, ob andere Mitglieder bearbeiten dürfen
-- **Visuelle Hinweise**: "Nur-Lese-Modus" wird klar angezeigt
-- **UI-Anpassungen**: 
-  - FloatingActionButton wird deaktiviert
-  - Checkboxen werden deaktiviert
-  - Delete-Buttons werden ausgeblendet
-  - Informationsbanner wird angezeigt
-
-### Berechtigungslogik
-- **Besitzer**: Kann immer alles bearbeiten
-- **Mitglieder mit Bearbeitungsberechtigung**: Können Items hinzufügen, bearbeiten und löschen
-- **Mitglieder ohne Bearbeitungsberechtigung**: Können nur lesen
-
-### Todo-Zuweisungen
-- **Beim Erstellen**: Wähle optional einen Benutzer aus, dem das Todo zugewiesen werden soll
-- **Visuelle Unterscheidung**:
-  - Hellgrüne Outline für dir zugewiesene Todos
-  - Hellblaue Darstellung für anderen zugewiesene Todos
-  - "Dir zugewiesen" / "Zugewiesen an [Name]" Badges
-- **Berechtigungssteuerung**:
-  - Allgemeine Todos: Können von allen erledigt werden
-  - Zugewiesene Todos: Können nur vom zugewiesenen Benutzer erledigt werden
-  - Besitzer können immer alle Todos erledigen
-- **"Erledigt von"-Anzeige**: Zeigt den Namen des Benutzers, der das Todo erledigt hat
-
-### Sicherheit
-- Berechtigungen werden serverseitig in Firestore gespeichert
-- Client-seitige Validierung für bessere UX
-- Echtzeit-Updates der Berechtigungen und Zuweisungen
-
-### ✅ Konsistente Berechtigungen
-- Erledigen und Löschen von Todos ist nur für berechtigte Nutzer möglich (Besitzer oder zugewiesene Person)
-
-## Projektstruktur
-
-```
-lib/
-├── blocs/           # BLOC State Management
-│   ├── auth/        # Authentifizierung
-│   ├── todo/        # Todo-Verwaltung
-│   ├── shopping/    # Einkaufslisten
-│   ├── share/       # Listen teilen
-│   ├── list/        # Listen-Management
-│   ├── theme/       # Theme-Verwaltung
-│   └── notification/ # Benachrichtigungseinstellungen
-├── models/          # Datenmodelle
-├── repositories/    # Datenzugriff (Firebase + Mock)
-│   ├── auth_repository.dart
-│   ├── todo_repository.dart
-│   ├── shopping_repository.dart
-│   ├── share_repository.dart
-│   └── list_repository.dart
-├── screens/         # UI-Screens
-│   ├── auth/        # Login/Register
-│   ├── home/        # Hauptnavigation
-│   ├── lists/       # Listen-Übersicht
-│   ├── todo/        # Todo-Screens (mit Echtzeit-Streams + Berechtigungen)
-│   ├── shopping/    # Shopping-Screens (mit Echtzeit-Streams + Berechtigungen)
-│   ├── share/       # Share-Screens
-│   └── profile/     # Profilverwaltung (mit Benachrichtigungseinstellungen)
-├── widgets/         # Wiederverwendbare Widgets
-│   ├── todo/        # Todo-Widgets (mit Berechtigungsprüfung)
-│   ├── shopping/    # Shopping-Widgets (mit Berechtigungsprüfung)
-│   ├── share/       # Share-Widgets
-│   ├── lists/       # Listen-Widgets (mit Bearbeitungsberechtigung)
-│   └── theme/       # Theme-Widgets
-├── services/        # Services
-│   └── messaging_service.dart # Push-Benachrichtigungen
-├── utils/           # Utilities und Themes
-├── firebase_options.dart  # Firebase-Konfiguration
-└── main.dart        # App-Einstiegspunkt
-```
-
-## Push-Benachrichtigungen Setup
-
-### Voraussetzungen
-- **Firebase-Projekt** mit aktiviertem Cloud Messaging
-- **APNs Key** (für iOS/macOS) in Firebase hochgeladen
-- **Cloud Functions** deployed in der korrekten Region (europe-west3)
-
-### Benutzer-Einstellungen
-- **Profil-Screen**: Benachrichtigungen-Einstellungen konfigurieren
-- **Firestore**: Einstellungen werden automatisch synchronisiert
-- **Cloud Functions**: Berücksichtigen Benutzer-Einstellungen bei Benachrichtigungen
-
-### Testen
-- **Lokale Tests**: Test-Benachrichtigungen im Profil-Screen
-- **Cloud Tests**: Todos erstellen/bearbeiten und Benachrichtigungen prüfen
-- **FCM Token**: Wird im Profil-Screen angezeigt und kann kopiert werden
+1. **Flutter installieren**
+   ```bash
+   flutter --version
+   ```

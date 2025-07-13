@@ -251,5 +251,54 @@ class AppTheme {
         ),
       ),
     ),
+    'Fiberoptics25': ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.dark(
+        primary: Color(0xFFFF430B), // Orange-Rot aus dem Logo
+        onPrimary: Colors.white,
+        secondary: Color(0xFF3C62A9), // Blau aus dem Logo
+        onSecondary: Colors.white,
+        surface: Color(0xFF1A1A1A), // Dunkler Hintergrund
+        onSurface: Colors.white,
+        error: Color(0xFFFF0000), // Rot aus dem Logo
+        onError: Colors.white,
+        surfaceContainerHighest: Color(0xFF2A2A2A),
+        tertiary: Color(0xFFFFF000), // Gelb aus dem Logo
+        onTertiary: Colors.black,
+        outline: Color(0xFF006EFF), // Blau aus dem Logo
+        outlineVariant: Color(0xFF01FF00), // Grün aus dem Logo
+      ),
+      scaffoldBackgroundColor: Color(0xFF1A1A1A),
+      textTheme: GoogleFonts.robotoMonoTextTheme(
+        ThemeData.dark().textTheme,
+      ).apply(bodyColor: Colors.white, displayColor: Colors.white),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Color(0xFF2A2A2A),
+        foregroundColor: Color(0xFFFF430B),
+        iconTheme: IconThemeData(color: Color(0xFFFF430B)),
+        titleTextStyle: TextStyle(
+          color: Color(0xFFFF430B),
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: Color(0xFF2A2A2A),
+        elevation: 8,
+        shadowColor: Color(0xFFFF430B).withValues(alpha: 0.3),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Color(0xFFFF430B),
+          foregroundColor: Colors.white,
+          elevation: 4,
+          shadowColor: Color(0xFFFF430B).withValues(alpha: 0.5),
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: Color(0xFF3C62A9),
+        foregroundColor: Colors.white,
+      ),
+    ),
   };
 }

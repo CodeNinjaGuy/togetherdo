@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:io';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
@@ -9,6 +9,7 @@ import '../../blocs/theme/theme_bloc.dart';
 import '../../blocs/theme/theme_event.dart';
 import '../../blocs/theme/theme_state.dart';
 import '../../services/messaging_service.dart';
+import '../../widgets/profile/fiberoptics25_logo.dart';
 import 'notification_settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -69,21 +70,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Avatar-Upload wird später implementiert')),
     );
-  }
-
-  Future<void> _refreshFcmToken(
-    BuildContext context,
-    StateSetter setState,
-  ) async {
-    try {
-      await MessagingService().initialize();
-      final token = await MessagingService().getStoredFCMToken();
-      debugPrint('FCM Token im Profil-Screen: $token');
-      setState(() {}); // UI neu laden
-    } catch (e) {
-      debugPrint('Fehler beim Anfordern des FCM Tokens im Profil-Screen: $e');
-      setState(() {});
-    }
   }
 
   @override
@@ -156,6 +142,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                   const SizedBox(height: 24),
+
+                  // Fiberoptics25 Logo (nur im Fiberoptics25 Theme sichtbar)
+                  const Fiberoptics25Logo(),
 
                   // Profile Form
                   Form(
@@ -230,7 +219,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                   const SizedBox(height: 16),
 
-                  // FCM Token Section
+                  // Debug-Benachrichtigungen Section
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
@@ -240,12 +229,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Row(
                             children: [
                               Icon(
-                                Icons.token,
+                                Icons.bug_report,
                                 color: Theme.of(context).colorScheme.primary,
                               ),
                               const SizedBox(width: 8),
                               const Text(
-                                'Push-Benachrichtigungen Token',
+                                'Debug: Benachrichtigungen',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
@@ -254,8 +243,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ],
                           ),
                           const SizedBox(height: 12),
-                          FutureBuilder<String?>(
-                            future: MessagingService().getStoredFCMToken(),
+                          FutureBuilder<Map<String, bool>>(
+                            future: MessagingService()
+                                .getNotificationSettings(),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
@@ -264,110 +254,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 );
                               }
 
-                              final token = snapshot.data;
-                              if (token == null || token.isEmpty) {
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Kein Token verfügbar',
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: ElevatedButton.icon(
-                                        onPressed: () async {
-                                          await _refreshFcmToken(
-                                            context,
-                                            setState,
-                                          );
-                                        },
-                                        icon: const Icon(Icons.refresh),
-                                        label: const Text('Token anfordern'),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              }
-
+                              final settings = snapshot.data ?? {};
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.surfaceContainerHighest,
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.outline,
-                                      ),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          'FCM Token:',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        SelectableText(
-                                          token,
-                                          style: const TextStyle(
-                                            fontSize: 10,
-                                            fontFamily: 'monospace',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                  Text(
+                                    'Plattform: ${Platform.operatingSystem}',
+                                  ),
+                                  Text(
+                                    'Vordergrund-Benachrichtigungen: ${MessagingService().shouldShowForegroundNotifications()}',
                                   ),
                                   const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: ElevatedButton.icon(
-                                          onPressed: () async {
-                                            await _refreshFcmToken(
-                                              context,
-                                              setState,
-                                            );
-                                          },
-                                          icon: const Icon(Icons.refresh),
-                                          label: const Text('Token erneuern'),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: OutlinedButton.icon(
-                                          onPressed: () {
-                                            Clipboard.setData(
-                                              ClipboardData(text: token),
-                                            );
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'Token in Zwischenablage kopiert',
-                                                ),
-                                                duration: Duration(seconds: 2),
-                                              ),
-                                            );
-                                          },
-                                          icon: const Icon(Icons.copy),
-                                          label: const Text('Kopieren'),
-                                        ),
-                                      ),
-                                    ],
+                                  const Text(
+                                    'Aktuelle Einstellungen:',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    '• Todo erstellt: ${settings['todoCreated'] ?? true}',
+                                  ),
+                                  Text(
+                                    '• Todo erledigt: ${settings['todoCompleted'] ?? true}',
+                                  ),
+                                  Text(
+                                    '• Todo gelöscht: ${settings['todoDeleted'] ?? true}',
+                                  ),
+                                  Text(
+                                    '• Member hinzugefügt: ${settings['memberAdded'] ?? true}',
+                                  ),
+                                  Text(
+                                    '• Member entfernt: ${settings['memberRemoved'] ?? true}',
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Plattform-Verhalten:\n${MessagingService().getPlatformNotificationBehavior()}',
                                   ),
                                 ],
                               );
@@ -409,37 +330,84 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             style: TextStyle(fontSize: 14),
                           ),
                           const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: () async {
-                                try {
-                                  await MessagingService()
-                                      .sendTestNotification();
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Test-Benachrichtigung gesendet!',
-                                        ),
-                                        backgroundColor: Colors.green,
-                                      ),
-                                    );
-                                  }
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Fehler: $e'),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                  }
-                                }
-                              },
-                              icon: const Icon(Icons.send),
-                              label: const Text('Test-Benachrichtigung senden'),
-                            ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: () async {
+                                    try {
+                                      await MessagingService()
+                                          .sendTestNotification();
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Test-Benachrichtigung gesendet!',
+                                            ),
+                                            backgroundColor: Colors.green,
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text('Fehler: $e'),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  icon: const Icon(Icons.send),
+                                  label: const Text('Standard-Sound'),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: () async {
+                                    try {
+                                      await MessagingService()
+                                          .sendCustomSoundNotification(
+                                            title: '🎵 Custom Sound Test',
+                                            body:
+                                                'Dies ist ein Test mit benutzerdefiniertem Sound!',
+                                          );
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Custom Sound Test gesendet!',
+                                            ),
+                                            backgroundColor: Colors.blue,
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text('Fehler: $e'),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  icon: const Icon(Icons.music_note),
+                                  label: const Text('Custom Sound'),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -476,6 +444,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     'Ocean',
                                     'Forest',
                                     'Galaxy',
+                                    'Fiberoptics25',
                                   ]
                                   .map(
                                     (theme) => DropdownMenuItem(

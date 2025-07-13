@@ -202,34 +202,28 @@ class MessagingService {
 
   /// Lokale Benachrichtigung anzeigen
   Future<void> _showLocalNotification(RemoteMessage message) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-          'togetherdo_channel',
-          'TogetherDo Benachrichtigungen',
-          channelDescription: 'Benachrichtigungen für TogetherDo App',
-          importance: Importance.max,
-          priority: Priority.high,
-          showWhen: true,
-        );
-
-    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
-        DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        );
-
-    const DarwinNotificationDetails macOSPlatformChannelSpecifics =
-        DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        );
-
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: iOSPlatformChannelSpecifics,
-      macOS: macOSPlatformChannelSpecifics,
+    final NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'togetherdo_channel',
+        'TogetherDo Benachrichtigungen',
+        channelDescription: 'Benachrichtigungen für TogetherDo App',
+        importance: Importance.max,
+        priority: Priority.high,
+        showWhen: true,
+        sound: RawResourceAndroidNotificationSound('notification_sound'),
+      ),
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'notification_sound.caf',
+      ),
+      macOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'notification_sound.caf',
+      ),
     );
 
     await _localNotifications.show(
@@ -253,34 +247,28 @@ class MessagingService {
     required String title,
     required String body,
   }) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-          'todo_due_channel',
-          'Todo Fälligkeitsdaten',
-          channelDescription: 'Benachrichtigungen für fällige Todos',
-          importance: Importance.high,
-          priority: Priority.high,
-          showWhen: true,
-        );
-
-    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
-        DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        );
-
-    const DarwinNotificationDetails macOSPlatformChannelSpecifics =
-        DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        );
-
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: iOSPlatformChannelSpecifics,
-      macOS: macOSPlatformChannelSpecifics,
+    final NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'todo_due_channel',
+        'Todo Fälligkeitsdaten',
+        channelDescription: 'Benachrichtigungen für fällige Todos',
+        importance: Importance.high,
+        priority: Priority.high,
+        showWhen: true,
+        sound: RawResourceAndroidNotificationSound('notification_sound'),
+      ),
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'notification_sound.caf',
+      ),
+      macOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'notification_sound.caf',
+      ),
     );
 
     await _localNotifications.show(
@@ -302,36 +290,53 @@ class MessagingService {
     await _localNotifications.cancel(id);
   }
 
-  /// Test-Benachrichtigung senden
+  /// Debug-Funktion: Zeige Sound-Konfiguration
+  void debugSoundConfiguration() {
+    debugPrint('🔊 Sound-Konfiguration Debug:');
+    debugPrint('📱 Plattform: ${Platform.operatingSystem}');
+
+    if (Platform.isAndroid) {
+      debugPrint('🤖 Android: Custom Sound (notification_sound.mp3)');
+      debugPrint(
+        '📁 Sound-Datei: android/app/src/main/res/raw/notification_sound.mp3',
+      );
+    } else if (Platform.isIOS) {
+      debugPrint('🍎 iOS: Custom Sound (notification_sound.caf)');
+      debugPrint('📁 Sound-Datei: assets/sounds/notification_sound.caf');
+    } else if (Platform.isMacOS) {
+      debugPrint('🖥️ macOS: Custom Sound (notification_sound.caf)');
+      debugPrint('📁 Sound-Datei: assets/sounds/notification_sound.caf');
+    } else {
+      debugPrint('🌐 Web: Standard-Sound');
+    }
+  }
+
+  /// Test-Benachrichtigung mit benutzerdefiniertem Sound senden
   Future<void> sendTestNotification() async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-          'test_channel',
-          'Test Benachrichtigungen',
-          channelDescription: 'Test-Benachrichtigungen für TogetherDo App',
-          importance: Importance.max,
-          priority: Priority.high,
-          showWhen: true,
-        );
+    debugSoundConfiguration();
 
-    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
-        DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        );
-
-    const DarwinNotificationDetails macOSPlatformChannelSpecifics =
-        DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        );
-
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: iOSPlatformChannelSpecifics,
-      macOS: macOSPlatformChannelSpecifics,
+    final NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'test_channel',
+        'Test Benachrichtigungen',
+        channelDescription: 'Test-Benachrichtigungen für TogetherDo App',
+        importance: Importance.max,
+        priority: Priority.high,
+        showWhen: true,
+        sound: RawResourceAndroidNotificationSound('notification_sound'),
+      ),
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'notification_sound.caf',
+      ),
+      macOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'notification_sound.caf',
+      ),
     );
 
     await _localNotifications.show(
@@ -348,34 +353,67 @@ class MessagingService {
     required String body,
     String? payload,
   }) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-          'cloud_events_channel',
-          'Cloud Events Benachrichtigungen',
-          channelDescription: 'Benachrichtigungen für Cloud Events',
-          importance: Importance.max,
-          priority: Priority.high,
-          showWhen: true,
-        );
+    final NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'cloud_events_channel',
+        'Cloud Events Benachrichtigungen',
+        channelDescription: 'Benachrichtigungen für Cloud Events',
+        importance: Importance.max,
+        priority: Priority.high,
+        showWhen: true,
+        sound: RawResourceAndroidNotificationSound('notification_sound'),
+      ),
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'notification_sound.caf',
+      ),
+      macOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'notification_sound.caf',
+      ),
+    );
 
-    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
-        DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        );
+    await _localNotifications.show(
+      DateTime.now().millisecondsSinceEpoch ~/ 1000, // Unique ID
+      title,
+      body,
+      platformChannelSpecifics,
+      payload: payload,
+    );
+  }
 
-    const DarwinNotificationDetails macOSPlatformChannelSpecifics =
-        DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        );
-
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: iOSPlatformChannelSpecifics,
-      macOS: macOSPlatformChannelSpecifics,
+  /// Benachrichtigung mit benutzerdefiniertem Sound senden
+  Future<void> sendCustomSoundNotification({
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    final NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'custom_sound_channel',
+        'Benutzerdefinierte Sounds',
+        channelDescription: 'Benachrichtigungen mit benutzerdefinierten Sounds',
+        importance: Importance.max,
+        priority: Priority.high,
+        showWhen: true,
+        sound: RawResourceAndroidNotificationSound('notification_sound'),
+      ),
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'notification_sound.caf',
+      ),
+      macOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'notification_sound.caf',
+      ),
     );
 
     await _localNotifications.show(
@@ -396,6 +434,7 @@ class MessagingService {
       'todoDeleted': prefs.getBool('notification_todo_deleted') ?? true,
       'memberAdded': prefs.getBool('notification_member_added') ?? true,
       'memberRemoved': prefs.getBool('notification_member_removed') ?? true,
+      'chatMessage': prefs.getBool('notification_chat_message') ?? true,
     };
   }
 
@@ -414,6 +453,8 @@ class MessagingService {
         return settings['memberAdded'] ?? true;
       case 'member_removed':
         return settings['memberRemoved'] ?? true;
+      case 'chat_message':
+        return settings['chatMessage'] ?? true;
       default:
         return true; // Fallback
     }
