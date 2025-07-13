@@ -25,7 +25,9 @@ import 'screens/profile/profile_screen.dart';
 import 'screens/todo/todo_screen.dart';
 import 'screens/shopping/shopping_screen.dart';
 import 'screens/lists/lists_screen.dart';
+import 'screens/chat/chat_screen.dart';
 import 'utils/app_theme.dart';
+import 'utils/global_navigator.dart';
 import 'firebase_options.dart';
 import 'services/messaging_service.dart';
 
@@ -35,6 +37,19 @@ void main() async {
 
   // Messaging Service initialisieren
   await MessagingService().initialize();
+
+  // Navigation Callbacks für Push-Benachrichtigungen setzen
+  MessagingService().setNavigationCallbacks(
+    navigateToChat: (todoId, listId, todoTitle) {
+      GlobalNavigator().navigateToChat(todoId, listId, todoTitle);
+    },
+    navigateToTodo: (todoId, listId) {
+      GlobalNavigator().navigateToTodo(todoId, listId);
+    },
+    navigateToList: (listId) {
+      GlobalNavigator().navigateToList(listId);
+    },
+  );
 
   runApp(
     MultiRepositoryProvider(
@@ -116,6 +131,8 @@ class TogetherDoApp extends StatelessWidget {
 class TogetherDoAppView extends StatelessWidget {
   TogetherDoAppView({super.key});
 
+  final _navigatorKey = GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeBloc, ThemeState>(
@@ -128,6 +145,9 @@ class TogetherDoAppView extends StatelessWidget {
         }
         final themeData =
             AppTheme.themes[themeName] ?? AppTheme.themes['Light'];
+        // Global Navigator Router setzen
+        GlobalNavigator().setRouter(_router);
+
         return MaterialApp.router(
           title: 'TogetherDo',
           debugShowCheckedModeBanner: false,
@@ -195,6 +215,14 @@ class TogetherDoAppView extends StatelessWidget {
             builder: (context, state) {
               final listId = state.pathParameters['listId']!;
               return ShoppingScreen(listId: listId);
+            },
+          ),
+          GoRoute(
+            path: '/chat/:todoId',
+            builder: (context, state) {
+              final todoId = state.pathParameters['todoId']!;
+              final todoTitle = state.uri.queryParameters['title'] ?? 'Chat';
+              return ChatScreen(todoId: todoId, todoTitle: todoTitle);
             },
           ),
           GoRoute(

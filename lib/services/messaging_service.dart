@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -17,6 +18,12 @@ class MessagingService {
 
   String? _fcmToken;
   bool _isInitialized = false;
+
+  // Navigation Callbacks
+  Function(String todoId, String listId, String todoTitle)?
+  _navigateToChatCallback;
+  Function(String todoId, String listId)? _navigateToTodoCallback;
+  Function(String listId)? _navigateToListCallback;
 
   // Getter für den FCM Token
   String? get fcmToken => _fcmToken;
@@ -191,13 +198,13 @@ class MessagingService {
     debugPrint(
       'Hintergrund-Nachricht erhalten: ${message.notification?.title}',
     );
-    // Hier können Sie zur entsprechenden Seite navigieren
+    _handleMessageNavigation(message);
   }
 
   /// Initial-Nachrichten behandeln (wenn App durch Benachrichtigung gestartet wird)
   void _handleInitialMessage(RemoteMessage message) {
     debugPrint('Initial-Nachricht erhalten: ${message.notification?.title}');
-    // Hier können Sie zur entsprechenden Seite navigieren
+    _handleMessageNavigation(message);
   }
 
   /// Lokale Benachrichtigung anzeigen
@@ -238,7 +245,112 @@ class MessagingService {
   /// Benachrichtigungstap behandeln
   void _onNotificationTapped(NotificationResponse response) {
     debugPrint('Benachrichtigung getappt: ${response.payload}');
-    // Hier können Sie zur entsprechenden Seite navigieren
+
+    // Versuche die Daten aus dem Payload zu extrahieren
+    try {
+      if (response.payload != null && response.payload!.isNotEmpty) {
+        // Wenn es ein JSON-String ist, parsen wir ihn
+        final payload = response.payload!;
+        debugPrint('Payload: $payload');
+
+        // Für lokale Benachrichtigungen können wir die Daten aus dem Payload extrahieren
+        // oder eine Test-Navigation auslösen
+        _handleLocalNotificationTap(payload);
+      }
+    } catch (e) {
+      debugPrint('Fehler beim Verarbeiten der Benachrichtigung: $e');
+    }
+  }
+
+  /// Lokale Benachrichtigung Tap behandeln
+  void _handleLocalNotificationTap(String payload) {
+    debugPrint('Behandle lokale Benachrichtigung Tap: $payload');
+
+    // Für Test-Zwecke können wir eine Test-Navigation auslösen
+    Future.delayed(const Duration(milliseconds: 500), () {
+      _navigateToChatCallback?.call(
+        'test_todo_id',
+        'test_list_id',
+        'Test Todo',
+      );
+    });
+  }
+
+  /// Nachrichten-Navigation behandeln
+  void _handleMessageNavigation(RemoteMessage message) {
+    final data = message.data;
+    final type = data['type'];
+
+    debugPrint('Behandle Nachrichten-Navigation für Typ: $type');
+    debugPrint('Nachrichten-Daten: $data');
+
+    // Verzögerung hinzufügen, damit die App vollständig geladen ist
+    Future.delayed(const Duration(milliseconds: 500), () {
+      switch (type) {
+        case 'chat_message':
+          _navigateToChat(data);
+          break;
+        case 'todo_created':
+        case 'todo_completed':
+        case 'todo_deleted':
+          _navigateToTodo(data);
+          break;
+        case 'member_added':
+        case 'member_removed':
+          _navigateToList(data);
+          break;
+        default:
+          debugPrint('Unbekannter Nachrichten-Typ: $type');
+      }
+    });
+  }
+
+  /// Navigation zu Chat-Nachrichten
+  void _navigateToChat(Map<String, dynamic> data) {
+    final todoId = data['todoId'];
+    final listId = data['listId'];
+    final todoTitle = data['todoTitle'];
+
+    debugPrint('🔍 Chat-Navigation Daten:');
+    debugPrint('  todoId: $todoId');
+    debugPrint('  listId: $listId');
+    debugPrint('  todoTitle: $todoTitle');
+
+    if (todoId != null && listId != null) {
+      debugPrint('✅ Navigiere zu Chat: Todo $todoId in Liste $listId');
+      // Navigation wird über einen Global Navigator oder Callback behandelt
+      // Verwende einen Standard-Titel, falls todoTitle fehlt
+      final title = todoTitle ?? 'Chat';
+      _navigateToChatCallback?.call(todoId, listId, title);
+    } else {
+      debugPrint('❌ Fehlende Daten für Chat-Navigation:');
+      debugPrint('  todoId: $todoId');
+      debugPrint('  listId: $listId');
+      debugPrint('  todoTitle: $todoTitle');
+    }
+  }
+
+  /// Navigation zu Todo-Items
+  void _navigateToTodo(Map<String, dynamic> data) {
+    final todoId = data['todoId'];
+    final listId = data['listId'];
+
+    if (todoId != null && listId != null) {
+      debugPrint('Navigiere zu Todo: $todoId in Liste $listId');
+      // Navigation wird über einen Global Navigator oder Callback behandelt
+      _navigateToTodoCallback?.call(todoId, listId);
+    }
+  }
+
+  /// Navigation zu Listen
+  void _navigateToList(Map<String, dynamic> data) {
+    final listId = data['listId'];
+
+    if (listId != null) {
+      debugPrint('Navigiere zu Liste: $listId');
+      // Navigation wird über einen Global Navigator oder Callback behandelt
+      _navigateToListCallback?.call(listId);
+    }
   }
 
   /// Lokale Benachrichtigung für Todo-Fälligkeitsdatum
@@ -508,5 +620,135 @@ class MessagingService {
     } else {
       return true; // macOS, Android, Web zeigen Push-Benachrichtigungen im Vordergrund
     }
+  }
+
+  /// Navigation Callbacks setzen
+  void setNavigationCallbacks({
+    Function(String todoId, String listId, String todoTitle)? navigateToChat,
+    Function(String todoId, String listId)? navigateToTodo,
+    Function(String listId)? navigateToList,
+  }) {
+    _navigateToChatCallback = navigateToChat;
+    _navigateToTodoCallback = navigateToTodo;
+    _navigateToListCallback = navigateToList;
+  }
+
+  /// Test-Navigation zu Chat (für Debugging)
+  void testNavigationToChat() {
+    debugPrint('🧪 Teste Navigation zu Chat');
+    _navigateToChatCallback?.call('test_todo_id', 'test_list_id', 'Test Todo');
+  }
+
+  /// Teste ob Callbacks gesetzt sind
+  void testCallbacks() {
+    debugPrint('🧪 Teste Callbacks:');
+    debugPrint('  _navigateToChatCallback: ${_navigateToChatCallback != null}');
+    debugPrint('  _navigateToTodoCallback: ${_navigateToTodoCallback != null}');
+    debugPrint('  _navigateToListCallback: ${_navigateToListCallback != null}');
+
+    if (_navigateToChatCallback != null) {
+      debugPrint('✅ Chat-Callback ist gesetzt');
+    } else {
+      debugPrint('❌ Chat-Callback ist NICHT gesetzt');
+    }
+  }
+
+  /// Test-Push-Benachrichtigung simulieren
+  void testPushNotification() {
+    debugPrint('🧪 Simuliere Push-Benachrichtigung');
+
+    // Simuliere eine RemoteMessage mit Chat-Daten
+    final mockMessage = RemoteMessage(
+      data: {
+        'type': 'chat_message',
+        'messageId': 'test_message_id',
+        'todoId': 'test_todo_id',
+        'listId': 'test_list_id',
+        'todoTitle': 'Test Todo',
+        'userId': 'test_user_id',
+        'userName': 'Test User',
+        'message': 'Test Nachricht',
+      },
+      notification: RemoteNotification(
+        title: 'Test User hat eine Nachricht geschrieben',
+        body: 'Test Nachricht',
+      ),
+    );
+
+    // Behandle die Nachricht wie eine echte Push-Benachrichtigung
+    _handleMessageNavigation(mockMessage);
+  }
+
+  /// Test mit echten Daten aus der Push-Benachrichtigung
+  void testWithRealData() {
+    debugPrint('🧪 Teste mit echten Push-Benachrichtigungs-Daten');
+
+    // Verwende die Daten aus Ihrer Debug-Ausgabe
+    final mockMessage = RemoteMessage(
+      data: {
+        'type': 'chat_message',
+        'messageId': '1752388276535',
+        'senderName': 'Andreas Sarközy',
+        'todoId': '9peorLyGbgj311NXvuIt',
+        'listId': '56ZxKsnl7nf1pSL5AT4W',
+        'senderId': 'ogJhqBFgxVeIZ6iC2D0PTtSqRoj2',
+        // todoTitle fehlt - das ist das Problem!
+      },
+      notification: RemoteNotification(
+        title: 'Andreas Sarközy hat eine Nachricht geschrieben',
+        body: 'Test Nachricht',
+      ),
+    );
+
+    // Behandle die Nachricht wie eine echte Push-Benachrichtigung
+    _handleMessageNavigation(mockMessage);
+  }
+
+  /// Echte Push-Benachrichtigung über Cloud Functions senden
+  Future<void> sendRealTestPushNotification() async {
+    debugPrint('🧪 Sende echte Push-Benachrichtigung über Cloud Functions');
+
+    try {
+      final fcmToken = await getStoredFCMToken();
+      if (fcmToken == null) {
+        debugPrint('❌ Kein FCM Token verfügbar');
+        return;
+      }
+
+      // Cloud Function aufrufen
+      final functions = FirebaseFunctions.instance;
+      final callable = functions.httpsCallable('sendTestChatNotification');
+
+      final result = await callable.call({'fcmToken': fcmToken});
+
+      debugPrint('✅ Echte Push-Benachrichtigung gesendet: ${result.data}');
+    } catch (e) {
+      debugPrint('❌ Fehler beim Senden der echten Push-Benachrichtigung: $e');
+    }
+  }
+
+  /// Test mit echten Feldnamen (senderName, senderId)
+  void testWithRealFieldNames() {
+    debugPrint('🧪 Teste mit echten Feldnamen (senderName, senderId)');
+
+    // Verwende die Daten aus Ihrer Debug-Ausgabe mit korrekten Feldnamen
+    final mockMessage = RemoteMessage(
+      data: {
+        'type': 'chat_message',
+        'messageId': '1752388276535',
+        'senderName': 'Andreas Sarközy', // senderName statt userName
+        'todoId': '9peorLyGbgj311NXvuIt',
+        'listId': '56ZxKsnl7nf1pSL5AT4W',
+        'senderId': 'ogJhqBFgxVeIZ6iC2D0PTtSqRoj2', // senderId statt userId
+        // todoTitle fehlt - wird von der Cloud Function hinzugefügt
+      },
+      notification: RemoteNotification(
+        title: 'Andreas Sarközy hat eine Nachricht geschrieben',
+        body: 'Test Nachricht',
+      ),
+    );
+
+    // Behandle die Nachricht wie eine echte Push-Benachrichtigung
+    _handleMessageNavigation(mockMessage);
   }
 }

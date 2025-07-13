@@ -440,4 +440,175 @@ export const sendTestNotification = onCall({
     console.error('Fehler beim Senden der Test-Benachrichtigung:', error);
     throw new Error(`Fehler beim Senden der Benachrichtigung: ${error}`);
   }
+});
+
+// Test-Function für Chat-Push-Benachrichtigungen
+export const sendTestChatNotification = onCall({ 
+  region: 'europe-west3',
+  maxInstances: 10,
+}, async (request) => {
+  try {
+    const { fcmToken } = request.data;
+    
+    if (!fcmToken) {
+      throw new Error('FCM Token ist erforderlich');
+    }
+
+    const message = {
+      notification: {
+        title: 'Test User hat eine Nachricht geschrieben',
+        body: 'Das ist eine Test-Chat-Nachricht!',
+      },
+      data: {
+        type: 'chat_message',
+        messageId: 'test_message_id',
+        todoId: 'test_todo_id',
+        listId: 'test_list_id',
+        todoTitle: 'Test Todo',
+        userId: 'test_user_id',
+        userName: 'Test User',
+        message: 'Das ist eine Test-Chat-Nachricht!',
+      },
+      android: {
+        notification: {
+          sound: 'notification_sound',
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: 'notification_sound.caf',
+          },
+        },
+      },
+      token: fcmToken,
+    };
+
+    const response = await messaging.send(message);
+    
+    console.log('Test-Chat-Benachrichtigung erfolgreich gesendet:', response);
+    
+    return {
+      success: true,
+      messageId: response,
+      message: 'Test-Chat-Benachrichtigung erfolgreich gesendet'
+    };
+    
+  } catch (error) {
+    console.error('Fehler beim Senden der Test-Chat-Benachrichtigung:', error);
+    throw new Error(`Fehler beim Senden der Chat-Benachrichtigung: ${error}`);
+  }
+}); 
+
+// Cloud Function für neue Chat-Nachrichten
+export const onChatMessageCreated = onDocumentCreated({ region: 'europe-west3', document: 'chatMessages/{messageId}' }, async (event) => {
+  try {
+    const messageData = event.data?.data();
+    const messageId = event.params.messageId;
+    const todoId = messageData?.todoId;
+    
+    // Unterstütze verschiedene Feldnamen
+    const userId = messageData?.userId || messageData?.senderId;
+    const userName = messageData?.userName || messageData?.senderName;
+    const message = messageData?.message;
+
+    console.log('Chat-Nachrichten-Daten:', messageData);
+
+    if (!messageData || !todoId || !userId || !userName || !message) {
+      console.log('Ungültige Chat-Nachrichten-Daten');
+      console.log('  messageData:', messageData);
+      console.log('  todoId:', todoId);
+      console.log('  userId:', userId);
+      console.log('  userName:', userName);
+      console.log('  message:', message);
+      return;
+    }
+
+    console.log(`Neue Chat-Nachricht erstellt: ${messageId} für Todo: ${todoId}`);
+
+    // Todo abrufen um List-ID zu bekommen
+    const todoDoc = await db.collection('todos').doc(todoId).get();
+    if (!todoDoc.exists) {
+      console.log('Todo nicht gefunden');
+      return;
+    }
+
+    const todoData = todoDoc.data();
+    const listId = todoData?.listId;
+    const todoTitle = todoData?.title;
+
+    if (!listId || !todoTitle) {
+      console.log('Todo-Daten unvollständig');
+      return;
+    }
+
+    // Liste abrufen um Members zu bekommen
+    const listDoc = await db.collection('lists').doc(listId).get();
+    if (!listDoc.exists) {
+      console.log('Liste nicht gefunden');
+      return;
+    }
+
+    const listData = listDoc.data();
+    const members = listData?.members || [];
+
+    // FCM Tokens für alle Members außer dem Sender abrufen
+    const memberTokens: string[] = [];
+    
+    for (const memberId of members) {
+      if (memberId !== userId) {
+        const userDoc = await db.collection('users').doc(memberId).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          const fcmToken = userData?.fcmToken;
+          if (fcmToken) {
+            memberTokens.push(fcmToken);
+          }
+        }
+      }
+    }
+
+    if (memberTokens.length === 0) {
+      console.log('Keine FCM Tokens für Chat-Benachrichtigungen gefunden');
+      return;
+    }
+
+    // Benachrichtigung senden
+    const notificationData = {
+      type: 'chat_message',
+      messageId: messageId,
+      todoId: todoId,
+      listId: listId,
+      todoTitle: todoTitle,
+      userId: userId,
+      userName: userName,
+      message: message,
+    };
+
+    console.log('Sende Chat-Benachrichtigung mit Daten:', notificationData);
+
+    const response = await messaging.sendEachForMulticast({
+      tokens: memberTokens,
+      notification: {
+        title: `${userName} hat eine Nachricht geschrieben`,
+        body: message.length > 50 ? `${message.substring(0, 50)}...` : message,
+      },
+      data: notificationData,
+      android: {
+        notification: {
+          sound: 'notification_sound',
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: 'notification_sound.caf',
+          },
+        },
+      },
+    });
+    console.log(`Chat-Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
+  } catch (error) {
+    console.error('Fehler beim Senden der Chat-Benachrichtigung:', error);
+  }
 }); 

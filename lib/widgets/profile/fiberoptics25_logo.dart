@@ -11,7 +11,7 @@ class Fiberoptics25Logo extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeBloc, ThemeState>(
       builder: (context, state) {
-        // Debug: Aktuelles Theme ermitteln
+        // Aktuelles Theme ermitteln
         String currentTheme = 'Light'; // Default
         if (state is ThemeLoadSuccess) {
           currentTheme = state.themeName;
@@ -19,121 +19,90 @@ class Fiberoptics25Logo extends StatelessWidget {
           currentTheme = state.themeName;
         }
 
-        // Debug-Widget immer anzeigen
-        return Column(
-          children: [
-            // Debug-Info
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 10),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue, width: 1),
+        // Logo nur im Fiberoptics25 Theme anzeigen
+        if (currentTheme == 'Fiberoptics25') {
+          return Container(
+            margin: const EdgeInsets.symmetric(vertical: 20),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.primary,
+                width: 2,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '🔍 Debug: Fiberoptics25 Logo',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text('Aktuelles Theme: $currentTheme'),
-                  Text(
-                    'Logo wird angezeigt: ${currentTheme == 'Fiberoptics25' ? '✅ JA' : '❌ NEIN'}',
-                  ),
-                  Text('State Type: ${state.runtimeType}'),
-                ],
-              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-
-            // Logo nur im Fiberoptics25 Theme anzeigen
-            if (currentTheme == 'Fiberoptics25')
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 20),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
+            child: Column(
+              children: [
+                // Logo
+                SvgPicture.asset(
+                  'assets/images/FO25-Logo.svg',
+                  height: 80,
+                  width: 80,
+                ),
+                const SizedBox(height: 12),
+                // Theme Name
+                Text(
+                  'Fiberoptics25',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     color: Theme.of(context).colorScheme.primary,
-                    width: 2,
+                    fontWeight: FontWeight.bold,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primary.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
                 ),
-                child: Column(
+                const SizedBox(height: 8),
+                // Beschreibung
+                Text(
+                  'Technologie meets Design',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.8),
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Farbpalette anzeigen
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // Logo
-                    SvgPicture.asset(
-                      'assets/images/FO25-Logo.svg',
-                      height: 80,
-                      width: 80,
+                    _buildColorDot(
+                      Theme.of(context).colorScheme.primary,
+                      'Primary',
                     ),
-                    const SizedBox(height: 12),
-                    // Theme Name
-                    Text(
-                      'Fiberoptics25',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                    _buildColorDot(
+                      Theme.of(context).colorScheme.secondary,
+                      'Secondary',
                     ),
-                    const SizedBox(height: 8),
-                    // Beschreibung
-                    Text(
-                      'Technologie meets Design',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.8),
-                        fontStyle: FontStyle.italic,
-                      ),
+                    _buildColorDot(
+                      Theme.of(context).colorScheme.tertiary,
+                      'Accent',
                     ),
-                    const SizedBox(height: 12),
-                    // Farbpalette anzeigen
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildColorDot(
-                          Theme.of(context).colorScheme.primary,
-                          'Primary',
-                        ),
-                        _buildColorDot(
-                          Theme.of(context).colorScheme.secondary,
-                          'Secondary',
-                        ),
-                        _buildColorDot(
-                          Theme.of(context).colorScheme.tertiary,
-                          'Accent',
-                        ),
-                        _buildColorDot(
-                          Theme.of(context).colorScheme.outline,
-                          'Blue',
-                        ),
-                        _buildColorDot(
-                          Theme.of(context).colorScheme.outlineVariant,
-                          'Green',
-                        ),
-                      ],
+                    _buildColorDot(
+                      Theme.of(context).colorScheme.outline,
+                      'Blue',
+                    ),
+                    _buildColorDot(
+                      Theme.of(context).colorScheme.outlineVariant,
+                      'Green',
                     ),
                   ],
                 ),
-              ),
-          ],
-        );
+              ],
+            ),
+          );
+        }
+
+        // Wenn nicht Fiberoptics25 Theme, nichts anzeigen
+        return const SizedBox.shrink();
       },
     );
   }

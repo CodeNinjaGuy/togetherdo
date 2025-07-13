@@ -90,7 +90,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         displayName: event.displayName,
         avatarUrl: event.avatarUrl,
       );
-      emit(AuthProfileUpdateSuccess(user: user));
+      // Nach erfolgreichem Update direkt zu AuthAuthenticated wechseln
+      emit(AuthAuthenticated(user: user));
     } catch (e) {
       emit(AuthProfileUpdateFailure(message: e.toString()));
     }
@@ -106,7 +107,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final currentState = state;
       if (currentState is AuthAuthenticated) {
         final updatedUser = currentState.user.copyWith(avatarUrl: avatarUrl);
-        emit(AuthProfileUpdateSuccess(user: updatedUser));
+        // Nach erfolgreichem Avatar-Upload direkt zu AuthAuthenticated wechseln
+        emit(AuthAuthenticated(user: updatedUser));
       }
     } catch (e) {
       emit(AuthProfileUpdateFailure(message: e.toString()));
