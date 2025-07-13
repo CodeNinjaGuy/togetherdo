@@ -25,6 +25,9 @@ class UserModel extends Equatable {
       'memberAdded': true,
       'memberRemoved': true,
       'chatMessage': true,
+      'shoppingItemCreated': true,
+      'shoppingItemPurchased': true,
+      'shoppingItemDeleted': true,
     },
   });
 
@@ -46,6 +49,9 @@ class UserModel extends Equatable {
               'memberAdded': true,
               'memberRemoved': true,
               'chatMessage': true,
+              'shoppingItemCreated': true,
+              'shoppingItemPurchased': true,
+              'shoppingItemDeleted': true,
             },
       ),
     );

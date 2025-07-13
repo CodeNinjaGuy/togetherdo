@@ -77,6 +77,9 @@ export const onTodoCreated = onDocumentCreated({ region: 'europe-west3', documen
             sound: 'notification_sound.caf',
           },
         },
+        headers: {
+          'apns-priority': '10',
+        },
       },
     });
     console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
@@ -159,6 +162,9 @@ export const onTodoCompleted = onDocumentUpdated({ region: 'europe-west3', docum
               sound: 'notification_sound.caf',
             },
           },
+          headers: {
+            'apns-priority': '10',
+          },
         },
       });
       console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
@@ -238,6 +244,9 @@ export const onTodoDeleted = onDocumentDeleted({ region: 'europe-west3', documen
             sound: 'notification_sound.caf',
           },
         },
+        headers: {
+          'apns-priority': '10',
+        },
       },
     });
     console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
@@ -308,6 +317,9 @@ export const onListMemberAdded = onDocumentUpdated({ region: 'europe-west3', doc
             aps: {
               sound: 'notification_sound.caf',
             },
+          },
+          headers: {
+            'apns-priority': '10',
           },
         },
       });
@@ -381,6 +393,9 @@ export const onListMemberRemoved = onDocumentUpdated({ region: 'europe-west3', d
               sound: 'notification_sound.caf',
             },
           },
+          headers: {
+            'apns-priority': '10',
+          },
         },
       });
       console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
@@ -421,6 +436,9 @@ export const sendTestNotification = onCall({
           aps: {
             sound: 'notification_sound.caf',
           },
+        },
+        headers: {
+          'apns-priority': '10',
         },
       },
       token: fcmToken,
@@ -479,6 +497,9 @@ export const sendTestChatNotification = onCall({
           aps: {
             sound: 'notification_sound.caf',
           },
+        },
+        headers: {
+          'apns-priority': '10',
         },
       },
       token: fcmToken,
@@ -605,10 +626,261 @@ export const onChatMessageCreated = onDocumentCreated({ region: 'europe-west3', 
             sound: 'notification_sound.caf',
           },
         },
+        headers: {
+          'apns-priority': '10',
+        },
       },
     });
     console.log(`Chat-Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
   } catch (error) {
     console.error('Fehler beim Senden der Chat-Benachrichtigung:', error);
+  }
+}); 
+
+// Cloud Function für neue Shopping-Items
+export const onShoppingItemCreated = onDocumentCreated({ region: 'europe-west3', document: 'shoppingItems/{itemId}' }, async (event) => {
+  try {
+    const itemData = event.data?.data();
+    const itemId = event.params.itemId;
+    const createdBy = itemData?.createdBy;
+    const listId = itemData?.listId;
+
+    if (!itemData || !createdBy || !listId) {
+      console.log('Ungültige Shopping-Item-Daten');
+      return;
+    }
+
+    console.log(`Neues Shopping-Item erstellt: ${itemId} in Liste: ${listId}`);
+
+    // Liste abrufen um Members zu bekommen
+    const listDoc = await db.collection('lists').doc(listId).get();
+    if (!listDoc.exists) {
+      console.log('Liste nicht gefunden');
+      return;
+    }
+
+    const listData = listDoc.data();
+    const members = listData?.members || [];
+
+    // FCM Tokens für alle Members außer dem Ersteller abrufen
+    const memberTokens: string[] = [];
+    
+    for (const memberId of members) {
+      if (memberId !== createdBy) {
+        const userDoc = await db.collection('users').doc(memberId).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          const fcmToken = userData?.fcmToken;
+          if (fcmToken) {
+            memberTokens.push(fcmToken);
+          }
+        }
+      }
+    }
+
+    if (memberTokens.length === 0) {
+      console.log('Keine FCM Tokens für Benachrichtigungen gefunden');
+      return;
+    }
+
+    // Benachrichtigung senden
+    const response = await messaging.sendEachForMulticast({
+      tokens: memberTokens,
+      notification: {
+        title: 'Neues Einkaufsitem',
+        body: `${itemData.name} wurde zur Einkaufsliste hinzugefügt`,
+      },
+      data: {
+        type: 'shopping_item_created',
+        itemId: itemId,
+        listId: listId,
+        createdBy: createdBy,
+      },
+      android: {
+        notification: {
+          sound: 'notification_sound',
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: 'notification_sound.caf',
+          },
+        },
+        headers: {
+          'apns-priority': '10',
+        },
+      },
+    });
+    console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
+  } catch (error) {
+    console.error('Fehler beim Senden der Benachrichtigung:', error);
+  }
+});
+
+// Cloud Function für gekaufte Shopping-Items
+export const onShoppingItemPurchased = onDocumentUpdated({ region: 'europe-west3', document: 'shoppingItems/{itemId}' }, async (event) => {
+  try {
+    const beforeData = event.data?.before.data();
+    const afterData = event.data?.after.data();
+    const itemId = event.params.itemId;
+
+    if (!beforeData || !afterData) {
+      console.log('Ungültige Shopping-Item-Daten');
+      return;
+    }
+
+    // Prüfen ob Item von nicht gekauft zu gekauft geändert wurde
+    if (!beforeData.purchased && afterData.purchased) {
+      const listId = afterData.listId;
+      const purchasedBy = afterData.purchasedBy || afterData.createdBy;
+
+      console.log(`Shopping-Item gekauft: ${itemId} in Liste: ${listId}`);
+
+      // Liste abrufen
+      const listDoc = await db.collection('lists').doc(listId).get();
+      if (!listDoc.exists) {
+        console.log('Liste nicht gefunden');
+        return;
+      }
+
+      const listData = listDoc.data();
+      const members = listData?.members || [];
+
+      // FCM Tokens für alle Members außer dem, der es gekauft hat
+      const memberTokens: string[] = [];
+      
+      for (const memberId of members) {
+        if (memberId !== purchasedBy) {
+          const userDoc = await db.collection('users').doc(memberId).get();
+          if (userDoc.exists) {
+            const userData = userDoc.data();
+            const fcmToken = userData?.fcmToken;
+            if (fcmToken) {
+              memberTokens.push(fcmToken);
+            }
+          }
+        }
+      }
+
+      if (memberTokens.length === 0) {
+        console.log('Keine FCM Tokens für Benachrichtigungen gefunden');
+        return;
+      }
+
+      // Benachrichtigung senden
+      const response = await messaging.sendEachForMulticast({
+        tokens: memberTokens,
+        notification: {
+          title: 'Item gekauft',
+          body: `${afterData.name} wurde als gekauft markiert`,
+        },
+        data: {
+          type: 'shopping_item_purchased',
+          itemId: itemId,
+          listId: listId,
+          purchasedBy: purchasedBy,
+        },
+        android: {
+          notification: {
+            sound: 'notification_sound',
+          },
+        },
+        apns: {
+          payload: {
+            aps: {
+              sound: 'notification_sound.caf',
+            },
+          },
+          headers: {
+            'apns-priority': '10',
+          },
+        },
+      });
+      console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
+    }
+  } catch (error) {
+    console.error('Fehler beim Senden der Benachrichtigung:', error);
+  }
+});
+
+// Cloud Function für gelöschte Shopping-Items
+export const onShoppingItemDeleted = onDocumentDeleted({ region: 'europe-west3', document: 'shoppingItems/{itemId}' }, async (event) => {
+  try {
+    const itemData = event.data?.data();
+    const itemId = event.params.itemId;
+    const deletedBy = itemData?.deletedBy || itemData?.createdBy;
+    const listId = itemData?.listId;
+
+    if (!itemData || !deletedBy || !listId) {
+      console.log('Ungültige Shopping-Item-Daten');
+      return;
+    }
+
+    console.log(`Shopping-Item gelöscht: ${itemId} in Liste: ${listId}`);
+
+    // Liste abrufen
+    const listDoc = await db.collection('lists').doc(listId).get();
+    if (!listDoc.exists) {
+      console.log('Liste nicht gefunden');
+      return;
+    }
+
+    const listData = listDoc.data();
+    const members = listData?.members || [];
+
+    // FCM Tokens für alle Members außer dem, der es gelöscht hat
+    const memberTokens: string[] = [];
+    
+    for (const memberId of members) {
+      if (memberId !== deletedBy) {
+        const userDoc = await db.collection('users').doc(memberId).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          const fcmToken = userData?.fcmToken;
+          if (fcmToken) {
+            memberTokens.push(fcmToken);
+          }
+        }
+      }
+    }
+
+    if (memberTokens.length === 0) {
+      console.log('Keine FCM Tokens für Benachrichtigungen gefunden');
+      return;
+    }
+
+    // Benachrichtigung senden
+    const response = await messaging.sendEachForMulticast({
+      tokens: memberTokens,
+      notification: {
+        title: 'Einkaufsitem gelöscht',
+        body: `${itemData.name} wurde aus der Einkaufsliste entfernt`,
+      },
+      data: {
+        type: 'shopping_item_deleted',
+        itemId: itemId,
+        listId: listId,
+        deletedBy: deletedBy,
+      },
+      android: {
+        notification: {
+          sound: 'notification_sound',
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: 'notification_sound.caf',
+          },
+        },
+        headers: {
+          'apns-priority': '10',
+        },
+      },
+    });
+    console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
+  } catch (error) {
+    console.error('Fehler beim Senden der Benachrichtigung:', error);
   }
 }); 

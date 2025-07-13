@@ -24,6 +24,7 @@ class MessagingService {
   _navigateToChatCallback;
   Function(String todoId, String listId)? _navigateToTodoCallback;
   Function(String listId)? _navigateToListCallback;
+  Function(String itemId, String listId)? _navigateToShoppingCallback;
 
   // Getter für den FCM Token
   String? get fcmToken => _fcmToken;
@@ -295,6 +296,11 @@ class MessagingService {
         case 'todo_deleted':
           _navigateToTodo(data);
           break;
+        case 'shopping_item_created':
+        case 'shopping_item_purchased':
+        case 'shopping_item_deleted':
+          _navigateToShopping(data);
+          break;
         case 'member_added':
         case 'member_removed':
           _navigateToList(data);
@@ -339,6 +345,18 @@ class MessagingService {
       debugPrint('Navigiere zu Todo: $todoId in Liste $listId');
       // Navigation wird über einen Global Navigator oder Callback behandelt
       _navigateToTodoCallback?.call(todoId, listId);
+    }
+  }
+
+  /// Navigation zu Shopping-Items
+  void _navigateToShopping(Map<String, dynamic> data) {
+    final itemId = data['itemId'];
+    final listId = data['listId'];
+
+    if (itemId != null && listId != null) {
+      debugPrint('Navigiere zu Shopping-Item: $itemId in Liste $listId');
+      // Navigation wird über einen Global Navigator oder Callback behandelt
+      _navigateToShoppingCallback?.call(itemId, listId);
     }
   }
 
@@ -547,6 +565,12 @@ class MessagingService {
       'memberAdded': prefs.getBool('notification_member_added') ?? true,
       'memberRemoved': prefs.getBool('notification_member_removed') ?? true,
       'chatMessage': prefs.getBool('notification_chat_message') ?? true,
+      'shoppingItemCreated':
+          prefs.getBool('notification_shopping_item_created') ?? true,
+      'shoppingItemPurchased':
+          prefs.getBool('notification_shopping_item_purchased') ?? true,
+      'shoppingItemDeleted':
+          prefs.getBool('notification_shopping_item_deleted') ?? true,
     };
   }
 
@@ -567,6 +591,12 @@ class MessagingService {
         return settings['memberRemoved'] ?? true;
       case 'chat_message':
         return settings['chatMessage'] ?? true;
+      case 'shopping_item_created':
+        return settings['shoppingItemCreated'] ?? true;
+      case 'shopping_item_purchased':
+        return settings['shoppingItemPurchased'] ?? true;
+      case 'shopping_item_deleted':
+        return settings['shoppingItemDeleted'] ?? true;
       default:
         return true; // Fallback
     }
@@ -627,10 +657,12 @@ class MessagingService {
     Function(String todoId, String listId, String todoTitle)? navigateToChat,
     Function(String todoId, String listId)? navigateToTodo,
     Function(String listId)? navigateToList,
+    Function(String itemId, String listId)? navigateToShopping,
   }) {
     _navigateToChatCallback = navigateToChat;
     _navigateToTodoCallback = navigateToTodo;
     _navigateToListCallback = navigateToList;
+    _navigateToShoppingCallback = navigateToShopping;
   }
 
   /// Test-Navigation zu Chat (für Debugging)
@@ -645,6 +677,9 @@ class MessagingService {
     debugPrint('  _navigateToChatCallback: ${_navigateToChatCallback != null}');
     debugPrint('  _navigateToTodoCallback: ${_navigateToTodoCallback != null}');
     debugPrint('  _navigateToListCallback: ${_navigateToListCallback != null}');
+    debugPrint(
+      '  _navigateToShoppingCallback: ${_navigateToShoppingCallback != null}',
+    );
 
     if (_navigateToChatCallback != null) {
       debugPrint('✅ Chat-Callback ist gesetzt');

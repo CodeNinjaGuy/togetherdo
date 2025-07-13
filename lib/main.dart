@@ -46,6 +46,9 @@ void main() async {
     navigateToTodo: (todoId, listId) {
       GlobalNavigator().navigateToTodo(todoId, listId);
     },
+    navigateToShopping: (itemId, listId) {
+      GlobalNavigator().navigateToShopping(itemId, listId);
+    },
     navigateToList: (listId) {
       GlobalNavigator().navigateToList(listId);
     },

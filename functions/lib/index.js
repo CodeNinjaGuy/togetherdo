@@ -1,259 +1,771 @@
 "use strict";
-
-const { onDocumentCreated, onDocumentUpdated, onDocumentDeleted } = require("firebase-functions/v2/firestore");
-const { onCall } = require("firebase-functions/v2/https");
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.onShoppingItemDeleted = exports.onShoppingItemPurchased = exports.onShoppingItemCreated = exports.onChatMessageCreated = exports.sendTestChatNotification = exports.sendTestNotification = exports.onListMemberRemoved = exports.onListMemberAdded = exports.onTodoDeleted = exports.onTodoCompleted = exports.onTodoCreated = void 0;
+const firestore_1 = require("firebase-functions/v2/firestore");
+const https_1 = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 admin.initializeApp();
-
 const db = admin.firestore();
 const messaging = admin.messaging();
-
-const NotificationTypes = {
-  TODO_CREATED: 'todo_created',
-  TODO_COMPLETED: 'todo_completed',
-  TODO_DELETED: 'todo_deleted',
-  MEMBER_ADDED: 'member_added',
-  MEMBER_REMOVED: 'member_removed',
-  CHAT_MESSAGE: 'chat_message',
-  TEST: 'test'
-};
-
-const defaultSettings = {
-  [NotificationTypes.TODO_CREATED]: true,
-  [NotificationTypes.TODO_COMPLETED]: true,
-  [NotificationTypes.TODO_DELETED]: true,
-  [NotificationTypes.MEMBER_ADDED]: true,
-  [NotificationTypes.MEMBER_REMOVED]: true,
-  [NotificationTypes.CHAT_MESSAGE]: true
-};
-
-// 📋 Logging Utility
-const log = {
-  info: (...args) => console.log('ℹ️', ...args),
-  warn: (...args) => console.warn('⚠️', ...args),
-  error: (...args) => console.error('🚨', ...args),
-};
-
-async function getListMembers(listId) {
-  const listDoc = await db.collection("lists").doc(listId).get();
-  if (!listDoc.exists) {
-    log.error(`Liste nicht gefunden: ${listId}`);
-    return null;
-  }
-  return listDoc.data().allUserIds || [];
-}
-
-async function getFilteredMemberTokens(members, exclude = [], notificationType) {
-  const promises = members
-    .filter(memberId => !exclude.includes(memberId))
-    .map(async memberId => {
-      const userDoc = await db.collection("users").doc(memberId).get();
-      const userData = userDoc.data();
-      const fcmToken = userData?.fcmToken;
-      if (!fcmToken) return null;
-
-      const settings = userData?.notificationSettings || {};
-      const allowed = settings[notificationType] ?? defaultSettings[notificationType] ?? true;
-
-      if (!allowed) {
-        log.info(`🔕 ${notificationType} für ${memberId} deaktiviert`);
-        return null;
-      }
-
-      log.info(`📨 Token für ${memberId}: ${fcmToken}`);
-      return fcmToken;
-    });
-
-  const tokens = (await Promise.all(promises)).filter(Boolean);
-  return tokens;
-}
-
-async function sendNotification(members, exclude, payload, notificationType = NotificationTypes.TEST) {
-  const tokens = await getFilteredMemberTokens(members, exclude, notificationType);
-  if (tokens.length === 0) {
-    log.warn("Keine Empfänger gefunden oder alle Benachrichtigungen deaktiviert.");
-    return;
-  }
-
-  const notificationWithSound = {
-    notification: payload.notification,
-    data: payload.data,
-    android: {
-      notification: {
-        ...payload.notification,
-        sound: 'notification_sound',
-        channelId: 'togetherdo_channel',
-        priority: 'high',
-      },
-    },
-    apns: {
-      headers: {
-        'apns-priority': '10'
-      },
-      payload: {
-        aps: {
-          alert: payload.notification,
-          sound: 'notification_sound.aiff',
-          badge: 1,
-          "interruption-level": "time-sensitive"
-        },
-      },
-    },
-    tokens,
-  };
-
-  const response = await messaging.sendEachForMulticast(notificationWithSound);
-  log.info(`📬 Benachrichtigungen gesendet: ${response.successCount}/${tokens.length} (Typ: ${notificationType})`);
-
-  response.responses.forEach((r, i) => {
-    if (r.success) log.info(`✅ an ${tokens[i]}`);
-    else log.error(`❌ bei ${tokens[i]}:`, r.error?.message);
-  });
-}
-
-// 🔷 onTodoCreated
-exports.onTodoCreated = onDocumentCreated({ region: "europe-west3", document: "todos/{todoId}" }, async (event) => {
-  const todoData = event.data?.data();
-  if (!todoData) return log.error("Ungültige Todo-Daten");
-
-  const { userId, listId, title, assignedToUserId } = todoData;
-  if (!userId || !listId) return log.error("userId oder listId fehlt");
-
-  log.info(`✅ Neues Todo: ${title}`);
-
-  const members = await getListMembers(listId);
-  if (!members) return;
-
-  let targets = assignedToUserId ? [assignedToUserId] : members;
-  let exclude = assignedToUserId ? [] : [userId];
-  let note = { title: "Neues Todo", body: `${title} wurde ${assignedToUserId ? 'dir zugewiesen' : 'erstellt'}` };
-
-  await sendNotification(targets, exclude, {
-    notification: note,
-    data: { type: NotificationTypes.TODO_CREATED, todoId: event.params.todoId, listId, createdBy: userId },
-  }, NotificationTypes.TODO_CREATED);
+// Cloud Function für neue Todo-Items
+exports.onTodoCreated = (0, firestore_1.onDocumentCreated)({ region: 'europe-west3', document: 'todos/{todoId}' }, async (event) => {
+    var _a;
+    try {
+        const todoData = (_a = event.data) === null || _a === void 0 ? void 0 : _a.data();
+        const todoId = event.params.todoId;
+        const createdBy = todoData === null || todoData === void 0 ? void 0 : todoData.createdBy;
+        const listId = todoData === null || todoData === void 0 ? void 0 : todoData.listId;
+        if (!todoData || !createdBy || !listId) {
+            console.log('Ungültige Todo-Daten');
+            return;
+        }
+        console.log(`Neues Todo erstellt: ${todoId} in Liste: ${listId}`);
+        // Liste abrufen um Members zu bekommen
+        const listDoc = await db.collection('lists').doc(listId).get();
+        if (!listDoc.exists) {
+            console.log('Liste nicht gefunden');
+            return;
+        }
+        const listData = listDoc.data();
+        const members = (listData === null || listData === void 0 ? void 0 : listData.members) || [];
+        // FCM Tokens für alle Members außer dem Ersteller abrufen
+        const memberTokens = [];
+        for (const memberId of members) {
+            if (memberId !== createdBy) {
+                const userDoc = await db.collection('users').doc(memberId).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    const fcmToken = userData === null || userData === void 0 ? void 0 : userData.fcmToken;
+                    if (fcmToken) {
+                        memberTokens.push(fcmToken);
+                    }
+                }
+            }
+        }
+        if (memberTokens.length === 0) {
+            console.log('Keine FCM Tokens für Benachrichtigungen gefunden');
+            return;
+        }
+        // Benachrichtigung senden
+        const response = await messaging.sendEachForMulticast({
+            tokens: memberTokens,
+            notification: {
+                title: 'Neues Todo erstellt',
+                body: `${todoData.title} wurde zur Liste hinzugefügt`,
+            },
+            data: {
+                type: 'todo_created',
+                todoId: todoId,
+                listId: listId,
+                createdBy: createdBy,
+            },
+            android: {
+                notification: {
+                    sound: 'notification_sound',
+                },
+            },
+            apns: {
+                payload: {
+                    aps: {
+                        sound: 'notification_sound.caf',
+                    },
+                },
+            },
+        });
+        console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
+    }
+    catch (error) {
+        console.error('Fehler beim Senden der Benachrichtigung:', error);
+    }
 });
-
-// 🔷 onTodoCompleted
-exports.onTodoCompleted = onDocumentUpdated({ region: "europe-west3", document: "todos/{todoId}" }, async (event) => {
-  const before = event.data?.before.data();
-  const after = event.data?.after.data();
-  if (!before || !after) return log.error("Ungültige Daten");
-
-  if (!before.isCompleted && after.isCompleted) {
-    const { listId, title, completedByUserId, userId } = after;
-    const members = await getListMembers(listId);
-    if (!members) return;
-
-    await sendNotification(members, [completedByUserId || userId], {
-      notification: { title: "Todo erledigt", body: `${title} wurde als erledigt markiert` },
-      data: { type: NotificationTypes.TODO_COMPLETED, todoId: event.params.todoId, listId, completedBy: completedByUserId || userId },
-    }, NotificationTypes.TODO_COMPLETED);
-  }
+// Cloud Function für erledigte Todo-Items
+exports.onTodoCompleted = (0, firestore_1.onDocumentUpdated)({ region: 'europe-west3', document: 'todos/{todoId}' }, async (event) => {
+    var _a, _b;
+    try {
+        const beforeData = (_a = event.data) === null || _a === void 0 ? void 0 : _a.before.data();
+        const afterData = (_b = event.data) === null || _b === void 0 ? void 0 : _b.after.data();
+        const todoId = event.params.todoId;
+        if (!beforeData || !afterData) {
+            console.log('Ungültige Todo-Daten');
+            return;
+        }
+        // Prüfen ob Todo von unerledigt zu erledigt geändert wurde
+        if (!beforeData.completed && afterData.completed) {
+            const listId = afterData.listId;
+            const completedBy = afterData.completedBy || afterData.createdBy;
+            console.log(`Todo erledigt: ${todoId} in Liste: ${listId}`);
+            // Liste abrufen
+            const listDoc = await db.collection('lists').doc(listId).get();
+            if (!listDoc.exists) {
+                console.log('Liste nicht gefunden');
+                return;
+            }
+            const listData = listDoc.data();
+            const members = (listData === null || listData === void 0 ? void 0 : listData.members) || [];
+            // FCM Tokens für alle Members außer dem, der es erledigt hat
+            const memberTokens = [];
+            for (const memberId of members) {
+                if (memberId !== completedBy) {
+                    const userDoc = await db.collection('users').doc(memberId).get();
+                    if (userDoc.exists) {
+                        const userData = userDoc.data();
+                        const fcmToken = userData === null || userData === void 0 ? void 0 : userData.fcmToken;
+                        if (fcmToken) {
+                            memberTokens.push(fcmToken);
+                        }
+                    }
+                }
+            }
+            if (memberTokens.length === 0) {
+                console.log('Keine FCM Tokens für Benachrichtigungen gefunden');
+                return;
+            }
+            // Benachrichtigung senden
+            const response = await messaging.sendEachForMulticast({
+                tokens: memberTokens,
+                notification: {
+                    title: 'Todo erledigt',
+                    body: `${afterData.title} wurde als erledigt markiert`,
+                },
+                data: {
+                    type: 'todo_completed',
+                    todoId: todoId,
+                    listId: listId,
+                    completedBy: completedBy,
+                },
+                android: {
+                    notification: {
+                        sound: 'notification_sound',
+                    },
+                },
+                apns: {
+                    payload: {
+                        aps: {
+                            sound: 'notification_sound.caf',
+                        },
+                    },
+                },
+            });
+            console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
+        }
+    }
+    catch (error) {
+        console.error('Fehler beim Senden der Benachrichtigung:', error);
+    }
 });
-
-// 🔷 onTodoDeleted
-exports.onTodoDeleted = onDocumentDeleted({ region: "europe-west3", document: "todos/{todoId}" }, async (event) => {
-  const todoData = event.data?.data();
-  if (!todoData) return log.error("Ungültige Daten");
-
-  const { deletedByUserId, userId, listId, title } = todoData;
-  const members = await getListMembers(listId);
-  if (!members) return;
-
-  await sendNotification(members, [deletedByUserId || userId], {
-    notification: { title: "Todo gelöscht", body: `${title} wurde gelöscht` },
-    data: { type: NotificationTypes.TODO_DELETED, todoId: event.params.todoId, listId, deletedBy: deletedByUserId || userId },
-  }, NotificationTypes.TODO_DELETED);
+// Cloud Function für gelöschte Todo-Items
+exports.onTodoDeleted = (0, firestore_1.onDocumentDeleted)({ region: 'europe-west3', document: 'todos/{todoId}' }, async (event) => {
+    var _a;
+    try {
+        const todoData = (_a = event.data) === null || _a === void 0 ? void 0 : _a.data();
+        const todoId = event.params.todoId;
+        const deletedBy = (todoData === null || todoData === void 0 ? void 0 : todoData.deletedBy) || (todoData === null || todoData === void 0 ? void 0 : todoData.createdBy);
+        const listId = todoData === null || todoData === void 0 ? void 0 : todoData.listId;
+        if (!todoData || !deletedBy || !listId) {
+            console.log('Ungültige Todo-Daten');
+            return;
+        }
+        console.log(`Todo gelöscht: ${todoId} in Liste: ${listId}`);
+        // Liste abrufen
+        const listDoc = await db.collection('lists').doc(listId).get();
+        if (!listDoc.exists) {
+            console.log('Liste nicht gefunden');
+            return;
+        }
+        const listData = listDoc.data();
+        const members = (listData === null || listData === void 0 ? void 0 : listData.members) || [];
+        // FCM Tokens für alle Members außer dem, der es gelöscht hat
+        const memberTokens = [];
+        for (const memberId of members) {
+            if (memberId !== deletedBy) {
+                const userDoc = await db.collection('users').doc(memberId).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    const fcmToken = userData === null || userData === void 0 ? void 0 : userData.fcmToken;
+                    if (fcmToken) {
+                        memberTokens.push(fcmToken);
+                    }
+                }
+            }
+        }
+        if (memberTokens.length === 0) {
+            console.log('Keine FCM Tokens für Benachrichtigungen gefunden');
+            return;
+        }
+        // Benachrichtigung senden
+        const response = await messaging.sendEachForMulticast({
+            tokens: memberTokens,
+            notification: {
+                title: 'Todo gelöscht',
+                body: `${todoData.title} wurde aus der Liste entfernt`,
+            },
+            data: {
+                type: 'todo_deleted',
+                todoId: todoId,
+                listId: listId,
+                deletedBy: deletedBy,
+            },
+            android: {
+                notification: {
+                    sound: 'notification_sound',
+                },
+            },
+            apns: {
+                payload: {
+                    aps: {
+                        sound: 'notification_sound.caf',
+                    },
+                },
+            },
+        });
+        console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
+    }
+    catch (error) {
+        console.error('Fehler beim Senden der Benachrichtigung:', error);
+    }
 });
-
-// 🔷 onListMemberAdded
-exports.onListMemberAdded = onDocumentUpdated({ region: "europe-west3", document: "lists/{listId}" }, async (event) => {
-  const before = event.data?.before.data();
-  const after = event.data?.after.data();
-  if (!before || !after) return log.error("Ungültige Daten");
-
-  const newMembers = (after.allUserIds || []).filter(m => !(before.allUserIds || []).includes(m));
-  if (newMembers.length === 0) return;
-
-  await sendNotification(before.allUserIds || [], newMembers, {
-    notification: { title: "Neuer Member", body: `${newMembers.length} neuer Member ist beigetreten` },
-    data: { type: NotificationTypes.MEMBER_ADDED, listId: event.params.listId, newMembers: newMembers.join(",") },
-  }, NotificationTypes.MEMBER_ADDED);
+// Cloud Function für neue List-Members
+exports.onListMemberAdded = (0, firestore_1.onDocumentUpdated)({ region: 'europe-west3', document: 'lists/{listId}' }, async (event) => {
+    var _a, _b;
+    try {
+        const beforeData = (_a = event.data) === null || _a === void 0 ? void 0 : _a.before.data();
+        const afterData = (_b = event.data) === null || _b === void 0 ? void 0 : _b.after.data();
+        const listId = event.params.listId;
+        if (!beforeData || !afterData) {
+            console.log('Ungültige Listen-Daten');
+            return;
+        }
+        const beforeMembers = beforeData.members || [];
+        const afterMembers = afterData.members || [];
+        // Prüfen ob ein neuer Member hinzugefügt wurde
+        const newMembers = afterMembers.filter((member) => !beforeMembers.includes(member));
+        if (newMembers.length > 0) {
+            console.log(`Neue Members in Liste ${listId}: ${newMembers.join(', ')}`);
+            // FCM Tokens für alle bestehenden Members abrufen
+            const memberTokens = [];
+            for (const memberId of beforeMembers) {
+                const userDoc = await db.collection('users').doc(memberId).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    const fcmToken = userData === null || userData === void 0 ? void 0 : userData.fcmToken;
+                    if (fcmToken) {
+                        memberTokens.push(fcmToken);
+                    }
+                }
+            }
+            if (memberTokens.length === 0) {
+                console.log('Keine FCM Tokens für Benachrichtigungen gefunden');
+                return;
+            }
+            // Benachrichtigung senden
+            const response = await messaging.sendEachForMulticast({
+                tokens: memberTokens,
+                notification: {
+                    title: 'Neuer Member',
+                    body: `${newMembers.length} neuer Member ist der Liste beigetreten`,
+                },
+                data: {
+                    type: 'member_added',
+                    listId: listId,
+                    newMembers: newMembers.join(','),
+                },
+                android: {
+                    notification: {
+                        sound: 'notification_sound',
+                    },
+                },
+                apns: {
+                    payload: {
+                        aps: {
+                            sound: 'notification_sound.caf',
+                        },
+                    },
+                },
+            });
+            console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
+        }
+    }
+    catch (error) {
+        console.error('Fehler beim Senden der Benachrichtigung:', error);
+    }
 });
-
-// 🔷 onListMemberRemoved
-exports.onListMemberRemoved = onDocumentUpdated({ region: "europe-west3", document: "lists/{listId}" }, async (event) => {
-  const before = event.data?.before.data();
-  const after = event.data?.after.data();
-  if (!before || !after) return log.error("Ungültige Daten");
-
-  const removedMembers = (before.allUserIds || []).filter(m => !(after.allUserIds || []).includes(m));
-  if (removedMembers.length === 0) return;
-
-  await sendNotification(after.allUserIds || [], removedMembers, {
-    notification: { title: "Member entfernt", body: `${removedMembers.length} Member hat die Liste verlassen` },
-    data: { type: NotificationTypes.MEMBER_REMOVED, listId: event.params.listId, removedMembers: removedMembers.join(",") },
-  }, NotificationTypes.MEMBER_REMOVED);
+// Cloud Function für entfernte List-Members
+exports.onListMemberRemoved = (0, firestore_1.onDocumentUpdated)({ region: 'europe-west3', document: 'lists/{listId}' }, async (event) => {
+    var _a, _b;
+    try {
+        const beforeData = (_a = event.data) === null || _a === void 0 ? void 0 : _a.before.data();
+        const afterData = (_b = event.data) === null || _b === void 0 ? void 0 : _b.after.data();
+        const listId = event.params.listId;
+        if (!beforeData || !afterData) {
+            console.log('Ungültige Listen-Daten');
+            return;
+        }
+        const beforeMembers = beforeData.members || [];
+        const afterMembers = afterData.members || [];
+        // Prüfen ob ein Member entfernt wurde
+        const removedMembers = beforeMembers.filter((member) => !afterMembers.includes(member));
+        if (removedMembers.length > 0) {
+            console.log(`Members aus Liste ${listId} entfernt: ${removedMembers.join(', ')}`);
+            // FCM Tokens für alle verbleibenden Members abrufen
+            const memberTokens = [];
+            for (const memberId of afterMembers) {
+                const userDoc = await db.collection('users').doc(memberId).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    const fcmToken = userData === null || userData === void 0 ? void 0 : userData.fcmToken;
+                    if (fcmToken) {
+                        memberTokens.push(fcmToken);
+                    }
+                }
+            }
+            if (memberTokens.length === 0) {
+                console.log('Keine FCM Tokens für Benachrichtigungen gefunden');
+                return;
+            }
+            // Benachrichtigung senden
+            const response = await messaging.sendEachForMulticast({
+                tokens: memberTokens,
+                notification: {
+                    title: 'Member verlassen',
+                    body: `${removedMembers.length} Member hat die Liste verlassen`,
+                },
+                data: {
+                    type: 'member_removed',
+                    listId: listId,
+                    removedMembers: removedMembers.join(','),
+                },
+                android: {
+                    notification: {
+                        sound: 'notification_sound',
+                    },
+                },
+                apns: {
+                    payload: {
+                        aps: {
+                            sound: 'notification_sound.caf',
+                        },
+                    },
+                },
+            });
+            console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
+        }
+    }
+    catch (error) {
+        console.error('Fehler beim Senden der Benachrichtigung:', error);
+    }
 });
-
-// 🔷 onChatMessageCreated
-exports.onChatMessageCreated = onDocumentCreated({ region: "europe-west3", document: "todos/{todoId}/chatMessages/{messageId}" }, async (event) => {
-  const messageData = event.data?.data();
-  if (!messageData) return log.error("Ungültige Daten");
-
-  const { userId, userName, message } = messageData;
-  const { todoId } = event.params;
-  if (!todoId || !userId) return log.error("todoId oder userId fehlt");
-
-  const todoDoc = await db.collection("todos").doc(todoId).get();
-  if (!todoDoc.exists) return log.error(`Todo ${todoId} nicht gefunden`);
-
-  const listId = todoDoc.data().listId;
-  if (!listId) return log.error(`listId für Todo ${todoId} nicht gefunden`);
-
-  const members = await getListMembers(listId);
-  if (!members) return;
-
-  await sendNotification(members, [userId], {
-    notification: { title: `💬 ${userName}`, body: message.length > 50 ? message.substring(0, 50) + '...' : message },
-    data: { type: NotificationTypes.CHAT_MESSAGE, messageId: event.params.messageId, todoId, listId, senderId: userId, senderName: userName },
-  }, NotificationTypes.CHAT_MESSAGE);
+// Test-Function für Push-Benachrichtigungen
+exports.sendTestNotification = (0, https_1.onCall)({
+    region: 'europe-west3',
+    maxInstances: 10,
+}, async (request) => {
+    try {
+        const { fcmToken, title = 'Test Nachricht', body = 'Das ist eine Test-Benachrichtigung!' } = request.data;
+        if (!fcmToken) {
+            throw new Error('FCM Token ist erforderlich');
+        }
+        const message = {
+            notification: {
+                title: title,
+                body: body,
+            },
+            data: {
+                type: 'test',
+                timestamp: Date.now().toString(),
+            },
+            android: {
+                notification: {
+                    sound: 'notification_sound',
+                },
+            },
+            apns: {
+                payload: {
+                    aps: {
+                        sound: 'notification_sound.caf',
+                    },
+                },
+            },
+            token: fcmToken,
+        };
+        const response = await messaging.send(message);
+        console.log('Test-Benachrichtigung erfolgreich gesendet:', response);
+        return {
+            success: true,
+            messageId: response,
+            message: 'Test-Benachrichtigung erfolgreich gesendet'
+        };
+    }
+    catch (error) {
+        console.error('Fehler beim Senden der Test-Benachrichtigung:', error);
+        throw new Error(`Fehler beim Senden der Benachrichtigung: ${error}`);
+    }
 });
-
-// 🔷 sendTestNotification
-exports.sendTestNotification = onCall({ region: "europe-west3" }, async (request) => {
-  const { fcmToken, title = "Test Nachricht", body = "Das ist eine Test-Benachrichtigung!" } = request.data;
-  if (!fcmToken) throw new Error("FCM Token erforderlich");
-
-  const response = await messaging.send({
-    token: fcmToken,
-    notification: { title, body },
-    data: { type: NotificationTypes.TEST, timestamp: Date.now().toString() },
-    android: {
-      notification: {
-        title,
-        body,
-        sound: 'notification_sound',
-        channelId: 'togetherdo_channel',
-        priority: 'high',
-      },
-    },
-    apns: {
-      headers: {
-        'apns-priority': '10'
-      },
-      payload: {
-        aps: {
-          alert: { title, body },
-          sound: 'notification_sound.aiff',
-          badge: 1,
-          "interruption-level": "time-sensitive"
-        },
-      },
-    },
-  });
-
-  log.info("✅ Test-Benachrichtigung gesendet:", response);
-  return { success: true, messageId: response, message: "Test-Benachrichtigung gesendet" };
+// Test-Function für Chat-Push-Benachrichtigungen
+exports.sendTestChatNotification = (0, https_1.onCall)({
+    region: 'europe-west3',
+    maxInstances: 10,
+}, async (request) => {
+    try {
+        const { fcmToken } = request.data;
+        if (!fcmToken) {
+            throw new Error('FCM Token ist erforderlich');
+        }
+        const message = {
+            notification: {
+                title: 'Test User hat eine Nachricht geschrieben',
+                body: 'Das ist eine Test-Chat-Nachricht!',
+            },
+            data: {
+                type: 'chat_message',
+                messageId: 'test_message_id',
+                todoId: 'test_todo_id',
+                listId: 'test_list_id',
+                todoTitle: 'Test Todo',
+                userId: 'test_user_id',
+                userName: 'Test User',
+                message: 'Das ist eine Test-Chat-Nachricht!',
+            },
+            android: {
+                notification: {
+                    sound: 'notification_sound',
+                },
+            },
+            apns: {
+                payload: {
+                    aps: {
+                        sound: 'notification_sound.caf',
+                    },
+                },
+            },
+            token: fcmToken,
+        };
+        const response = await messaging.send(message);
+        console.log('Test-Chat-Benachrichtigung erfolgreich gesendet:', response);
+        return {
+            success: true,
+            messageId: response,
+            message: 'Test-Chat-Benachrichtigung erfolgreich gesendet'
+        };
+    }
+    catch (error) {
+        console.error('Fehler beim Senden der Test-Chat-Benachrichtigung:', error);
+        throw new Error(`Fehler beim Senden der Chat-Benachrichtigung: ${error}`);
+    }
 });
+// Cloud Function für neue Chat-Nachrichten
+exports.onChatMessageCreated = (0, firestore_1.onDocumentCreated)({ region: 'europe-west3', document: 'chatMessages/{messageId}' }, async (event) => {
+    var _a;
+    try {
+        const messageData = (_a = event.data) === null || _a === void 0 ? void 0 : _a.data();
+        const messageId = event.params.messageId;
+        const todoId = messageData === null || messageData === void 0 ? void 0 : messageData.todoId;
+        // Unterstütze verschiedene Feldnamen
+        const userId = (messageData === null || messageData === void 0 ? void 0 : messageData.userId) || (messageData === null || messageData === void 0 ? void 0 : messageData.senderId);
+        const userName = (messageData === null || messageData === void 0 ? void 0 : messageData.userName) || (messageData === null || messageData === void 0 ? void 0 : messageData.senderName);
+        const message = messageData === null || messageData === void 0 ? void 0 : messageData.message;
+        console.log('Chat-Nachrichten-Daten:', messageData);
+        if (!messageData || !todoId || !userId || !userName || !message) {
+            console.log('Ungültige Chat-Nachrichten-Daten');
+            console.log('  messageData:', messageData);
+            console.log('  todoId:', todoId);
+            console.log('  userId:', userId);
+            console.log('  userName:', userName);
+            console.log('  message:', message);
+            return;
+        }
+        console.log(`Neue Chat-Nachricht erstellt: ${messageId} für Todo: ${todoId}`);
+        // Todo abrufen um List-ID zu bekommen
+        const todoDoc = await db.collection('todos').doc(todoId).get();
+        if (!todoDoc.exists) {
+            console.log('Todo nicht gefunden');
+            return;
+        }
+        const todoData = todoDoc.data();
+        const listId = todoData === null || todoData === void 0 ? void 0 : todoData.listId;
+        const todoTitle = todoData === null || todoData === void 0 ? void 0 : todoData.title;
+        if (!listId || !todoTitle) {
+            console.log('Todo-Daten unvollständig');
+            return;
+        }
+        // Liste abrufen um Members zu bekommen
+        const listDoc = await db.collection('lists').doc(listId).get();
+        if (!listDoc.exists) {
+            console.log('Liste nicht gefunden');
+            return;
+        }
+        const listData = listDoc.data();
+        const members = (listData === null || listData === void 0 ? void 0 : listData.members) || [];
+        // FCM Tokens für alle Members außer dem Sender abrufen
+        const memberTokens = [];
+        for (const memberId of members) {
+            if (memberId !== userId) {
+                const userDoc = await db.collection('users').doc(memberId).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    const fcmToken = userData === null || userData === void 0 ? void 0 : userData.fcmToken;
+                    if (fcmToken) {
+                        memberTokens.push(fcmToken);
+                    }
+                }
+            }
+        }
+        if (memberTokens.length === 0) {
+            console.log('Keine FCM Tokens für Chat-Benachrichtigungen gefunden');
+            return;
+        }
+        // Benachrichtigung senden
+        const notificationData = {
+            type: 'chat_message',
+            messageId: messageId,
+            todoId: todoId,
+            listId: listId,
+            todoTitle: todoTitle,
+            userId: userId,
+            userName: userName,
+            message: message,
+        };
+        console.log('Sende Chat-Benachrichtigung mit Daten:', notificationData);
+        const response = await messaging.sendEachForMulticast({
+            tokens: memberTokens,
+            notification: {
+                title: `${userName} hat eine Nachricht geschrieben`,
+                body: message.length > 50 ? `${message.substring(0, 50)}...` : message,
+            },
+            data: notificationData,
+            android: {
+                notification: {
+                    sound: 'notification_sound',
+                },
+            },
+            apns: {
+                payload: {
+                    aps: {
+                        sound: 'notification_sound.caf',
+                    },
+                },
+            },
+        });
+        console.log(`Chat-Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
+    }
+    catch (error) {
+        console.error('Fehler beim Senden der Chat-Benachrichtigung:', error);
+    }
+});
+// Cloud Function für neue Shopping-Items
+exports.onShoppingItemCreated = (0, firestore_1.onDocumentCreated)({ region: 'europe-west3', document: 'shoppingItems/{itemId}' }, async (event) => {
+    var _a;
+    try {
+        const itemData = (_a = event.data) === null || _a === void 0 ? void 0 : _a.data();
+        const itemId = event.params.itemId;
+        const createdBy = itemData === null || itemData === void 0 ? void 0 : itemData.createdBy;
+        const listId = itemData === null || itemData === void 0 ? void 0 : itemData.listId;
+        if (!itemData || !createdBy || !listId) {
+            console.log('Ungültige Shopping-Item-Daten');
+            return;
+        }
+        console.log(`Neues Shopping-Item erstellt: ${itemId} in Liste: ${listId}`);
+        // Liste abrufen um Members zu bekommen
+        const listDoc = await db.collection('lists').doc(listId).get();
+        if (!listDoc.exists) {
+            console.log('Liste nicht gefunden');
+            return;
+        }
+        const listData = listDoc.data();
+        const members = (listData === null || listData === void 0 ? void 0 : listData.members) || [];
+        // FCM Tokens für alle Members außer dem Ersteller abrufen
+        const memberTokens = [];
+        for (const memberId of members) {
+            if (memberId !== createdBy) {
+                const userDoc = await db.collection('users').doc(memberId).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    const fcmToken = userData === null || userData === void 0 ? void 0 : userData.fcmToken;
+                    if (fcmToken) {
+                        memberTokens.push(fcmToken);
+                    }
+                }
+            }
+        }
+        if (memberTokens.length === 0) {
+            console.log('Keine FCM Tokens für Benachrichtigungen gefunden');
+            return;
+        }
+        // Benachrichtigung senden
+        const response = await messaging.sendEachForMulticast({
+            tokens: memberTokens,
+            notification: {
+                title: 'Neues Einkaufsitem',
+                body: `${itemData.name} wurde zur Einkaufsliste hinzugefügt`,
+            },
+            data: {
+                type: 'shopping_item_created',
+                itemId: itemId,
+                listId: listId,
+                createdBy: createdBy,
+            },
+            android: {
+                notification: {
+                    sound: 'notification_sound',
+                },
+            },
+            apns: {
+                payload: {
+                    aps: {
+                        sound: 'notification_sound.caf',
+                    },
+                },
+            },
+        });
+        console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
+    }
+    catch (error) {
+        console.error('Fehler beim Senden der Benachrichtigung:', error);
+    }
+});
+// Cloud Function für gekaufte Shopping-Items
+exports.onShoppingItemPurchased = (0, firestore_1.onDocumentUpdated)({ region: 'europe-west3', document: 'shoppingItems/{itemId}' }, async (event) => {
+    var _a, _b;
+    try {
+        const beforeData = (_a = event.data) === null || _a === void 0 ? void 0 : _a.before.data();
+        const afterData = (_b = event.data) === null || _b === void 0 ? void 0 : _b.after.data();
+        const itemId = event.params.itemId;
+        if (!beforeData || !afterData) {
+            console.log('Ungültige Shopping-Item-Daten');
+            return;
+        }
+        // Prüfen ob Item von nicht gekauft zu gekauft geändert wurde
+        if (!beforeData.purchased && afterData.purchased) {
+            const listId = afterData.listId;
+            const purchasedBy = afterData.purchasedBy || afterData.createdBy;
+            console.log(`Shopping-Item gekauft: ${itemId} in Liste: ${listId}`);
+            // Liste abrufen
+            const listDoc = await db.collection('lists').doc(listId).get();
+            if (!listDoc.exists) {
+                console.log('Liste nicht gefunden');
+                return;
+            }
+            const listData = listDoc.data();
+            const members = (listData === null || listData === void 0 ? void 0 : listData.members) || [];
+            // FCM Tokens für alle Members außer dem, der es gekauft hat
+            const memberTokens = [];
+            for (const memberId of members) {
+                if (memberId !== purchasedBy) {
+                    const userDoc = await db.collection('users').doc(memberId).get();
+                    if (userDoc.exists) {
+                        const userData = userDoc.data();
+                        const fcmToken = userData === null || userData === void 0 ? void 0 : userData.fcmToken;
+                        if (fcmToken) {
+                            memberTokens.push(fcmToken);
+                        }
+                    }
+                }
+            }
+            if (memberTokens.length === 0) {
+                console.log('Keine FCM Tokens für Benachrichtigungen gefunden');
+                return;
+            }
+            // Benachrichtigung senden
+            const response = await messaging.sendEachForMulticast({
+                tokens: memberTokens,
+                notification: {
+                    title: 'Item gekauft',
+                    body: `${afterData.name} wurde als gekauft markiert`,
+                },
+                data: {
+                    type: 'shopping_item_purchased',
+                    itemId: itemId,
+                    listId: listId,
+                    purchasedBy: purchasedBy,
+                },
+                android: {
+                    notification: {
+                        sound: 'notification_sound',
+                    },
+                },
+                apns: {
+                    payload: {
+                        aps: {
+                            sound: 'notification_sound.caf',
+                        },
+                    },
+                },
+            });
+            console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
+        }
+    }
+    catch (error) {
+        console.error('Fehler beim Senden der Benachrichtigung:', error);
+    }
+});
+// Cloud Function für gelöschte Shopping-Items
+exports.onShoppingItemDeleted = (0, firestore_1.onDocumentDeleted)({ region: 'europe-west3', document: 'shoppingItems/{itemId}' }, async (event) => {
+    var _a;
+    try {
+        const itemData = (_a = event.data) === null || _a === void 0 ? void 0 : _a.data();
+        const itemId = event.params.itemId;
+        const deletedBy = (itemData === null || itemData === void 0 ? void 0 : itemData.deletedBy) || (itemData === null || itemData === void 0 ? void 0 : itemData.createdBy);
+        const listId = itemData === null || itemData === void 0 ? void 0 : itemData.listId;
+        if (!itemData || !deletedBy || !listId) {
+            console.log('Ungültige Shopping-Item-Daten');
+            return;
+        }
+        console.log(`Shopping-Item gelöscht: ${itemId} in Liste: ${listId}`);
+        // Liste abrufen
+        const listDoc = await db.collection('lists').doc(listId).get();
+        if (!listDoc.exists) {
+            console.log('Liste nicht gefunden');
+            return;
+        }
+        const listData = listDoc.data();
+        const members = (listData === null || listData === void 0 ? void 0 : listData.members) || [];
+        // FCM Tokens für alle Members außer dem, der es gelöscht hat
+        const memberTokens = [];
+        for (const memberId of members) {
+            if (memberId !== deletedBy) {
+                const userDoc = await db.collection('users').doc(memberId).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    const fcmToken = userData === null || userData === void 0 ? void 0 : userData.fcmToken;
+                    if (fcmToken) {
+                        memberTokens.push(fcmToken);
+                    }
+                }
+            }
+        }
+        if (memberTokens.length === 0) {
+            console.log('Keine FCM Tokens für Benachrichtigungen gefunden');
+            return;
+        }
+        // Benachrichtigung senden
+        const response = await messaging.sendEachForMulticast({
+            tokens: memberTokens,
+            notification: {
+                title: 'Einkaufsitem gelöscht',
+                body: `${itemData.name} wurde aus der Einkaufsliste entfernt`,
+            },
+            data: {
+                type: 'shopping_item_deleted',
+                itemId: itemId,
+                listId: listId,
+                deletedBy: deletedBy,
+            },
+            android: {
+                notification: {
+                    sound: 'notification_sound',
+                },
+            },
+            apns: {
+                payload: {
+                    aps: {
+                        sound: 'notification_sound.caf',
+                    },
+                },
+            },
+        });
+        console.log(`Benachrichtigungen gesendet: ${response.successCount}/${memberTokens.length}`);
+    }
+    catch (error) {
+        console.error('Fehler beim Senden der Benachrichtigung:', error);
+    }
+});
+//# sourceMappingURL=index.js.map
