@@ -1,53 +1,106 @@
-# Miscellaneous
+# ----------------------
+# 📋 System & Misc
+# ----------------------
 *.class
 *.log
 *.pyc
 *.swp
 .DS_Store
+Thumbs.db
 .atom/
-.build/
 .buildlog/
 .history
 .svn/
 .swiftpm/
 migrate_working_dir/
+app.*.symbols
+app.*.map.json
 
-# IntelliJ related
+# ----------------------
+# 📋 IDEs & Editors
+# ----------------------
+.idea/
 *.iml
 *.ipr
 *.iws
-.idea/
+.vscode/
+*.tmproj
+*.tmproject
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# ----------------------
+# 📋 Flutter & Dart
+# ----------------------
 .dart_tool/
+.packages
+.pub/
+build/
 .flutter-plugins
 .flutter-plugins-dependencies
-.pub-cache/
-.pub/
-/build/
+generated_plugin_registrant.dart
 
-# Symbolication related
-app.*.symbols
-
-# Obfuscation related
-app.*.map.json
-
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-
-# iOS related
-ios/Pods/
-ios/.symlinks/
+# ----------------------
+# 📋 iOS
+# ----------------------
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/App.framework
 ios/Flutter/Generated.xcconfig
 ios/Flutter/ephemeral/
-ios/build
+ios/.symlinks/
+ios/Pods/
+ios/build/
 
+# Xcode (iOS & macOS)
+DerivedData/
+*.xcworkspace
+*.xcuserstate
+*.xcuserdata/
+*.xcodeproj/project.xcworkspace/
+*.xcodeproj/xcuserdata/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xccheckout
+*.moved-aside
+
+# ----------------------
+# 📋 macOS
+# ----------------------
+macos/Flutter/ephemeral/
+macos/build/
+
+# ----------------------
+# 📋 Android
+# ----------------------
+android/.gradle/
+android/.idea/
+android/local.properties
+android/.externalNativeBuild/
+android/build/
+android/app/debug
+android/app/profile
+android/app/release
+
+# ----------------------
+# 📋 Web
+# ----------------------
+web/.dart_tool/
+web/build/
+
+# ----------------------
+# 📋 Firebase Cloud Functions
+# ----------------------
+functions/node_modules/
+functions/lib/
+functions/build/
+functions/.firebase/
+functions/.env
+functions/*.log
+functions/.DS_Store
+
+# ----------------------
+# 📋 Other tools
+# ----------------------
+migrate_working_dir/
+.build/
