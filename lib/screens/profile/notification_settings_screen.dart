@@ -159,43 +159,6 @@ class _NotificationSettingsScreenState
                 _updateSettings(settings.copyWith(chatMessage: value)),
           ),
 
-          const SizedBox(height: 24),
-
-          // Shopping-Benachrichtigungen
-          const Text(
-            'Einkaufslisten-Benachrichtigungen',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 16),
-
-          _buildSwitchTile(
-            title: 'Neues Einkaufsitem',
-            subtitle:
-                'Benachrichtigung wenn ein neues Item zur Einkaufsliste hinzugefügt wird',
-            value: settings.shoppingItemCreated,
-            onChanged: (value) =>
-                _updateSettings(settings.copyWith(shoppingItemCreated: value)),
-          ),
-
-          _buildSwitchTile(
-            title: 'Item gekauft',
-            subtitle:
-                'Benachrichtigung wenn ein Item als gekauft markiert wird',
-            value: settings.shoppingItemPurchased,
-            onChanged: (value) => _updateSettings(
-              settings.copyWith(shoppingItemPurchased: value),
-            ),
-          ),
-
-          _buildSwitchTile(
-            title: 'Einkaufsitem gelöscht',
-            subtitle:
-                'Benachrichtigung wenn ein Item aus der Einkaufsliste entfernt wird',
-            value: settings.shoppingItemDeleted,
-            onChanged: (value) =>
-                _updateSettings(settings.copyWith(shoppingItemDeleted: value)),
-          ),
-
           const SizedBox(height: 32),
 
           // Info Box

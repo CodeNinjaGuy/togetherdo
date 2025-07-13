@@ -54,30 +54,14 @@ class GlobalNavigator {
     }
   }
 
-  /// Navigation zu Shopping-Items
-  void navigateToShopping(String itemId, String listId) {
-    debugPrint('🚀 Global Navigation zu Shopping: $itemId in Liste $listId');
-
-    if (_router != null) {
-      try {
-        debugPrint('📱 Navigiere zu Shopping-Liste: /shopping/$listId');
-        _router!.push('/shopping/$listId');
-      } catch (e) {
-        debugPrint('❌ Fehler bei Global Navigation: $e');
-      }
-    } else {
-      debugPrint('❌ Router ist null');
-    }
-  }
-
   /// Navigation zu Listen
   void navigateToList(String listId) {
     debugPrint('🚀 Global Navigation zu Liste: $listId');
 
     if (_router != null) {
       try {
-        debugPrint('📱 Navigiere zu Listen: /');
-        _router!.push('/');
+        debugPrint('📱 Navigiere zu Liste: /todo/$listId');
+        _router!.push('/todo/$listId');
       } catch (e) {
         debugPrint('❌ Fehler bei Global Navigation: $e');
       }
