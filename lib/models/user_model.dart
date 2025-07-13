@@ -7,6 +7,8 @@ class UserModel extends Equatable {
   final String? avatarUrl;
   final DateTime createdAt;
   final DateTime lastLoginAt;
+  final String? fcmToken;
+  final Map<String, bool> notificationSettings;
 
   const UserModel({
     required this.id,
@@ -15,6 +17,15 @@ class UserModel extends Equatable {
     this.avatarUrl,
     required this.createdAt,
     required this.lastLoginAt,
+    this.fcmToken,
+    this.notificationSettings = const {
+      'todoCreated': true,
+      'todoCompleted': true,
+      'todoDeleted': true,
+      'memberAdded': true,
+      'memberRemoved': true,
+      'chatMessage': true,
+    },
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -25,6 +36,18 @@ class UserModel extends Equatable {
       avatarUrl: json['avatarUrl'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       lastLoginAt: DateTime.parse(json['lastLoginAt'] as String),
+      fcmToken: json['fcmToken'] as String?,
+      notificationSettings: Map<String, bool>.from(
+        json['notificationSettings'] as Map<String, dynamic>? ??
+            {
+              'todoCreated': true,
+              'todoCompleted': true,
+              'todoDeleted': true,
+              'memberAdded': true,
+              'memberRemoved': true,
+              'chatMessage': true,
+            },
+      ),
     );
   }
 
@@ -36,6 +59,8 @@ class UserModel extends Equatable {
       'avatarUrl': avatarUrl,
       'createdAt': createdAt.toIso8601String(),
       'lastLoginAt': lastLoginAt.toIso8601String(),
+      'fcmToken': fcmToken,
+      'notificationSettings': notificationSettings,
     };
   }
 
@@ -46,6 +71,8 @@ class UserModel extends Equatable {
     String? avatarUrl,
     DateTime? createdAt,
     DateTime? lastLoginAt,
+    String? fcmToken,
+    Map<String, bool>? notificationSettings,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -54,6 +81,8 @@ class UserModel extends Equatable {
       avatarUrl: avatarUrl ?? this.avatarUrl,
       createdAt: createdAt ?? this.createdAt,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
+      fcmToken: fcmToken ?? this.fcmToken,
+      notificationSettings: notificationSettings ?? this.notificationSettings,
     );
   }
 
@@ -65,5 +94,7 @@ class UserModel extends Equatable {
     avatarUrl,
     createdAt,
     lastLoginAt,
+    fcmToken,
+    notificationSettings,
   ];
 }

@@ -32,12 +32,12 @@ class TodoItemWidget extends StatelessWidget {
         final isMember = list?.memberIds.contains(currentUserId) == true;
         final canEdit = isOwner || (isMember && (list?.allowEdit ?? true));
 
-        // Prüfe, ob es zusätzliche Teilnehmer gibt (außer dem aktuellen Benutzer)
+        // Prüfe, ob es sich um eine geteilte Liste handelt
         final hasOtherParticipants =
             list != null &&
-            (list.memberIds.length > 1 ||
-                (list.memberIds.length == 1 &&
-                    !list.memberIds.contains(currentUserId)));
+            (list.memberIds.length > 0 || // Es gibt andere Mitglieder
+                list.ownerId !=
+                    currentUserId); // Benutzer ist nicht der Besitzer
 
         // Berechtigung für das Erledigen des Todos
         final canComplete =

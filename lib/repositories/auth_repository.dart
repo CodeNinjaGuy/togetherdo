@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 abstract class AuthRepository {
   Future<UserModel?> getCurrentUser();
@@ -134,13 +135,29 @@ class FirebaseAuthRepository implements AuthRepository {
     );
     final doc = await _firestore.collection('users').doc(cred.user!.uid).get();
     if (!doc.exists) throw Exception('Benutzerprofil nicht gefunden');
-    // Update lastLoginAt
-    await doc.reference.update({
-      'lastLoginAt': DateTime.now().toIso8601String(),
-    });
+
+    // FCM Token abrufen und aktualisieren
+    String? fcmToken;
+    try {
+      fcmToken = await FirebaseMessaging.instance.getToken();
+    } catch (e) {
+      // FCM Token ist optional, fahre ohne fort
+      print('FCM Token konnte nicht abgerufen werden: $e');
+    }
+
+    // Update lastLoginAt und FCM Token
+    final updateData = {'lastLoginAt': DateTime.now().toIso8601String()};
+
+    if (fcmToken != null) {
+      updateData['fcmToken'] = fcmToken;
+    }
+
+    await doc.reference.update(updateData);
+
     return UserModel.fromJson({
       ...doc.data()!,
       'lastLoginAt': DateTime.now().toIso8601String(),
+      if (fcmToken != null) 'fcmToken': fcmToken,
     });
   }
 
@@ -156,13 +173,36 @@ class FirebaseAuthRepository implements AuthRepository {
     );
     final user = cred.user!;
     final now = DateTime.now();
+
+    // FCM Token abrufen
+    String? fcmToken;
+    try {
+      fcmToken = await FirebaseMessaging.instance.getToken();
+    } catch (e) {
+      // FCM Token ist optional, fahre ohne fort
+      print('FCM Token konnte nicht abgerufen werden: $e');
+    }
+
+    // Standard Notification Settings
+    final notificationSettings = {
+      'todoCreated': true,
+      'todoCompleted': true,
+      'todoDeleted': true,
+      'memberAdded': true,
+      'memberRemoved': true,
+      'chatMessage': true,
+    };
+
     final userModel = UserModel(
       id: user.uid,
       email: user.email!,
       displayName: displayName,
       createdAt: now,
       lastLoginAt: now,
+      fcmToken: fcmToken,
+      notificationSettings: notificationSettings,
     );
+
     await _firestore.collection('users').doc(user.uid).set(userModel.toJson());
     await user.updateDisplayName(displayName);
     return userModel;
