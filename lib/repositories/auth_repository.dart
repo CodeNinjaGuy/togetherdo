@@ -1,9 +1,11 @@
-import '../models/user_model.dart';
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
+
+import '../models/user_model.dart';
 
 abstract class AuthRepository {
   Future<UserModel?> getCurrentUser();
@@ -142,7 +144,7 @@ class FirebaseAuthRepository implements AuthRepository {
       fcmToken = await FirebaseMessaging.instance.getToken();
     } catch (e) {
       // FCM Token ist optional, fahre ohne fort
-      print('FCM Token konnte nicht abgerufen werden: $e');
+      debugPrint('FCM Token konnte nicht abgerufen werden: $e');
     }
 
     // Update lastLoginAt und FCM Token
@@ -180,7 +182,7 @@ class FirebaseAuthRepository implements AuthRepository {
       fcmToken = await FirebaseMessaging.instance.getToken();
     } catch (e) {
       // FCM Token ist optional, fahre ohne fort
-      print('FCM Token konnte nicht abgerufen werden: $e');
+      debugPrint('FCM Token konnte nicht abgerufen werden: $e');
     }
 
     // Standard Notification Settings
@@ -210,7 +212,12 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {
-    await _firebaseAuth.signOut();
+    try {
+      await _firebaseAuth.signOut();
+    } catch (e) {
+      debugPrint('Fehler beim Abmelden: $e');
+      throw Exception('Fehler beim Abmelden: $e');
+    }
   }
 
   @override

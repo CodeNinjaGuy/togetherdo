@@ -35,7 +35,7 @@ class TodoItemWidget extends StatelessWidget {
         // Prüfe, ob es sich um eine geteilte Liste handelt
         final hasOtherParticipants =
             list != null &&
-            (list.memberIds.length > 0 || // Es gibt andere Mitglieder
+            (list.memberIds.isNotEmpty || // Es gibt andere Mitglieder
                 list.ownerId !=
                     currentUserId); // Benutzer ist nicht der Besitzer
 

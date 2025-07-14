@@ -23,21 +23,8 @@ const NotificationTypes = {
   SHOPPING_MEMBER_REMOVED: 'shoppingMemberRemoved',
 };
 
-const defaultSettings = {
-  [NotificationTypes.TODO_CREATED]: true,
-  [NotificationTypes.TODO_COMPLETED]: true,
-  [NotificationTypes.TODO_DELETED]: true,
-  [NotificationTypes.MEMBER_ADDED]: true,
-  [NotificationTypes.MEMBER_REMOVED]: true,
-  [NotificationTypes.CHAT_MESSAGE]: true,
-  [NotificationTypes.SHOPPING_ITEM_CREATED]: true,
-  [NotificationTypes.SHOPPING_ITEM_PURCHASED]: true,
-  [NotificationTypes.SHOPPING_ITEM_DELETED]: true,
-  [NotificationTypes.SHOPPING_MEMBER_ADDED]: true,
-  [NotificationTypes.SHOPPING_MEMBER_REMOVED]: true,
-};
+const defaultSettings = Object.fromEntries(Object.values(NotificationTypes).map(key => [key, true]));
 
-// 📋 Logging Utility
 const log = {
   info: (...args) => console.log('ℹ️', ...args),
   warn: (...args) => console.warn('⚠️', ...args),
@@ -45,311 +32,180 @@ const log = {
 };
 
 async function getListMembers(listId) {
-  const listDoc = await db.collection("lists").doc(listId).get();
-  if (!listDoc.exists) {
-    log.error(`Liste nicht gefunden: ${listId}`);
-    return null;
-  }
-  return listDoc.data().allUserIds || [];
+  const doc = await db.collection("lists").doc(listId).get();
+  if (!doc.exists) return [];
+  return doc.data().allUserIds || [];
 }
 
 async function getFilteredMemberTokens(members, exclude = [], notificationType) {
-  const promises = members
-    .filter(memberId => !exclude.includes(memberId))
-    .map(async memberId => {
-      const userDoc = await db.collection("users").doc(memberId).get();
-      const userData = userDoc.data();
-      const fcmToken = userData?.fcmToken;
-      if (!fcmToken) return null;
+  const filtered = members.filter(id => !exclude.includes(id));
+  if (!filtered.length) return [];
 
-      const settings = userData?.notificationSettings || {};
-      const allowed = settings[notificationType] ?? defaultSettings[notificationType] ?? true;
+  const chunks = [];
+  for (let i = 0; i < filtered.length; i += 10) chunks.push(filtered.slice(i, i + 10));
 
-      if (!allowed) {
-        log.info(`🔕 ${notificationType} für ${memberId} deaktiviert`);
-        return null;
-      }
+  const tokens = [];
+  for (const chunk of chunks) {
+    const snap = await db.collection("users")
+      .where(admin.firestore.FieldPath.documentId(), "in", chunk)
+      .get();
 
-      log.info(`📨 Token für ${memberId}: ${fcmToken}`);
-      return fcmToken;
+    snap.forEach(doc => {
+      const data = doc.data();
+      const fcmToken = data?.fcmToken;
+      const allowed = (data?.notificationSettings?.[notificationType] ?? defaultSettings[notificationType]);
+      if (!fcmToken || !allowed) return;
+      tokens.push(fcmToken);
     });
-
-  const tokens = (await Promise.all(promises)).filter(Boolean);
+  }
   return tokens;
 }
 
-async function sendNotification(members, exclude, payload, notificationType = NotificationTypes.TEST) {
+async function sendNotification(members, exclude, payload, notificationType) {
   const tokens = await getFilteredMemberTokens(members, exclude, notificationType);
-  if (tokens.length === 0) {
-    log.warn("Keine Empfänger gefunden oder alle Benachrichtigungen deaktiviert.");
-    return;
-  }
+  if (!tokens.length) return;
 
-  const notificationWithSound = {
-    notification: payload.notification,
-    data: payload.data,
-    android: {
-      notification: {
-        ...payload.notification,
-        sound: 'notification_sound',
-        channelId: 'togetherdo_channel',
-        priority: 'high',
-      },
-    },
-    apns: {
-      headers: {
-        'apns-priority': '10'
-      },
-      payload: {
-        aps: {
-          alert: payload.notification,
-          sound: 'notification_sound.aiff',
-          badge: 1,
-          "interruption-level": "time-sensitive"
-        },
-      },
-    },
-    tokens,
-  };
+  const batches = [];
+  for (let i = 0; i < tokens.length; i += 500) batches.push(tokens.slice(i, i + 500));
 
-  const response = await messaging.sendEachForMulticast(notificationWithSound);
-  log.info(`📬 Benachrichtigungen gesendet: ${response.successCount}/${tokens.length} (Typ: ${notificationType})`);
+  await Promise.all(batches.map(async (batch) => {
+    const message = {
+      notification: payload.notification,
+      data: payload.data,
+      android: {
+        notification: { ...payload.notification, sound: 'notification_sound', channelId: 'togetherdo_channel', priority: 'high' },
+      },
+      apns: {
+        headers: { 'apns-priority': '10' },
+        payload: { aps: { alert: payload.notification, sound: 'notification_sound.aiff', badge: 1, "interruption-level": "time-sensitive" } },
+      },
+      tokens: batch,
+    };
 
-  response.responses.forEach((r, i) => {
-    if (r.success) log.info(`✅ an ${tokens[i]}`);
-    else log.error(`❌ bei ${tokens[i]}:`, r.error?.message);
-  });
+    const response = await messaging.sendEachForMulticast(message);
+    response.responses.forEach((r, i) => {
+      if (r.success) log.info(`✅ an ${batch[i]}`);
+      else log.error(`❌ bei ${batch[i]}:`, r.error?.message);
+    });
+  }));
 }
 
-// 🔷 onTodoCreated
+async function handleEvent({members, exclude, title, body, type, data}) {
+  const note = { title, body };
+  await sendNotification(members, exclude, {notification: note, data}, type);
+}
+
 exports.onTodoCreated = onDocumentCreated({ region: "europe-west3", document: "todos/{todoId}" }, async (event) => {
-  const todoData = event.data?.data();
-  if (!todoData) return log.error("Ungültige Todo-Daten");
-
-  const { userId, listId, title, assignedToUserId } = todoData;
-  if (!userId || !listId) return log.error("userId oder listId fehlt");
-
-  log.info(`✅ Neues Todo: ${title}`);
-
+  const d = event.data?.data();
+  if (!d) return;
+  const { userId, listId, title, assignedToUserId } = d;
   const members = await getListMembers(listId);
-  if (!members) return;
-
-  let targets = assignedToUserId ? [assignedToUserId] : members;
-  let exclude = assignedToUserId ? [] : [userId];
-  let note = { title: "Neues Todo", body: `${title} wurde ${assignedToUserId ? 'dir zugewiesen' : 'erstellt'}` };
-
-  await sendNotification(targets, exclude, {
-    notification: note,
-    data: { type: NotificationTypes.TODO_CREATED, todoId: event.params.todoId, listId, createdBy: userId },
-  }, NotificationTypes.TODO_CREATED);
+  const targets = assignedToUserId ? [assignedToUserId] : members;
+  const exclude = assignedToUserId ? [] : [userId];
+  await handleEvent({ members: targets, exclude, title: "Neues Todo", body: `${title} wurde ${assignedToUserId ? 'dir zugewiesen' : 'erstellt'}`, type: NotificationTypes.TODO_CREATED, data: { type: NotificationTypes.TODO_CREATED, todoId: event.params.todoId, listId, createdBy: userId }});
 });
 
-// 🔷 onTodoCompleted
 exports.onTodoCompleted = onDocumentUpdated({ region: "europe-west3", document: "todos/{todoId}" }, async (event) => {
-  const before = event.data?.before.data();
-  const after = event.data?.after.data();
-  if (!before || !after) return log.error("Ungültige Daten");
-
+  const before = event.data?.before.data(), after = event.data?.after.data();
+  if (!before || !after) return;
   if (!before.isCompleted && after.isCompleted) {
     const { listId, title, completedByUserId, userId } = after;
     const members = await getListMembers(listId);
-    if (!members) return;
-
-    await sendNotification(members, [completedByUserId || userId], {
-      notification: { title: "Todo erledigt", body: `${title} wurde als erledigt markiert` },
-      data: { type: NotificationTypes.TODO_COMPLETED, todoId: event.params.todoId, listId, completedBy: completedByUserId || userId },
-    }, NotificationTypes.TODO_COMPLETED);
+    await handleEvent({ members, exclude: [completedByUserId || userId], title: "Todo erledigt", body: `${title} wurde als erledigt markiert`, type: NotificationTypes.TODO_COMPLETED, data: { type: NotificationTypes.TODO_COMPLETED, todoId: event.params.todoId, listId, completedBy: completedByUserId || userId }});
   }
 });
 
-// 🔷 onTodoDeleted
 exports.onTodoDeleted = onDocumentDeleted({ region: "europe-west3", document: "todos/{todoId}" }, async (event) => {
-  const todoData = event.data?.data();
-  if (!todoData) return log.error("Ungültige Daten");
-
-  const { deletedByUserId, userId, listId, title } = todoData;
+  const d = event.data?.data();
+  if (!d) return;
+  const { deletedByUserId, userId, listId, title } = d;
   const members = await getListMembers(listId);
-  if (!members) return;
-
-  await sendNotification(members, [deletedByUserId || userId], {
-    notification: { title: "Todo gelöscht", body: `${title} wurde gelöscht` },
-    data: { type: NotificationTypes.TODO_DELETED, todoId: event.params.todoId, listId, deletedBy: deletedByUserId || userId },
-  }, NotificationTypes.TODO_DELETED);
+  await handleEvent({ members, exclude: [deletedByUserId || userId], title: "Todo gelöscht", body: `${title} wurde gelöscht`, type: NotificationTypes.TODO_DELETED, data: { type: NotificationTypes.TODO_DELETED, todoId: event.params.todoId, listId, deletedBy: deletedByUserId || userId }});
 });
 
-// 🔷 onListMemberAdded
 exports.onListMemberAdded = onDocumentUpdated({ region: "europe-west3", document: "lists/{listId}" }, async (event) => {
-  const before = event.data?.before.data();
-  const after = event.data?.after.data();
-  if (!before || !after) return log.error("Ungültige Daten");
-
+  const before = event.data?.before.data(), after = event.data?.after.data();
+  if (!before || !after) return;
   const newMembers = (after.allUserIds || []).filter(m => !(before.allUserIds || []).includes(m));
-  if (newMembers.length === 0) return;
-
-  await sendNotification(before.allUserIds || [], newMembers, {
-    notification: { title: "Neuer Member", body: `${newMembers.length} neuer Member ist beigetreten` },
-    data: { type: NotificationTypes.MEMBER_ADDED, listId: event.params.listId, newMembers: newMembers.join(",") },
-  }, NotificationTypes.MEMBER_ADDED);
+  if (!newMembers.length) return;
+  await handleEvent({ members: before.allUserIds || [], exclude: newMembers, title: "Neuer Member", body: `${newMembers.length} neuer Member ist beigetreten`, type: NotificationTypes.MEMBER_ADDED, data: { type: NotificationTypes.MEMBER_ADDED, listId: event.params.listId, newMembers: newMembers.join(",") }});
 });
 
-// 🔷 onListMemberRemoved
 exports.onListMemberRemoved = onDocumentUpdated({ region: "europe-west3", document: "lists/{listId}" }, async (event) => {
-  const before = event.data?.before.data();
-  const after = event.data?.after.data();
-  if (!before || !after) return log.error("Ungültige Daten");
-
-  const removedMembers = (before.allUserIds || []).filter(m => !(after.allUserIds || []).includes(m));
-  if (removedMembers.length === 0) return;
-
-  await sendNotification(after.allUserIds || [], removedMembers, {
-    notification: { title: "Member entfernt", body: `${removedMembers.length} Member hat die Liste verlassen` },
-    data: { type: NotificationTypes.MEMBER_REMOVED, listId: event.params.listId, removedMembers: removedMembers.join(",") },
-  }, NotificationTypes.MEMBER_REMOVED);
+  const before = event.data?.before.data(), after = event.data?.after.data();
+  if (!before || !after) return;
+  const removed = (before.allUserIds || []).filter(m => !(after.allUserIds || []).includes(m));
+  if (!removed.length) return;
+  await handleEvent({ members: after.allUserIds || [], exclude: removed, title: "Member entfernt", body: `${removed.length} Member hat die Liste verlassen`, type: NotificationTypes.MEMBER_REMOVED, data: { type: NotificationTypes.MEMBER_REMOVED, listId: event.params.listId, removedMembers: removed.join(",") }});
 });
 
-// 🔷 onChatMessageCreated
 exports.onChatMessageCreated = onDocumentCreated({ region: "europe-west3", document: "todos/{todoId}/chatMessages/{messageId}" }, async (event) => {
-  const messageData = event.data?.data();
-  if (!messageData) return log.error("Ungültige Daten");
-
-  const { userId, userName, message } = messageData;
-  const { todoId } = event.params;
-  if (!todoId || !userId) return log.error("todoId oder userId fehlt");
-
-  const todoDoc = await db.collection("todos").doc(todoId).get();
-  if (!todoDoc.exists) return log.error(`Todo ${todoId} nicht gefunden`);
-
-  const listId = todoDoc.data().listId;
-  if (!listId) return log.error(`listId für Todo ${todoId} nicht gefunden`);
-
+  const d = event.data?.data();
+  if (!d) return;
+  const { userId, userName, message } = d;
+  const todoId = event.params.todoId;
+  const todo = await db.collection("todos").doc(todoId).get();
+  if (!todo.exists) return;
+  const listId = todo.data().listId;
   const members = await getListMembers(listId);
-  if (!members) return;
-
-  await sendNotification(members, [userId], {
-    notification: { title: `💬 ${userName}`, body: message.length > 50 ? message.substring(0, 50) + '...' : message },
-    data: { type: NotificationTypes.CHAT_MESSAGE, messageId: event.params.messageId, todoId, listId, senderId: userId, senderName: userName },
-  }, NotificationTypes.CHAT_MESSAGE);
+  await handleEvent({ members, exclude: [userId], title: `💬 ${userName}`, body: message.length > 50 ? message.slice(0, 50) + '...' : message, type: NotificationTypes.CHAT_MESSAGE, data: { type: NotificationTypes.CHAT_MESSAGE, messageId: event.params.messageId, todoId, listId, senderId: userId, senderName: userName }});
 });
 
-// 🔷 sendTestNotification
-exports.sendTestNotification = onCall({ region: "europe-west3" }, async (request) => {
-  const { fcmToken, title = "Test Nachricht", body = "Das ist eine Test-Benachrichtigung!" } = request.data;
-  if (!fcmToken) throw new Error("FCM Token erforderlich");
-
-  const response = await messaging.send({
-    token: fcmToken,
-    notification: { title, body },
-    data: { type: NotificationTypes.TEST, timestamp: Date.now().toString() },
-    android: {
-      notification: {
-        title,
-        body,
-        sound: 'notification_sound',
-        channelId: 'togetherdo_channel',
-        priority: 'high',
-      },
-    },
-    apns: {
-      headers: {
-        'apns-priority': '10'
-      },
-      payload: {
-        aps: {
-          alert: { title, body },
-          sound: 'notification_sound.aiff',
-          badge: 1,
-          "interruption-level": "time-sensitive"
-        },
-      },
-    },
-  });
-
-  log.info("✅ Test-Benachrichtigung gesendet:", response);
-  return { success: true, messageId: response, message: "Test-Benachrichtigung gesendet" };
-});
-
-// 🔷 onShoppingItemCreated
 exports.onShoppingItemCreated = onDocumentCreated({ region: "europe-west3", document: "shopping_items/{itemId}" }, async (event) => {
-  const itemData = event.data?.data();
-  if (!itemData) return log.error("Ungültige Shopping-Item-Daten");
-
-  const { userId, listId, name, assignedToUserId } = itemData;
-  if (!userId || !listId) return log.error("userId oder listId fehlt");
-
-  log.info(`✅ Neues Einkaufsitem: ${name}`);
-
+  const d = event.data?.data();
+  if (!d) return;
+  const { userId, listId, name, assignedToUserId } = d;
   const members = await getListMembers(listId);
-  if (!members) return;
-
-  let targets = assignedToUserId ? [assignedToUserId] : members;
-  let exclude = assignedToUserId ? [] : [userId];
-  let note = { title: "Neues Einkaufsitem", body: `${name} wurde ${assignedToUserId ? 'dir zugewiesen' : 'hinzugefügt'}` };
-
-  await sendNotification(targets, exclude, {
-    notification: note,
-    data: { type: NotificationTypes.SHOPPING_ITEM_CREATED, itemId: event.params.itemId, listId, createdBy: userId },
-  }, NotificationTypes.SHOPPING_ITEM_CREATED);
+  const targets = assignedToUserId ? [assignedToUserId] : members;
+  const exclude = assignedToUserId ? [] : [userId];
+  await handleEvent({ members: targets, exclude, title: "Neues Einkaufsitem", body: `${name} wurde ${assignedToUserId ? 'dir zugewiesen' : 'hinzugefügt'}`, type: NotificationTypes.SHOPPING_ITEM_CREATED, data: { type: NotificationTypes.SHOPPING_ITEM_CREATED, itemId: event.params.itemId, listId, createdBy: userId }});
 });
 
-// 🔷 onShoppingItemPurchased
 exports.onShoppingItemPurchased = onDocumentUpdated({ region: "europe-west3", document: "shopping_items/{itemId}" }, async (event) => {
-  const before = event.data?.before.data();
-  const after = event.data?.after.data();
-  if (!before || !after) return log.error("Ungültige Daten");
-
+  const before = event.data?.before.data(), after = event.data?.after.data();
+  if (!before || !after) return;
   if (!before.isPurchased && after.isPurchased) {
     const { listId, name, purchasedByUserId, userId } = after;
     const members = await getListMembers(listId);
-    if (!members) return;
-
-    await sendNotification(members, [purchasedByUserId || userId], {
-      notification: { title: "Einkaufsitem erledigt", body: `${name} wurde als erledigt/gekauft markiert` },
-      data: { type: NotificationTypes.SHOPPING_ITEM_PURCHASED, itemId: event.params.itemId, listId, purchasedBy: purchasedByUserId || userId },
-    }, NotificationTypes.SHOPPING_ITEM_PURCHASED);
+    await handleEvent({ members, exclude: [purchasedByUserId || userId], title: "Einkaufsitem erledigt", body: `${name} wurde als erledigt/gekauft markiert`, type: NotificationTypes.SHOPPING_ITEM_PURCHASED, data: { type: NotificationTypes.SHOPPING_ITEM_PURCHASED, itemId: event.params.itemId, listId, purchasedBy: purchasedByUserId || userId }});
   }
 });
 
-// 🔷 onShoppingItemDeleted
 exports.onShoppingItemDeleted = onDocumentDeleted({ region: "europe-west3", document: "shopping_items/{itemId}" }, async (event) => {
-  const itemData = event.data?.data();
-  if (!itemData) return log.error("Ungültige Daten");
-
-  const { deletedByUserId, userId, listId, name } = itemData;
+  const d = event.data?.data();
+  if (!d) return;
+  const { deletedByUserId, userId, listId, name } = d;
   const members = await getListMembers(listId);
-  if (!members) return;
-
-  await sendNotification(members, [deletedByUserId || userId], {
-    notification: { title: "Einkaufsitem gelöscht", body: `${name} wurde gelöscht` },
-    data: { type: NotificationTypes.SHOPPING_ITEM_DELETED, itemId: event.params.itemId, listId, deletedBy: deletedByUserId || userId },
-  }, NotificationTypes.SHOPPING_ITEM_DELETED);
+  await handleEvent({ members, exclude: [deletedByUserId || userId], title: "Einkaufsitem gelöscht", body: `${name} wurde gelöscht`, type: NotificationTypes.SHOPPING_ITEM_DELETED, data: { type: NotificationTypes.SHOPPING_ITEM_DELETED, itemId: event.params.itemId, listId, deletedBy: deletedByUserId || userId }});
 });
 
-// 🔷 onShoppingListMemberAdded
 exports.onShoppingListMemberAdded = onDocumentUpdated({ region: "europe-west3", document: "lists/{listId}" }, async (event) => {
-  const before = event.data?.before.data();
-  const after = event.data?.after.data();
-  if (!before || !after) return log.error("Ungültige Daten");
-
+  const before = event.data?.before.data(), after = event.data?.after.data();
+  if (!before || !after) return;
   const newMembers = (after.allUserIds || []).filter(m => !(before.allUserIds || []).includes(m));
-  if (newMembers.length === 0) return;
-
-  await sendNotification(before.allUserIds || [], newMembers, {
-    notification: { title: "Neuer Member in Einkaufsliste", body: `${newMembers.length} neuer Member ist der Einkaufsliste beigetreten` },
-    data: { type: NotificationTypes.SHOPPING_MEMBER_ADDED, listId: event.params.listId, newMembers: newMembers.join(",") },
-  }, NotificationTypes.SHOPPING_MEMBER_ADDED);
+  if (!newMembers.length) return;
+  await handleEvent({ members: before.allUserIds || [], exclude: newMembers, title: "Neuer Member in Einkaufsliste", body: `${newMembers.length} neuer Member ist der Einkaufsliste beigetreten`, type: NotificationTypes.SHOPPING_MEMBER_ADDED, data: { type: NotificationTypes.SHOPPING_MEMBER_ADDED, listId: event.params.listId, newMembers: newMembers.join(",") }});
 });
 
-// 🔷 onShoppingListMemberRemoved
 exports.onShoppingListMemberRemoved = onDocumentUpdated({ region: "europe-west3", document: "lists/{listId}" }, async (event) => {
-  const before = event.data?.before.data();
-  const after = event.data?.after.data();
-  if (!before || !after) return log.error("Ungültige Daten");
+  const before = event.data?.before.data(), after = event.data?.after.data();
+  if (!before || !after) return;
+  const removed = (before.allUserIds || []).filter(m => !(after.allUserIds || []).includes(m));
+  if (!removed.length) return;
+  await handleEvent({ members: after.allUserIds || [], exclude: removed, title: "Member verlässt Einkaufsliste", body: `${removed.length} Member hat die Einkaufsliste verlassen`, type: NotificationTypes.SHOPPING_MEMBER_REMOVED, data: { type: NotificationTypes.SHOPPING_MEMBER_REMOVED, listId: event.params.listId, removedMembers: removed.join(",") }});
+});
 
-  const removedMembers = (before.allUserIds || []).filter(m => !(after.allUserIds || []).includes(m));
-  if (removedMembers.length === 0) return;
-
-  await sendNotification(after.allUserIds || [], removedMembers, {
-    notification: { title: "Member verlässt Einkaufsliste", body: `${removedMembers.length} Member hat die Einkaufsliste verlassen` },
-    data: { type: NotificationTypes.SHOPPING_MEMBER_REMOVED, listId: event.params.listId, removedMembers: removedMembers.join(",") },
-  }, NotificationTypes.SHOPPING_MEMBER_REMOVED);
+exports.sendTestNotification = onCall({ region: "europe-west3" }, async (request) => {
+  const { fcmToken, title = "Test Nachricht", body = "Das ist eine Test-Benachrichtigung!" } = request.data;
+  if (!fcmToken) throw new Error("FCM Token erforderlich");
+  const message = {
+    token: fcmToken,
+    notification: { title, body },
+    data: { type: NotificationTypes.TEST, timestamp: Date.now().toString() },
+    android: { notification: { title, body, sound: 'notification_sound', channelId: 'togetherdo_channel', priority: 'high' } },
+    apns: { headers: { 'apns-priority': '10' }, payload: { aps: { alert: { title, body }, sound: 'notification_sound.aiff', badge: 1, "interruption-level": "time-sensitive" } } },
+  };
+  const res = await messaging.send(message);
+  log.info("✅ Test-Benachrichtigung gesendet:", res);
+  return { success: true, messageId: res };
 });

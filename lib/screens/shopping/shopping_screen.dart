@@ -38,7 +38,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
   void didUpdateWidget(covariant ShoppingScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.highlightItemId != oldWidget.highlightItemId) {
-      print(
+      debugPrint(
         "HighlightItemId geändert: ${oldWidget.highlightItemId} -> ${widget.highlightItemId}",
       );
       setState(() {

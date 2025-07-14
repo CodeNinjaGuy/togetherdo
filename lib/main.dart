@@ -134,8 +134,6 @@ class TogetherDoApp extends StatelessWidget {
 class TogetherDoAppView extends StatelessWidget {
   TogetherDoAppView({super.key});
 
-  final _navigatorKey = GlobalKey<NavigatorState>();
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeBloc, ThemeState>(

@@ -4,10 +4,8 @@ import 'package:intl/intl.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
-import '../../repositories/list_repository.dart';
 import '../../repositories/shopping_repository.dart';
 import '../../models/shopping_item_model.dart';
-import '../../models/list_model.dart';
 
 class ShoppingItemWidget extends StatefulWidget {
   final ShoppingItemModel item;
@@ -41,7 +39,7 @@ class _ShoppingItemWidgetState extends State<ShoppingItemWidget>
     );
     _colorAnimation = ColorTween(
       begin: Colors.transparent,
-      end: Colors.green.withOpacity(0.3),
+      end: Colors.green.withValues(alpha: 0.3),
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
     if (widget.highlight) {
       _startHighlightAnimation();
@@ -57,6 +55,8 @@ class _ShoppingItemWidgetState extends State<ShoppingItemWidget>
   }
 
   void _startHighlightAnimation() async {
+    if (!mounted) return;
+
     setState(() {
       _isHighlighted = true;
       _wasHighlighted = true;
@@ -64,13 +64,16 @@ class _ShoppingItemWidgetState extends State<ShoppingItemWidget>
 
     // Dezente Blink-Animation
     for (int i = 0; i < 2; i++) {
+      if (!mounted) return;
       await _controller.forward();
       await Future.delayed(const Duration(milliseconds: 200));
+      if (!mounted) return;
       await _controller.reverse();
       await Future.delayed(const Duration(milliseconds: 200));
     }
 
     // Nach dem Blinken das Highlight komplett entfernen
+    if (!mounted) return;
     setState(() {
       _isHighlighted = false;
       _wasHighlighted = false;
@@ -229,12 +232,6 @@ class _ShoppingItemWidgetState extends State<ShoppingItemWidget>
   }
 
   bool _canEdit(BuildContext context) {
-    final list = (context.read<ListRepository>() as FirebaseListRepository)
-        .getListById(widget.item.listId);
-    final authState = context.read<AuthBloc>().state;
-    final currentUserId = authState is AuthAuthenticated
-        ? authState.user.id
-        : '';
     // Dummy-Check, ggf. anpassen
     return true;
   }
