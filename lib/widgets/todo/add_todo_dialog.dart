@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
@@ -156,8 +157,10 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return AlertDialog(
-      title: const Text('Neues Todo'),
+      title: Text(l10n.newTodoTitle),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -169,9 +172,9 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
               children: [
                 TextFormField(
                   controller: _titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Titel',
-                    hintText: 'Was muss erledigt werden?',
+                  decoration: InputDecoration(
+                    labelText: l10n.todoTitle,
+                    hintText: l10n.exampleTodo,
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -183,9 +186,9 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Beschreibung (optional)',
-                    hintText: 'Weitere Details...',
+                  decoration: InputDecoration(
+                    labelText: l10n.todoDescription,
+                    hintText: l10n.exampleDescription,
                   ),
                   maxLines: 3,
                 ),
@@ -193,9 +196,9 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
                 // Ersetze das TextFormField für Kategorie durch ein Dropdown mit den wichtigsten Kategorien und optionaler benutzerdefinierter Eingabe.
                 DropdownButtonFormField<String>(
                   value: _selectedCategory,
-                  decoration: const InputDecoration(
-                    labelText: 'Kategorie (optional)',
-                    hintText: 'Kategorie auswählen',
+                  decoration: InputDecoration(
+                    labelText: l10n.todoCategory,
+                    hintText: l10n.selectCategory,
                   ),
                   isExpanded: true,
                   items: _categories
@@ -217,9 +220,9 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
                 ),
                 if (_selectedCategory == 'Benutzerdefiniert')
                   TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: 'Eigene Kategorie',
-                      hintText: 'z.B. Hobby, Projekt ...',
+                    decoration: InputDecoration(
+                      labelText: l10n.customCategory,
+                      hintText: l10n.exampleCustomCategory,
                     ),
                     onChanged: (value) {
                       setState(() {
@@ -233,15 +236,15 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
                 if (_availableUsers.isNotEmpty) ...[
                   DropdownButtonFormField<String>(
                     value: _selectedUserId,
-                    decoration: const InputDecoration(
-                      labelText: 'Zuweisung (optional)',
-                      hintText: 'Wem soll das Todo zugewiesen werden?',
+                    decoration: InputDecoration(
+                      labelText: l10n.assignment,
+                      hintText: l10n.assignTo,
                     ),
                     isExpanded: true,
                     items: [
-                      const DropdownMenuItem<String>(
+                      DropdownMenuItem<String>(
                         value: null,
-                        child: Text('Keine Zuweisung'),
+                        child: Text(l10n.noAssignment),
                       ),
                       ..._availableUsers.map((user) {
                         return DropdownMenuItem<String>(
@@ -270,19 +273,19 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
                 // Priorität
                 DropdownButtonFormField<TodoPriority>(
                   value: _priority,
-                  decoration: const InputDecoration(labelText: 'Priorität'),
+                  decoration: InputDecoration(labelText: l10n.priorityLabel),
                   isExpanded: true,
                   items: TodoPriority.values.map((priority) {
                     String label;
                     switch (priority) {
                       case TodoPriority.high:
-                        label = 'Hoch';
+                        label = l10n.priorityHigh;
                         break;
                       case TodoPriority.medium:
-                        label = 'Mittel';
+                        label = l10n.priorityMedium;
                         break;
                       case TodoPriority.low:
-                        label = 'Niedrig';
+                        label = l10n.priorityLow;
                         break;
                     }
                     return DropdownMenuItem(
@@ -307,10 +310,10 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
                       child: TextFormField(
                         readOnly: true,
                         decoration: InputDecoration(
-                          labelText: 'Fälligkeitsdatum (optional)',
+                          labelText: l10n.dueDateOptional,
                           hintText: _selectedDate != null
                               ? DateFormat('dd.MM.yyyy').format(_selectedDate!)
-                              : 'Datum auswählen',
+                              : l10n.exampleDate,
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.calendar_today),
                             onPressed: _selectDate,
@@ -323,10 +326,10 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
                       child: TextFormField(
                         readOnly: true,
                         decoration: InputDecoration(
-                          labelText: 'Uhrzeit (optional)',
+                          labelText: l10n.timeOptional,
                           hintText: _selectedTime != null
                               ? _selectedTime!.format(context)
-                              : 'Zeit auswählen',
+                              : l10n.exampleTime,
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.access_time),
                             onPressed: _selectTime,
@@ -344,9 +347,9 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Abbrechen'),
+          child: Text(l10n.cancel),
         ),
-        ElevatedButton(onPressed: _addTodo, child: const Text('Hinzufügen')),
+        ElevatedButton(onPressed: _addTodo, child: Text(l10n.add)),
       ],
     );
   }

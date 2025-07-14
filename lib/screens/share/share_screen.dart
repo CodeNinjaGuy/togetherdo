@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
@@ -47,9 +48,10 @@ class _ShareScreenState extends State<ShareScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Geteilte Listen'),
+        title: Text(l10n.sharedLists),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -85,12 +87,12 @@ class _ShareScreenState extends State<ShareScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Keine geteilten Listen',
+                            l10n.noSharedLists,
                             style: Theme.of(context).textTheme.headlineSmall,
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Erstelle eine neue Liste oder trete einer bei',
+                            l10n.createOrJoinList,
                             style: Theme.of(context).textTheme.bodyLarge
                                 ?.copyWith(
                                   color: Theme.of(

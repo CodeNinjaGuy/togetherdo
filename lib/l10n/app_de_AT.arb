@@ -1,0 +1,22 @@
+{
+    "@@locale": "de_AT",
+    "shoppingList": "Einkaufszettel",
+    "shoppingLists": "Einkaufszettel",
+    "newShoppingList": "Neuer Einkaufszettel",
+    "newSharedList": "Neuer geteilter Einkaufszettel",
+    "shoppingListType": "Einkaufszettel",
+    "shoppingNotifications": "Einkaufszettel-Benachrichtigungen",
+    "newShoppingItem": "Neues Einkaufs-Item",
+    "newShoppingItemSubtitle": "Benachrichtigung, wenn ein neues Item zum Einkaufszettel hinzugefügt wird",
+    "shoppingItemCompletedSubtitle": "Benachrichtigung, wenn ein Item als erledigt/gekauft markiert wird",
+    "shoppingItemDeletedSubtitle": "Benachrichtigung, wenn ein Item aus dem Einkaufszettel entfernt wird",
+    "newShoppingMemberSubtitle": "Benachrichtigung, wenn jemand dem Einkaufszettel beitritt",
+    "shoppingMemberLeftSubtitle": "Benachrichtigung, wenn jemand den Einkaufszettel verlässt",
+    "membersCanEditSubtitle": "Andere Mitglieder können Todos und Einkaufszettel bearbeiten",
+    "itemNotes": "Bemerkungen",
+    "notesOptional": "Bemerkungen (optional)",
+    "exampleNotes": "z.B. Bio, Marke, Größe",
+    "unit_pack": "Packerl",
+    "unit_bag": "Sackerl",
+    "region_at": "Österreich"
+  }

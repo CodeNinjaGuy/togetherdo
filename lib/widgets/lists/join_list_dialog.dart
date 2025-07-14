@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
@@ -59,6 +60,8 @@ class _JoinListDialogState extends State<JoinListDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return BlocListener<ListBloc, ListState>(
       listener: (context, state) {
         if (state is ListCodeCheckSuccess) {
@@ -85,7 +88,7 @@ class _JoinListDialogState extends State<JoinListDialog> {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Erfolgreich "${state.list.name}" beigetreten'),
+              content: Text(l10n.listJoinedSuccess(state.list.name)),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -96,7 +99,7 @@ class _JoinListDialogState extends State<JoinListDialog> {
           setState(() => _isLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Fehler: ${state.message}'),
+              content: Text('${l10n.error}: ${state.message}'),
               behavior: SnackBarBehavior.floating,
               backgroundColor: Theme.of(context).colorScheme.error,
               shape: RoundedRectangleBorder(
@@ -107,7 +110,7 @@ class _JoinListDialogState extends State<JoinListDialog> {
         }
       },
       child: AlertDialog(
-        title: const Text('Liste beitreten'),
+        title: Text(l10n.joinList),
         content: Form(
           key: _formKey,
           child: Column(
@@ -116,11 +119,11 @@ class _JoinListDialogState extends State<JoinListDialog> {
             children: [
               TextFormField(
                 controller: _codeController,
-                decoration: const InputDecoration(
-                  labelText: '6-stelliger Code',
-                  hintText: '123456',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.qr_code),
+                decoration: InputDecoration(
+                  labelText: l10n.sixDigitCode,
+                  hintText: l10n.exampleCode,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.qr_code),
                 ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [
@@ -186,21 +189,21 @@ class _JoinListDialogState extends State<JoinListDialog> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Typ: ${_foundList!.type == ListType.todo ? 'Todo-Liste' : 'Einkaufsliste'}',
+                        '${l10n.listTypeLabel}: ${_foundList!.type == ListType.todo ? l10n.todoListLabel : l10n.shoppingListLabel}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Besitzer: ${_foundList!.ownerName}',
+                        '${l10n.owner}: ${_foundList!.ownerName}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Mitglieder: ${_foundList!.memberCount}',
+                        '${l10n.members}: ${_foundList!.memberCount}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -226,7 +229,7 @@ class _JoinListDialogState extends State<JoinListDialog> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Code nicht gefunden',
+                          l10n.listNotFound,
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: Theme.of(
@@ -244,7 +247,7 @@ class _JoinListDialogState extends State<JoinListDialog> {
         actions: [
           TextButton(
             onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-            child: const Text('Abbrechen'),
+            child: Text(l10n.cancel),
           ),
           if (_foundList != null)
             FilledButton(
@@ -255,7 +258,7 @@ class _JoinListDialogState extends State<JoinListDialog> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Beitreten'),
+                  : Text(l10n.join),
             ),
         ],
       ),

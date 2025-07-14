@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
@@ -40,6 +41,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
@@ -87,8 +90,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           AuthFormField(
                             controller: _emailController,
-                            labelText: 'E-Mail',
-                            hintText: 'deine@email.com',
+                            labelText: l10n.email,
+                            hintText: l10n.emailHint,
                             keyboardType: TextInputType.emailAddress,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -105,8 +108,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 16),
                           AuthFormField(
                             controller: _passwordController,
-                            labelText: 'Passwort',
-                            hintText: 'Dein Passwort',
+                            labelText: l10n.password,
+                            hintText: l10n.passwordHint,
                             obscureText: _obscurePassword,
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -125,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 return 'Passwort ist erforderlich';
                               }
                               if (value.length < 6) {
-                                return 'Passwort muss mindestens 6 Zeichen lang sein';
+                                return l10n.passwordMinLength;
                               }
                               return null;
                             },
@@ -149,9 +152,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                             strokeWidth: 2,
                                           ),
                                         )
-                                      : const Text(
-                                          'Anmelden',
-                                          style: TextStyle(fontSize: 16),
+                                      : Text(
+                                          l10n.login,
+                                          style: const TextStyle(fontSize: 16),
                                         ),
                                 ),
                               );
@@ -173,7 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         TextButton(
                           onPressed: () => context.go('/register'),
-                          child: const Text('Registrieren'),
+                          child: Text(l10n.register),
                         ),
                       ],
                     ),

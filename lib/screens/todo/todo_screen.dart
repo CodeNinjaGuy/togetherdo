@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
@@ -125,6 +126,7 @@ class _TodoScreenState extends State<TodoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Meine Todos'),
@@ -267,7 +269,7 @@ class _TodoScreenState extends State<TodoScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Nur-Lese-Modus: Du kannst diese Liste nur anzeigen. Nur der Besitzer kann Items bearbeiten.',
+                          l10n.readOnlyMode,
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: Theme.of(

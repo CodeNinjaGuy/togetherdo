@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 
 import 'blocs/auth/auth_bloc.dart';
 import 'blocs/auth/auth_event.dart';
@@ -13,6 +15,9 @@ import 'blocs/theme/theme_bloc.dart';
 import 'blocs/theme/theme_event.dart';
 import 'blocs/theme/theme_state.dart';
 import 'blocs/notification/notification_bloc.dart';
+import 'blocs/language/language_bloc.dart';
+import 'blocs/language/language_event.dart';
+import 'blocs/language/language_state.dart';
 import 'repositories/auth_repository.dart';
 import 'repositories/todo_repository.dart';
 import 'repositories/shopping_repository.dart';
@@ -83,50 +88,36 @@ class TogetherDoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiRepositoryProvider(
+    return MultiBlocProvider(
       providers: [
-        RepositoryProvider<AuthRepository>(
-          create: (context) => FirebaseAuthRepository(),
+        BlocProvider<AuthBloc>(
+          create: (context) =>
+              AuthBloc(authRepository: context.read<AuthRepository>())
+                ..add(const AuthCheckRequested()),
         ),
-        RepositoryProvider<TodoRepository>(
-          create: (context) => FirebaseTodoRepository(),
+        BlocProvider<TodoBloc>(
+          create: (context) =>
+              TodoBloc(todoRepository: context.read<TodoRepository>()),
         ),
-        RepositoryProvider<ShoppingRepository>(
-          create: (context) => FirebaseShoppingRepository(),
+        BlocProvider<ShoppingBloc>(
+          create: (context) => ShoppingBloc(
+            shoppingRepository: context.read<ShoppingRepository>(),
+          ),
         ),
-        RepositoryProvider<ListRepository>(
-          create: (context) => FirebaseListRepository(),
+        BlocProvider<ListBloc>(
+          create: (context) =>
+              ListBloc(listRepository: context.read<ListRepository>()),
+        ),
+        BlocProvider<ThemeBloc>(
+          create: (context) => ThemeBloc()..add(const ThemeLoadRequested()),
+        ),
+        BlocProvider<NotificationBloc>(create: (context) => NotificationBloc()),
+        BlocProvider<LanguageBloc>(
+          create: (context) =>
+              LanguageBloc()..add(const LanguageLoadRequested()),
         ),
       ],
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider<AuthBloc>(
-            create: (context) =>
-                AuthBloc(authRepository: context.read<AuthRepository>())
-                  ..add(const AuthCheckRequested()),
-          ),
-          BlocProvider<TodoBloc>(
-            create: (context) =>
-                TodoBloc(todoRepository: context.read<TodoRepository>()),
-          ),
-          BlocProvider<ShoppingBloc>(
-            create: (context) => ShoppingBloc(
-              shoppingRepository: context.read<ShoppingRepository>(),
-            ),
-          ),
-          BlocProvider<ListBloc>(
-            create: (context) =>
-                ListBloc(listRepository: context.read<ListRepository>()),
-          ),
-          BlocProvider<ThemeBloc>(
-            create: (context) => ThemeBloc()..add(const ThemeLoadRequested()),
-          ),
-          BlocProvider<NotificationBloc>(
-            create: (context) => NotificationBloc(),
-          ),
-        ],
-        child: TogetherDoAppView(),
-      ),
+      child: TogetherDoAppView(),
     );
   }
 }
@@ -149,24 +140,66 @@ class TogetherDoAppView extends StatelessWidget {
         // Global Navigator Router setzen
         GlobalNavigator().setRouter(_router);
 
-        return MaterialApp.router(
-          title: 'TogetherDo',
-          debugShowCheckedModeBanner: false,
-          theme: themeData,
-          routerConfig: _router,
-          builder: (context, child) {
-            return BlocListener<AuthBloc, AuthState>(
-              listener: (context, state) {
-                if (state is AuthFailure) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: Theme.of(context).colorScheme.error,
-                    ),
-                  );
-                }
+        return BlocBuilder<LanguageBloc, LanguageState>(
+          builder: (context, languageState) {
+            Locale? currentLocale;
+            if (languageState is LanguageLoadSuccess) {
+              currentLocale = languageState.locale;
+            } else if (languageState is LanguageChangedSuccess) {
+              currentLocale = languageState.locale;
+            }
+
+            return MaterialApp.router(
+              title: 'TogetherDo',
+              debugShowCheckedModeBanner: false,
+              theme: themeData,
+              routerConfig: _router,
+              locale: currentLocale,
+              localeResolutionCallback: (locale, supportedLocales) {
+                // Immer das gewünschte Locale übernehmen
+                return currentLocale ?? locale ?? supportedLocales.first;
               },
-              child: child!,
+              localizationsDelegates: [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale('de', 'DE'), // Deutsch (Deutschland)
+                Locale('de', 'AT'), // Deutsch (Österreich)
+                Locale('en', 'EN'), // Englisch (England)
+                Locale('en', 'US'), // Englisch (USA)
+              ],
+              builder: (context, child) {
+                return BlocListener<AuthBloc, AuthState>(
+                  listener: (context, state) {
+                    if (state is AuthFailure) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.message),
+                          backgroundColor: Theme.of(context).colorScheme.error,
+                        ),
+                      );
+                    }
+                  },
+                  child: BlocListener<LanguageBloc, LanguageState>(
+                    listener: (context, state) {
+                      if (state is LanguageChangedSuccess) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Sprache geändert zu ${state.languageCode.toUpperCase()}',
+                            ),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    },
+                    child: child!,
+                  ),
+                );
+              },
             );
           },
         );
@@ -174,36 +207,25 @@ class TogetherDoAppView extends StatelessWidget {
     );
   }
 
-  late final GoRouter _router = GoRouter(
+  final GoRouter _router = GoRouter(
     initialLocation: '/',
-    redirect: (context, state) {
-      final authState = context.read<AuthBloc>().state;
-      final isAuthRoute =
-          state.matchedLocation == '/login' ||
-          state.matchedLocation == '/register';
-
-      if (authState is AuthAuthenticated) {
-        if (isAuthRoute) {
-          return '/';
-        }
-        return null;
-      } else {
-        if (isAuthRoute) {
-          return null;
-        }
-        return '/login';
-      }
-    },
     routes: [
-      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-      GoRoute(
-        path: '/register',
-        builder: (context, state) => const RegisterScreen(),
-      ),
       ShellRoute(
         builder: (context, state, child) => HomeScreen(child: child),
         routes: [
           GoRoute(path: '/', builder: (context, state) => const ListsScreen()),
+          GoRoute(
+            path: '/login',
+            builder: (context, state) => const LoginScreen(),
+          ),
+          GoRoute(
+            path: '/register',
+            builder: (context, state) => const RegisterScreen(),
+          ),
+          GoRoute(
+            path: '/profile',
+            builder: (context, state) => const ProfileScreen(),
+          ),
           GoRoute(
             path: '/todo/:listId',
             builder: (context, state) {
@@ -215,12 +237,12 @@ class TogetherDoAppView extends StatelessWidget {
             path: '/shopping/:listId',
             builder: (context, state) {
               final listId = state.pathParameters['listId']!;
-              final highlightItemId = state.uri.queryParameters['highlight'];
-              return ShoppingScreen(
-                listId: listId,
-                highlightItemId: highlightItemId,
-              );
+              return ShoppingScreen(listId: listId);
             },
+          ),
+          GoRoute(
+            path: '/lists',
+            builder: (context, state) => const ListsScreen(),
           ),
           GoRoute(
             path: '/chat/:todoId',
@@ -229,10 +251,6 @@ class TogetherDoAppView extends StatelessWidget {
               final todoTitle = state.uri.queryParameters['title'] ?? 'Chat';
               return ChatScreen(todoId: todoId, todoTitle: todoTitle);
             },
-          ),
-          GoRoute(
-            path: '/profile',
-            builder: (context, state) => const ProfileScreen(),
           ),
         ],
       ),

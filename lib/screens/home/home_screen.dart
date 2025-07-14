@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
 import '../../widgets/responsive_scaffold.dart';
@@ -44,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, authState) {
         if (authState is AuthAuthenticated) {
@@ -56,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   location.startsWith('/shopping/'));
 
           return Scaffold(
-            appBar: AppBar(title: const Text('TogetherDo')),
+            appBar: AppBar(title: const Text('ToGetherDo')),
             body: showSplitView
                 ? ResponsiveScaffold(
                     leftChild: const ListsScreen(),
@@ -110,7 +112,10 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 const CircularProgressIndicator(),
                 const SizedBox(height: 16),
-                Text('Lade...', style: Theme.of(context).textTheme.bodyLarge),
+                Text(
+                  l10n.loading,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
               ],
             ),
           ),

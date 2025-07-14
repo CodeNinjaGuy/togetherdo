@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 import '../../repositories/list_repository.dart';
 import 'list_event.dart';
 import 'list_state.dart';
+import '../../utils/global_navigator.dart';
 
 class ListBloc extends Bloc<ListEvent, ListState> {
   final ListRepository _listRepository;
@@ -95,7 +97,15 @@ class ListBloc extends Bloc<ListEvent, ListState> {
       if (list != null) {
         emit(ListCodeCheckSuccess(list: list));
       } else {
-        emit(const ListCodeCheckFailure(message: 'Code nicht gefunden'));
+        emit(
+          ListCodeCheckFailure(
+            message:
+                AppLocalizations.of(
+                  GlobalNavigator.navigatorKey.currentContext!,
+                )?.codeNotFound ??
+                'Code nicht gefunden',
+          ),
+        );
       }
     } catch (e) {
       emit(ListCodeCheckFailure(message: e.toString()));
@@ -106,6 +116,9 @@ class ListBloc extends Bloc<ListEvent, ListState> {
     ListJoinRequested event,
     Emitter<ListState> emit,
   ) async {
+    final l10n = AppLocalizations.of(
+      GlobalNavigator.navigatorKey.currentContext!,
+    );
     try {
       final list = await _listRepository.getListByCode(event.code);
 
@@ -113,7 +126,11 @@ class ListBloc extends Bloc<ListEvent, ListState> {
         // Prüfe ob Benutzer bereits Mitglied ist oder der Owner
         if (list.ownerId == event.userId ||
             list.memberIds.contains(event.userId)) {
-          emit(const ListJoinFailure(message: 'Bereits Mitglied dieser Liste'));
+          emit(
+            ListJoinFailure(
+              message: l10n?.alreadyMember ?? 'Du bist bereits Mitglied',
+            ),
+          );
           return;
         }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
@@ -46,6 +47,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
@@ -93,14 +96,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         children: [
                           AuthFormField(
                             controller: _displayNameController,
-                            labelText: 'Anzeigename',
-                            hintText: 'Dein Name',
+                            labelText: l10n.displayName,
+                            hintText: l10n.nameHint,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Anzeigename ist erforderlich';
+                                return l10n.displayNameRequired;
                               }
                               if (value.length < 2) {
-                                return 'Anzeigename muss mindestens 2 Zeichen lang sein';
+                                return l10n.displayNameMinLength;
                               }
                               return null;
                             },
@@ -108,8 +111,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(height: 16),
                           AuthFormField(
                             controller: _emailController,
-                            labelText: 'E-Mail',
-                            hintText: 'deine@email.com',
+                            labelText: l10n.email,
+                            hintText: l10n.emailHint,
                             keyboardType: TextInputType.emailAddress,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -126,8 +129,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(height: 16),
                           AuthFormField(
                             controller: _passwordController,
-                            labelText: 'Passwort',
-                            hintText: 'Mindestens 6 Zeichen',
+                            labelText: l10n.password,
+                            hintText: l10n.passwordMinLength,
                             obscureText: _obscurePassword,
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -146,7 +149,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 return 'Passwort ist erforderlich';
                               }
                               if (value.length < 6) {
-                                return 'Passwort muss mindestens 6 Zeichen lang sein';
+                                return l10n.passwordMinLength;
                               }
                               return null;
                             },
@@ -154,8 +157,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(height: 16),
                           AuthFormField(
                             controller: _confirmPasswordController,
-                            labelText: 'Passwort bestätigen',
-                            hintText: 'Passwort wiederholen',
+                            labelText: l10n.confirmPassword,
+                            hintText: l10n.passwordConfirmHint,
                             obscureText: _obscureConfirmPassword,
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -199,9 +202,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                             strokeWidth: 2,
                                           ),
                                         )
-                                      : const Text(
-                                          'Registrieren',
-                                          style: TextStyle(fontSize: 16),
+                                      : Text(
+                                          l10n.register,
+                                          style: const TextStyle(fontSize: 16),
                                         ),
                                 ),
                               );
@@ -223,7 +226,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         TextButton(
                           onPressed: () => context.go('/login'),
-                          child: const Text('Anmelden'),
+                          child: Text(l10n.login),
                         ),
                       ],
                     ),

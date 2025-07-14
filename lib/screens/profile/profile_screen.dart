@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
@@ -8,6 +9,7 @@ import '../../blocs/theme/theme_bloc.dart';
 import '../../blocs/theme/theme_event.dart';
 import '../../blocs/theme/theme_state.dart';
 import '../../widgets/profile/fiberoptics25_logo.dart';
+import '../../widgets/profile/language_selector.dart';
 import 'notification_settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -66,15 +68,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _uploadAvatar() {
     // Avatar-Upload wird in einer späteren Version implementiert
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Avatar-Upload wird später implementiert')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.avatarUpload)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profil'),
+        title: Text(l10n.profile),
         actions: [
           BlocBuilder<AuthBloc, AuthState>(
             builder: (context, authState) {
@@ -82,7 +86,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 return IconButton(
                   icon: Icon(_isEditing ? Icons.save : Icons.edit),
                   onPressed: _isEditing ? _saveProfile : _toggleEdit,
-                  tooltip: _isEditing ? 'Speichern' : 'Bearbeiten',
+                  tooltip: _isEditing ? l10n.save : l10n.edit,
                 );
               }
               return const SizedBox.shrink();
@@ -94,13 +98,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         builder: (context, authState) {
           // Loading State während Profile-Update
           if (authState is AuthProfileUpdateLoading) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Profil wird gespeichert...'),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(l10n.profileSaving),
                 ],
               ),
             );
@@ -113,7 +117,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               context.read<AuthBloc>().add(const AuthCheckRequested());
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Fehler beim Speichern: ${authState.message}'),
+                  content: Text('${l10n.saveError}: ${authState.message}'),
                   backgroundColor: Colors.red,
                 ),
               );
@@ -180,17 +184,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         TextFormField(
                           controller: _displayNameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Anzeigename',
-                            hintText: 'Dein Name',
+                          decoration: InputDecoration(
+                            labelText: l10n.displayName,
+                            hintText: l10n.yourName,
                           ),
                           enabled: _isEditing,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'Anzeigename ist erforderlich';
+                              return l10n.displayNameRequired;
                             }
                             if (value.length < 2) {
-                              return 'Anzeigename muss mindestens 2 Zeichen lang sein';
+                              return l10n.displayNameMinLength;
                             }
                             return null;
                           },
@@ -198,26 +202,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const SizedBox(height: 16),
                         TextFormField(
                           initialValue: authState.user.email,
-                          decoration: const InputDecoration(
-                            labelText: 'E-Mail',
+                          decoration: InputDecoration(labelText: l10n.email),
+                          enabled: false,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          initialValue:
+                              '${l10n.memberSince} ${_formatDate(authState.user.createdAt)}',
+                          decoration: InputDecoration(
+                            labelText: l10n.memberSince,
                           ),
                           enabled: false,
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
                           initialValue:
-                              'Mitglied seit ${_formatDate(authState.user.createdAt)}',
-                          decoration: const InputDecoration(
-                            labelText: 'Mitglied seit',
-                          ),
-                          enabled: false,
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          initialValue:
-                              'Letzter Login: ${_formatDate(authState.user.lastLoginAt)}',
-                          decoration: const InputDecoration(
-                            labelText: 'Letzter Login',
+                              '${l10n.lastLogin}: ${_formatDate(authState.user.lastLoginAt)}',
+                          decoration: InputDecoration(
+                            labelText: l10n.lastLogin,
                           ),
                           enabled: false,
                         ),
@@ -240,7 +242,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                       icon: const Icon(Icons.notifications),
-                      label: const Text('Benachrichtigungen'),
+                      label: Text(l10n.notifications),
                     ),
                   ),
 
@@ -259,30 +261,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         child: DropdownButtonFormField<String>(
                           value: currentTheme,
-                          decoration: const InputDecoration(
-                            labelText: 'Theme',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText: l10n.theme,
+                            border: const OutlineInputBorder(),
                           ),
                           items:
                               [
-                                    'Light',
-                                    'Matrix',
-                                    'Neo',
-                                    'Summer',
-                                    'Aurora',
-                                    'Sunset',
-                                    'Ocean',
-                                    'Forest',
-                                    'Galaxy',
-                                    'Fiberoptics25',
-                                  ]
-                                  .map(
-                                    (theme) => DropdownMenuItem(
-                                      value: theme,
-                                      child: Text(theme),
-                                    ),
-                                  )
-                                  .toList(),
+                                'Light',
+                                'Matrix',
+                                'Neo',
+                                'Summer',
+                                'Aurora',
+                                'Sunset',
+                                'Ocean',
+                                'Forest',
+                                'Galaxy',
+                                'Fiberoptics25',
+                              ].map((theme) {
+                                String localizedThemeName;
+                                switch (theme) {
+                                  case 'Light':
+                                    localizedThemeName = l10n.theme_light;
+                                    break;
+                                  case 'Matrix':
+                                    localizedThemeName = l10n.theme_matrix;
+                                    break;
+                                  case 'Neo':
+                                    localizedThemeName = l10n.theme_neo;
+                                    break;
+                                  case 'Summer':
+                                    localizedThemeName = l10n.theme_summer;
+                                    break;
+                                  case 'Aurora':
+                                    localizedThemeName = l10n.theme_aurora;
+                                    break;
+                                  case 'Sunset':
+                                    localizedThemeName = l10n.theme_sunset;
+                                    break;
+                                  case 'Ocean':
+                                    localizedThemeName = l10n.theme_ocean;
+                                    break;
+                                  case 'Forest':
+                                    localizedThemeName = l10n.theme_forest;
+                                    break;
+                                  case 'Galaxy':
+                                    localizedThemeName = l10n.theme_galaxy;
+                                    break;
+                                  case 'Fiberoptics25':
+                                    localizedThemeName =
+                                        l10n.theme_fiberoptics25;
+                                    break;
+                                  default:
+                                    localizedThemeName = theme;
+                                }
+                                return DropdownMenuItem(
+                                  value: theme,
+                                  child: Text(localizedThemeName),
+                                );
+                              }).toList(),
                           onChanged: (value) {
                             if (value != null) {
                               context.read<ThemeBloc>().add(
@@ -295,13 +331,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     },
                   ),
 
+                  // Language Selector
+                  const LanguageSelector(),
+
                   // Actions
                   if (_isEditing) ...[
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: _saveProfile,
-                        child: const Text('Speichern'),
+                        child: Text(l10n.save),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -309,7 +348,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       width: double.infinity,
                       child: OutlinedButton(
                         onPressed: _toggleEdit,
-                        child: const Text('Abbrechen'),
+                        child: Text(l10n.cancel),
                       ),
                     ),
                   ] else ...[
@@ -317,7 +356,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       width: double.infinity,
                       child: OutlinedButton(
                         onPressed: _toggleEdit,
-                        child: const Text('Profil bearbeiten'),
+                        child: Text(l10n.editProfile),
                       ),
                     ),
                   ],
@@ -332,14 +371,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('Abmelden'),
-                            content: const Text(
-                              'Möchtest du dich wirklich abmelden?',
-                            ),
+                            title: Text(l10n.logout),
+                            content: Text(l10n.logoutConfirm),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(),
-                                child: const Text('Abbrechen'),
+                                child: Text(l10n.cancel),
                               ),
                               ElevatedButton(
                                 onPressed: () {
@@ -356,7 +393,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     context,
                                   ).colorScheme.onError,
                                 ),
-                                child: const Text('Abmelden'),
+                                child: Text(l10n.logout),
                               ),
                             ],
                           ),
@@ -370,7 +407,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           context,
                         ).colorScheme.onErrorContainer,
                       ),
-                      child: const Text('Abmelden'),
+                      child: Text(l10n.logout),
                     ),
                   ),
                 ],

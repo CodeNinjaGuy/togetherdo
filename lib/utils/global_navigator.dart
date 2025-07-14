@@ -6,6 +6,9 @@ class GlobalNavigator {
   factory GlobalNavigator() => _instance;
   GlobalNavigator._internal();
 
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   GoRouter? _router;
 
   void setRouter(GoRouter router) {

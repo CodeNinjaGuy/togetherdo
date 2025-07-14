@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
@@ -56,9 +57,10 @@ class _ListsScreenState extends State<ListsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Meine Listen'),
+        title: Text(l10n.myLists),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -94,12 +96,12 @@ class _ListsScreenState extends State<ListsScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Keine Listen vorhanden',
+                            l10n.noLists,
                             style: Theme.of(context).textTheme.headlineSmall,
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Erstelle deine erste Liste oder trete einer bei',
+                            l10n.createOrJoinList,
                             style: Theme.of(context).textTheme.bodyLarge
                                 ?.copyWith(
                                   color: Theme.of(
@@ -115,13 +117,13 @@ class _ListsScreenState extends State<ListsScreen> {
                               ElevatedButton.icon(
                                 onPressed: _showCreateListDialog,
                                 icon: const Icon(Icons.add),
-                                label: const Text('Liste erstellen'),
+                                label: Text(l10n.createList),
                               ),
                               const SizedBox(width: 16),
                               OutlinedButton.icon(
                                 onPressed: _showJoinListDialog,
                                 icon: const Icon(Icons.join_full),
-                                label: const Text('Beitreten'),
+                                label: Text(l10n.joinList),
                               ),
                             ],
                           ),
@@ -181,7 +183,7 @@ class _ListsScreenState extends State<ListsScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Fehler beim Laden',
+                          l10n.loadError,
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(height: 8),
@@ -198,7 +200,7 @@ class _ListsScreenState extends State<ListsScreen> {
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: _loadLists,
-                          child: const Text('Erneut versuchen'),
+                          child: Text(l10n.tryAgain),
                         ),
                       ],
                     ),
@@ -216,7 +218,7 @@ class _ListsScreenState extends State<ListsScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showCreateListDialog,
         icon: const Icon(Icons.add),
-        label: const Text('Liste erstellen'),
+        label: Text(l10n.createList),
       ),
     );
   }

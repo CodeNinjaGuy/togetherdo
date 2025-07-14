@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
@@ -62,8 +63,9 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Einkaufsliste')),
+      appBar: AppBar(title: Text(l10n.shoppingList)),
       body: FutureBuilder<ListModel?>(
         future: _listRepository.getListById(widget.listId),
         builder: (context, listSnapshot) {
@@ -73,7 +75,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
 
           final list = listSnapshot.data;
           if (list == null) {
-            return const Center(child: Text('Liste nicht gefunden'));
+            return Center(child: Text(l10n.listNotFound));
           }
 
           final authState = context.read<AuthBloc>().state;
@@ -113,7 +115,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Nur-Lese-Modus: Du kannst diese Liste nur anzeigen. Nur der Besitzer kann Items bearbeiten.',
+                          l10n.readOnlyMode,
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: Theme.of(
@@ -135,7 +137,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                     }
                     if (snapshot.hasError) {
                       return Center(
-                        child: Text('Fehler beim Laden: \\${snapshot.error}'),
+                        child: Text('${l10n.loadError}: \\${snapshot.error}'),
                       );
                     }
                     final items = snapshot.data ?? <ShoppingItemModel>[];
@@ -152,14 +154,12 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'Einkaufsliste ist leer',
+                              l10n.shoppingListEmpty,
                               style: Theme.of(context).textTheme.headlineSmall,
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              canEdit
-                                  ? 'Füge dein erstes Item hinzu'
-                                  : 'Die Liste ist noch leer',
+                              canEdit ? l10n.addFirstItem : l10n.listIsEmpty,
                               style: Theme.of(context).textTheme.bodyLarge
                                   ?.copyWith(
                                     color: Theme.of(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 import '../../models/chat_message_model.dart';
 import '../../repositories/chat_repository.dart';
 import '../../blocs/auth/auth_bloc.dart';
@@ -59,6 +60,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(title: Text('Chat: ${widget.todoTitle}')),
       body: Column(
@@ -72,7 +74,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 }
                 final messages = snapshot.data!;
                 if (messages.isEmpty) {
-                  return const Center(child: Text('Noch keine Nachrichten.'));
+                  return Center(child: Text(l10n.noMessages));
                 }
                 return ListView.builder(
                   reverse: true,
@@ -136,8 +138,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    decoration: const InputDecoration(
-                      hintText: 'Nachricht eingeben...',
+                    decoration: InputDecoration(
+                      hintText: l10n.enterMessage,
                       border: OutlineInputBorder(),
                     ),
                     onSubmitted: (_) => _sendMessage(),

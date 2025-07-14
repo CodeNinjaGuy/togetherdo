@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../blocs/list/list_bloc.dart';
 import '../../blocs/list/list_event.dart';
@@ -21,6 +22,7 @@ class ListItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isOwner = list.ownerId == currentUserId;
     final isMember = list.memberIds.contains(currentUserId);
     final canDelete = isOwner;
@@ -146,7 +148,7 @@ class ListItemWidget extends StatelessWidget {
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        'Mitglied',
+                                        l10n.member,
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall
@@ -292,7 +294,7 @@ class ListItemWidget extends StatelessWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        'Besitzer: ${list.ownerName}',
+                        '${l10n.owner}: ${list.ownerName}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -337,7 +339,7 @@ class ListItemWidget extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '${list.memberCount} Mitglieder',
+                      '${list.memberCount} ${l10n.members}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -364,7 +366,7 @@ class ListItemWidget extends StatelessWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Du kannst diese Liste nur lesen. Nur der Besitzer kann Items bearbeiten.',
+                            l10n.readOnlyMode,
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   color: Theme.of(
@@ -386,18 +388,16 @@ class ListItemWidget extends StatelessWidget {
   }
 
   void _showDeleteDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Liste löschen'),
-        content: Text(
-          'Möchtest du die Liste "${list.name}" wirklich löschen? '
-          'Diese Aktion kann nicht rückgängig gemacht werden.',
-        ),
+        title: Text(l10n.listDeleteTitle),
+        content: Text(l10n.listDeleteContent(list.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Abbrechen'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
@@ -410,7 +410,7 @@ class ListItemWidget extends StatelessWidget {
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
-            child: const Text('Löschen'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -418,17 +418,16 @@ class ListItemWidget extends StatelessWidget {
   }
 
   void _showLeaveDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Liste verlassen'),
-        content: Text(
-          'Möchtest du die Liste "${list.name}" wirklich verlassen?',
-        ),
+        title: Text(l10n.listLeaveTitle),
+        content: Text(l10n.listLeaveContent(list.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Abbrechen'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
@@ -441,7 +440,7 @@ class ListItemWidget extends StatelessWidget {
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
-            child: const Text('Verlassen'),
+            child: Text(l10n.leave),
           ),
         ],
       ),

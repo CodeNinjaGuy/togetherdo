@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../blocs/notification/notification_bloc.dart';
 import '../../blocs/notification/notification_event.dart';
@@ -24,8 +25,10 @@ class _NotificationSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Benachrichtigungen')),
+      appBar: AppBar(title: Text(l10n.notifications)),
       body: BlocBuilder<NotificationBloc, NotificationState>(
         builder: (context, state) {
           if (state is NotificationLoading) {
@@ -39,7 +42,7 @@ class _NotificationSettingsScreenState
                 children: [
                   const Icon(Icons.error, size: 64, color: Colors.red),
                   const SizedBox(height: 16),
-                  Text('Fehler: ${state.error}'),
+                  Text('${l10n.error}: ${state.error}'),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
@@ -47,7 +50,7 @@ class _NotificationSettingsScreenState
                         const NotificationLoadRequested(),
                       );
                     },
-                    child: const Text('Erneut versuchen'),
+                    child: Text(l10n.retry),
                   ),
                 ],
               ),
@@ -65,51 +68,50 @@ class _NotificationSettingsScreenState
   }
 
   Widget _buildSettingsForm(NotificationSettings settings) {
+    final l10n = AppLocalizations.of(context)!;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Push-Benachrichtigungen',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          Text(
+            l10n.pushNotifications,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Wähle aus, welche Benachrichtigungen du erhalten möchtest:',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
+          Text(
+            l10n.pushNotificationsDescription,
+            style: const TextStyle(fontSize: 16, color: Colors.grey),
           ),
           const SizedBox(height: 24),
 
           // Todo-Benachrichtigungen
-          const Text(
-            'Todo-Benachrichtigungen',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          Text(
+            l10n.todoNotifications,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 16),
 
           _buildSwitchTile(
-            title: 'Neues Todo erstellt',
-            subtitle:
-                'Benachrichtigung wenn ein neues Todo zur Liste hinzugefügt wird',
+            title: l10n.newTodoCreated,
+            subtitle: l10n.newTodoCreatedSubtitle,
             value: settings.todoCreated,
             onChanged: (value) =>
                 _updateSettings(settings.copyWith(todoCreated: value)),
           ),
 
           _buildSwitchTile(
-            title: 'Todo erledigt',
-            subtitle:
-                'Benachrichtigung wenn ein Todo als erledigt markiert wird',
+            title: l10n.todoCompleted,
+            subtitle: l10n.todoCompletedSubtitle,
             value: settings.todoCompleted,
             onChanged: (value) =>
                 _updateSettings(settings.copyWith(todoCompleted: value)),
           ),
 
           _buildSwitchTile(
-            title: 'Todo gelöscht',
-            subtitle:
-                'Benachrichtigung wenn ein Todo aus der Liste entfernt wird',
+            title: l10n.todoDeleted,
+            subtitle: l10n.todoDeletedSubtitle,
             value: settings.todoDeleted,
             onChanged: (value) =>
                 _updateSettings(settings.copyWith(todoDeleted: value)),
@@ -118,24 +120,23 @@ class _NotificationSettingsScreenState
           const SizedBox(height: 24),
 
           // Member-Benachrichtigungen
-          const Text(
-            'Member-Benachrichtigungen',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          Text(
+            l10n.memberNotifications,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 16),
 
           _buildSwitchTile(
-            title: 'Neuer Member',
-            subtitle:
-                'Benachrichtigung wenn ein neuer Member der Liste beitritt',
+            title: l10n.newMember,
+            subtitle: l10n.newMemberSubtitle,
             value: settings.memberAdded,
             onChanged: (value) =>
                 _updateSettings(settings.copyWith(memberAdded: value)),
           ),
 
           _buildSwitchTile(
-            title: 'Member verlassen',
-            subtitle: 'Benachrichtigung wenn ein Member die Liste verlässt',
+            title: l10n.memberLeft,
+            subtitle: l10n.memberLeftSubtitle,
             value: settings.memberRemoved,
             onChanged: (value) =>
                 _updateSettings(settings.copyWith(memberRemoved: value)),
@@ -144,16 +145,15 @@ class _NotificationSettingsScreenState
           const SizedBox(height: 24),
 
           // Chat-Benachrichtigungen
-          const Text(
-            'Chat-Benachrichtigungen',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          Text(
+            l10n.chatNotifications,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 16),
 
           _buildSwitchTile(
-            title: 'Neue Chat-Nachricht',
-            subtitle:
-                'Benachrichtigung wenn eine neue Nachricht im Todo-Chat gesendet wird',
+            title: l10n.newChatMessage,
+            subtitle: l10n.newChatMessageSubtitle,
             value: settings.chatMessage,
             onChanged: (value) =>
                 _updateSettings(settings.copyWith(chatMessage: value)),
@@ -162,25 +162,23 @@ class _NotificationSettingsScreenState
           const SizedBox(height: 24),
 
           // Einkaufslisten-Benachrichtigungen
-          const Text(
-            'Einkaufslisten-Benachrichtigungen',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          Text(
+            l10n.shoppingNotifications,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 16),
 
           _buildSwitchTile(
-            title: 'Neues Einkaufsitem',
-            subtitle:
-                'Benachrichtigung, wenn ein neues Item zur Einkaufsliste hinzugefügt wird',
+            title: l10n.newShoppingItem,
+            subtitle: l10n.newShoppingItemSubtitle,
             value: settings.shoppingItemCreated,
             onChanged: (value) =>
                 _updateSettings(settings.copyWith(shoppingItemCreated: value)),
           ),
 
           _buildSwitchTile(
-            title: 'Einkaufsitem erledigt',
-            subtitle:
-                'Benachrichtigung, wenn ein Item als erledigt/gekauft markiert wird',
+            title: l10n.shoppingItemCompleted,
+            subtitle: l10n.shoppingItemCompletedSubtitle,
             value: settings.shoppingItemPurchased,
             onChanged: (value) => _updateSettings(
               settings.copyWith(shoppingItemPurchased: value),
@@ -188,27 +186,24 @@ class _NotificationSettingsScreenState
           ),
 
           _buildSwitchTile(
-            title: 'Einkaufsitem gelöscht',
-            subtitle:
-                'Benachrichtigung, wenn ein Item aus der Einkaufsliste entfernt wird',
+            title: l10n.shoppingItemDeleted,
+            subtitle: l10n.shoppingItemDeletedSubtitle,
             value: settings.shoppingItemDeleted,
             onChanged: (value) =>
                 _updateSettings(settings.copyWith(shoppingItemDeleted: value)),
           ),
 
           _buildSwitchTile(
-            title: 'Neuer Member in Einkaufsliste',
-            subtitle:
-                'Benachrichtigung, wenn jemand der Einkaufsliste beitritt',
+            title: l10n.newShoppingMember,
+            subtitle: l10n.newShoppingMemberSubtitle,
             value: settings.shoppingMemberAdded,
             onChanged: (value) =>
                 _updateSettings(settings.copyWith(shoppingMemberAdded: value)),
           ),
 
           _buildSwitchTile(
-            title: 'Member verlässt Einkaufsliste',
-            subtitle:
-                'Benachrichtigung, wenn jemand die Einkaufsliste verlässt',
+            title: l10n.shoppingMemberLeft,
+            subtitle: l10n.shoppingMemberLeftSubtitle,
             value: settings.shoppingMemberRemoved,
             onChanged: (value) => _updateSettings(
               settings.copyWith(shoppingMemberRemoved: value),
@@ -234,17 +229,16 @@ class _NotificationSettingsScreenState
                       color: Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(width: 8),
-                    const Text(
-                      'Hinweis',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                    Text(
+                      l10n.note,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Benachrichtigungen werden nur an andere Mitglieder der Liste gesendet. '
-                  'Du erhältst keine Benachrichtigungen für deine eigenen Aktionen.',
-                  style: TextStyle(fontSize: 14),
+                Text(
+                  l10n.notificationNote,
+                  style: const TextStyle(fontSize: 14),
                 ),
               ],
             ),
@@ -276,28 +270,30 @@ class _NotificationSettingsScreenState
   }
 
   IconData _getIconForSetting(String title) {
+    final l10n = AppLocalizations.of(context)!;
+
     switch (title) {
-      case 'Neues Todo erstellt':
+      case String s when s == l10n.newTodoCreated:
         return Icons.add_task;
-      case 'Todo erledigt':
+      case String s when s == l10n.todoCompleted:
         return Icons.check_circle;
-      case 'Todo gelöscht':
+      case String s when s == l10n.todoDeleted:
         return Icons.delete;
-      case 'Neuer Member':
+      case String s when s == l10n.newMember:
         return Icons.person_add;
-      case 'Member verlassen':
+      case String s when s == l10n.memberLeft:
         return Icons.person_remove;
-      case 'Neue Chat-Nachricht':
+      case String s when s == l10n.newChatMessage:
         return Icons.chat;
-      case 'Neues Einkaufsitem':
+      case String s when s == l10n.newShoppingItem:
         return Icons.shopping_cart;
-      case 'Einkaufsitem erledigt':
+      case String s when s == l10n.shoppingItemCompleted:
         return Icons.check_circle;
-      case 'Einkaufsitem gelöscht':
+      case String s when s == l10n.shoppingItemDeleted:
         return Icons.delete;
-      case 'Neuer Member in Einkaufsliste':
+      case String s when s == l10n.newShoppingMember:
         return Icons.person_add;
-      case 'Member verlässt Einkaufsliste':
+      case String s when s == l10n.shoppingMemberLeft:
         return Icons.person_remove;
       default:
         return Icons.notifications;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
@@ -49,13 +50,15 @@ class _CreateListDialogState extends State<CreateListDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return BlocListener<ListBloc, ListState>(
       listener: (context, state) {
         if (state is ListCreateSuccess) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Liste "${state.list.name}" erstellt'),
+              content: Text(l10n.listCreatedSuccess(state.list.name)),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -66,7 +69,7 @@ class _CreateListDialogState extends State<CreateListDialog> {
           setState(() => _isLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Fehler: ${state.message}'),
+              content: Text('${l10n.error}: ${state.message}'),
               behavior: SnackBarBehavior.floating,
               backgroundColor: Theme.of(context).colorScheme.error,
               shape: RoundedRectangleBorder(
@@ -77,7 +80,7 @@ class _CreateListDialogState extends State<CreateListDialog> {
         }
       },
       child: AlertDialog(
-        title: const Text('Neue Liste erstellen'),
+        title: Text(l10n.newListTitle),
         content: SingleChildScrollView(
           child: Form(
             key: _formKey,
@@ -87,17 +90,17 @@ class _CreateListDialogState extends State<CreateListDialog> {
               children: [
                 TextFormField(
                   controller: _listNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Listenname',
-                    hintText: 'z.B. Einkaufsliste für Party',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.listName,
+                    hintText: l10n.exampleShoppingList,
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Bitte gib einen Namen ein';
+                      return l10n.pleaseEnterName;
                     }
                     if (value.trim().length < 3) {
-                      return 'Der Name muss mindestens 3 Zeichen lang sein';
+                      return l10n.listNameMinLength;
                     }
                     return null;
                   },
@@ -106,21 +109,21 @@ class _CreateListDialogState extends State<CreateListDialog> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Listentyp',
+                  l10n.listTypeLabel,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 8),
                 SegmentedButton<ListType>(
-                  segments: const [
+                  segments: [
                     ButtonSegment<ListType>(
                       value: ListType.todo,
-                      icon: Icon(Icons.check_circle_outline),
-                      label: Text('Todo-Liste'),
+                      icon: const Icon(Icons.check_circle_outline),
+                      label: Text(l10n.todoListLabel),
                     ),
                     ButtonSegment<ListType>(
                       value: ListType.shopping,
-                      icon: Icon(Icons.shopping_cart_outlined),
-                      label: Text('Einkaufsliste'),
+                      icon: const Icon(Icons.shopping_cart_outlined),
+                      label: Text(l10n.shoppingListLabel),
                     ),
                   ],
                   selected: {_selectedType},
@@ -132,11 +135,11 @@ class _CreateListDialogState extends State<CreateListDialog> {
                 ),
                 const SizedBox(height: 16),
                 CheckboxListTile(
-                  title: const Text('Mitglieder können bearbeiten'),
+                  title: Text(l10n.membersCanEditTitle),
                   subtitle: Text(
                     _allowEdit
-                        ? 'Andere Benutzer können Items hinzufügen, bearbeiten und löschen'
-                        : 'Nur du kannst Items hinzufügen, bearbeiten und löschen',
+                        ? l10n.membersCanEditSubtitle
+                        : l10n.onlyOwnerCanEditItems,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -169,7 +172,7 @@ class _CreateListDialogState extends State<CreateListDialog> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Die Liste erhält automatisch einen 6-stelligen Code zum Teilen.',
+                          '${l10n.listCreatedSubtitle} ${l10n.sixDigitCode} ${l10n.listCreatedSubtitle2}',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: Theme.of(
@@ -188,7 +191,7 @@ class _CreateListDialogState extends State<CreateListDialog> {
         actions: [
           TextButton(
             onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-            child: const Text('Abbrechen'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: _isLoading ? null : _createList,
@@ -198,7 +201,7 @@ class _CreateListDialogState extends State<CreateListDialog> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Erstellen'),
+                : Text(l10n.create),
           ),
         ],
       ),

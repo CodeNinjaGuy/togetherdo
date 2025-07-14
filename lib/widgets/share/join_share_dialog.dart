@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
@@ -58,6 +59,7 @@ class _JoinShareDialogState extends State<JoinShareDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocListener<ShareBloc, ShareState>(
       listener: (context, state) {
         if (state is ShareCodeCheckSuccess) {
@@ -194,7 +196,7 @@ class _JoinShareDialogState extends State<JoinShareDialog> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Besitzer: ${_foundShare!.ownerName}',
+                        '${l10n.owner}: ${_foundShare!.ownerName}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),

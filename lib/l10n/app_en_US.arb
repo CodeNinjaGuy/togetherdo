@@ -1,0 +1,23 @@
+{
+    "@@locale": "en_US",
+    "shoppingList": "Grocery List",
+    "shoppingLists": "Grocery Lists",
+    "newShoppingList": "New Grocery List",
+    "newSharedList": "New Shared Grocery List",
+    "shoppingListType": "Grocery List",
+    "shoppingListEmpty": "Grocery list is empty",
+    "shoppingNotifications": "Grocery List Notifications",
+    "newShoppingItem": "New Grocery Item",
+    "newShoppingItemSubtitle": "Notification when a new item is added to the grocery list",
+    "shoppingItemCompleted": "Grocery Item Completed",
+    "shoppingItemCompletedSubtitle": "Notification when an item is marked as purchased",
+    "shoppingItemDeleted": "Grocery Item Deleted",
+    "shoppingItemDeletedSubtitle": "Notification when an item is removed from the grocery list",
+    "newShoppingMember": "New Member in Grocery List",
+    "newShoppingMemberSubtitle": "Notification when someone joins the grocery list",
+    "shoppingMemberLeft": "Member Leaves Grocery List",
+    "shoppingMemberLeftSubtitle": "Notification when someone leaves the grocery list",
+    "allowEditDescription": "Other members can edit todos and grocery lists",
+    "membersCanEditSubtitle": "Other members can edit todos and grocery lists",
+    "exampleShoppingList": "e.g. Grocery list for party"
+  }
