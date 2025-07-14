@@ -208,20 +208,41 @@ class TogetherDoAppView extends StatelessWidget {
   }
 
   final GoRouter _router = GoRouter(
-    initialLocation: '/',
+    initialLocation: '/login',
+    redirect: (context, state) {
+      // Prüfe Auth-Status
+      final authBloc = context.read<AuthBloc>();
+      final authState = authBloc.state;
+
+      // Wenn nicht authentifiziert und nicht auf Login/Register-Seite
+      if (authState is! AuthAuthenticated &&
+          !state.matchedLocation.startsWith('/login') &&
+          !state.matchedLocation.startsWith('/register')) {
+        return '/login';
+      }
+
+      // Wenn authentifiziert und auf Login/Register-Seite
+      if (authState is AuthAuthenticated &&
+          (state.matchedLocation.startsWith('/login') ||
+              state.matchedLocation.startsWith('/register'))) {
+        return '/';
+      }
+
+      return null;
+    },
     routes: [
+      // Auth Routes (außerhalb der ShellRoute)
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/register',
+        builder: (context, state) => const RegisterScreen(),
+      ),
+
+      // App Routes (nur für authentifizierte Benutzer)
       ShellRoute(
         builder: (context, state, child) => HomeScreen(child: child),
         routes: [
           GoRoute(path: '/', builder: (context, state) => const ListsScreen()),
-          GoRoute(
-            path: '/login',
-            builder: (context, state) => const LoginScreen(),
-          ),
-          GoRoute(
-            path: '/register',
-            builder: (context, state) => const RegisterScreen(),
-          ),
           GoRoute(
             path: '/profile',
             builder: (context, state) => const ProfileScreen(),
