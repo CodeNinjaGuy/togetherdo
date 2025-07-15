@@ -20,7 +20,12 @@ abstract class AuthRepository {
     required String displayName,
     String? avatarUrl,
   });
+  Future<UserModel> updateLanguage({
+    required String languageCode,
+    required String countryCode,
+  });
   Future<String> uploadAvatar(String imagePath);
+  Future<Map<String, String>?> getUserLanguage();
 }
 
 class MockAuthRepository implements AuthRepository {
@@ -103,12 +108,45 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<UserModel> updateLanguage({
+    required String languageCode,
+    required String countryCode,
+  }) async {
+    // Simuliere eine Verzögerung
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (_currentUser == null) {
+      throw Exception('Kein Benutzer angemeldet');
+    }
+
+    _currentUser = _currentUser!.copyWith(
+      languageCode: languageCode,
+      countryCode: countryCode,
+    );
+    return _currentUser!;
+  }
+
+  @override
   Future<String> uploadAvatar(String imagePath) async {
     // Simuliere eine Verzögerung
     await Future.delayed(const Duration(seconds: 2));
 
     // Mock-Avatar-Upload - gibt eine simulierte URL zurück
     return 'https://example.com/avatars/${DateTime.now().millisecondsSinceEpoch}.jpg';
+  }
+
+  @override
+  Future<Map<String, String>?> getUserLanguage() async {
+    // Simuliere eine Verzögerung
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    if (_currentUser == null) return null;
+
+    // Gibt die Spracheinstellungen des Benutzers zurück
+    return {
+      'languageCode': _currentUser!.languageCode ?? 'en',
+      'countryCode': _currentUser!.countryCode ?? 'US',
+    };
   }
 }
 
@@ -243,6 +281,26 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<UserModel> updateLanguage({
+    required String languageCode,
+    required String countryCode,
+  }) async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) throw Exception('Nicht angemeldet');
+    final docRef = _firestore.collection('users').doc(user.uid);
+    final doc = await docRef.get();
+    if (!doc.exists) throw Exception('Benutzerprofil nicht gefunden');
+    final data = doc.data()!;
+    final updated = {
+      ...data,
+      'languageCode': languageCode,
+      'countryCode': countryCode,
+    };
+    await docRef.update(updated);
+    return UserModel.fromJson(updated);
+  }
+
+  @override
   Future<String> uploadAvatar(String imagePath) async {
     final user = _firebaseAuth.currentUser;
     if (user == null) throw Exception('Nicht angemeldet');
@@ -252,5 +310,23 @@ class FirebaseAuthRepository implements AuthRepository {
     );
     final uploadTask = await ref.putFile(file);
     return await uploadTask.ref.getDownloadURL();
+  }
+
+  @override
+  Future<Map<String, String>?> getUserLanguage() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) return null;
+    final doc = await _firestore.collection('users').doc(user.uid).get();
+    if (!doc.exists) return null;
+
+    final data = doc.data()!;
+    final languageCode = data['languageCode'] as String?;
+    final countryCode = data['countryCode'] as String?;
+
+    if (languageCode != null && countryCode != null) {
+      return {'languageCode': languageCode, 'countryCode': countryCode};
+    }
+
+    return null;
   }
 }

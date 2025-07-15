@@ -1,0 +1,23 @@
+{
+    "@@locale": "en_GB",
+    "shoppingList": "Shopping List",
+    "shoppingLists": "Shopping Lists",
+    "newShoppingList": "New Shopping List",
+    "newSharedList": "New Shared Shopping List",
+    "shoppingListType": "Shopping List",
+    "shoppingListEmpty": "Shopping list is empty",
+    "shoppingNotifications": "Shopping List Notifications",
+    "newShoppingItem": "New Shopping Item",
+    "newShoppingItemSubtitle": "Notification when a new item is added to the shopping list",
+    "shoppingItemCompleted": "Shopping Item Completed",
+    "shoppingItemCompletedSubtitle": "Notification when an item is marked as purchased",
+    "shoppingItemDeleted": "Shopping Item Deleted",
+    "shoppingItemDeletedSubtitle": "Notification when an item is removed from the shopping list",
+    "newShoppingMember": "New Member in Shopping List",
+    "newShoppingMemberSubtitle": "Notification when someone joins the shopping list",
+    "shoppingMemberLeft": "Member Leaves Shopping List",
+    "shoppingMemberLeftSubtitle": "Notification when someone leaves the shopping list",
+    "allowEditDescription": "Other members can edit todos and shopping lists",
+    "membersCanEditSubtitle": "Other members can edit todos and shopping lists",
+    "exampleShoppingList": "e.g. Shopping list for party"
+} 

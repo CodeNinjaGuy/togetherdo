@@ -42,6 +42,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get displayName => 'Display Name';
 
   @override
+  String get confirmPasswordRequired => 'Confirm Password is required';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? ';
+
+  @override
+  String get createAccount => 'Create Account';
+
+  @override
+  String get createAccountSubtitle => 'Create an account to manage your tasks';
+
+  @override
   String get logout => 'Logout';
 
   @override
@@ -805,6 +820,89 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get member => 'Member';
+
+  @override
+  String get welcomeBack => 'Welcome Back';
+
+  @override
+  String get loginSubtitle => 'Sign in to manage your tasks';
+
+  @override
+  String get emailRequired => 'Email is required';
+
+  @override
+  String get invalidEmail => 'Invalid email address';
+
+  @override
+  String get passwordRequired => 'Password is required';
+
+  @override
+  String get noAccountYet => 'Don\'t have an account yet? ';
+}
+
+/// The translations for English, as used in the United Kingdom (`en_GB`).
+class AppLocalizationsEnGb extends AppLocalizationsEn {
+  AppLocalizationsEnGb(): super('en_GB');
+
+  @override
+  String get shoppingListEmpty => 'Shopping list is empty';
+
+  @override
+  String get shoppingList => 'Shopping List';
+
+  @override
+  String get shoppingLists => 'Shopping Lists';
+
+  @override
+  String get newShoppingList => 'New Shopping List';
+
+  @override
+  String get newSharedList => 'New Shared Shopping List';
+
+  @override
+  String get shoppingListType => 'Shopping List';
+
+  @override
+  String get allowEditDescription => 'Other members can edit todos and shopping lists';
+
+  @override
+  String get exampleShoppingList => 'e.g. Shopping list for party';
+
+  @override
+  String get membersCanEditSubtitle => 'Other members can edit todos and shopping lists';
+
+  @override
+  String get shoppingNotifications => 'Shopping List Notifications';
+
+  @override
+  String get newShoppingItem => 'New Shopping Item';
+
+  @override
+  String get newShoppingItemSubtitle => 'Notification when a new item is added to the shopping list';
+
+  @override
+  String get shoppingItemCompleted => 'Shopping Item Completed';
+
+  @override
+  String get shoppingItemCompletedSubtitle => 'Notification when an item is marked as purchased';
+
+  @override
+  String get shoppingItemDeleted => 'Shopping Item Deleted';
+
+  @override
+  String get shoppingItemDeletedSubtitle => 'Notification when an item is removed from the shopping list';
+
+  @override
+  String get newShoppingMember => 'New Member in Shopping List';
+
+  @override
+  String get newShoppingMemberSubtitle => 'Notification when someone joins the shopping list';
+
+  @override
+  String get shoppingMemberLeft => 'Member Leaves Shopping List';
+
+  @override
+  String get shoppingMemberLeftSubtitle => 'Notification when someone leaves the shopping list';
 }
 
 /// The translations for English, as used in the United States (`en_US`).

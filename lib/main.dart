@@ -90,10 +90,16 @@ class TogetherDoApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthBloc>(
+        BlocProvider<LanguageBloc>(
           create: (context) =>
-              AuthBloc(authRepository: context.read<AuthRepository>())
-                ..add(const AuthCheckRequested()),
+              LanguageBloc(authRepository: context.read<AuthRepository>())
+                ..add(const LanguageLoadRequested()),
+        ),
+        BlocProvider<AuthBloc>(
+          create: (context) => AuthBloc(
+            authRepository: context.read<AuthRepository>(),
+            languageBloc: context.read<LanguageBloc>(),
+          )..add(const AuthCheckRequested()),
         ),
         BlocProvider<TodoBloc>(
           create: (context) =>
@@ -112,10 +118,6 @@ class TogetherDoApp extends StatelessWidget {
           create: (context) => ThemeBloc()..add(const ThemeLoadRequested()),
         ),
         BlocProvider<NotificationBloc>(create: (context) => NotificationBloc()),
-        BlocProvider<LanguageBloc>(
-          create: (context) =>
-              LanguageBloc()..add(const LanguageLoadRequested()),
-        ),
       ],
       child: TogetherDoAppView(),
     );
@@ -150,8 +152,7 @@ class TogetherDoAppView extends StatelessWidget {
             }
 
             return MaterialApp.router(
-              title: 'TogetherDo',
-              debugShowCheckedModeBanner: false,
+              title: 'ToGetherDo',
               theme: themeData,
               routerConfig: _router,
               locale: currentLocale,
@@ -168,7 +169,7 @@ class TogetherDoAppView extends StatelessWidget {
               supportedLocales: const [
                 Locale('de', 'DE'), // Deutsch (Deutschland)
                 Locale('de', 'AT'), // Deutsch (Österreich)
-                Locale('en', 'EN'), // Englisch (England)
+                Locale('en', 'GB'), // Englisch (England)
                 Locale('en', 'US'), // Englisch (USA)
               ],
               builder: (context, child) {
@@ -181,6 +182,16 @@ class TogetherDoAppView extends StatelessWidget {
                           backgroundColor: Theme.of(context).colorScheme.error,
                         ),
                       );
+                    } else if (state is AuthAuthenticated) {
+                      // Nach erfolgreicher Authentifizierung: Profilsprache laden
+                      context.read<LanguageBloc>().add(
+                        const LanguageLoadProfileRequested(),
+                      );
+                    } else if (state is AuthUnauthenticated) {
+                      // Nach Logout: Keine Sprachänderung - gespeicherte Sprache beibehalten
+                      // context.read<LanguageBloc>().add(
+                      //   const LanguageLoadSystemRequested(),
+                      // );
                     }
                   },
                   child: BlocListener<LanguageBloc, LanguageState>(

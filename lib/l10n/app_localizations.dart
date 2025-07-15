@@ -94,6 +94,7 @@ abstract class AppLocalizations {
     Locale('de'),
     Locale('de', 'AT'),
     Locale('en'),
+    Locale('en', 'GB'),
     Locale('en', 'US')
   ];
 
@@ -162,6 +163,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Display Name'**
   String get displayName;
+
+  /// No description provided for @confirmPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password is required'**
+  String get confirmPasswordRequired;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @alreadyHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? '**
+  String get alreadyHaveAccount;
+
+  /// No description provided for @createAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get createAccount;
+
+  /// No description provided for @createAccountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account to manage your tasks'**
+  String get createAccountSubtitle;
 
   /// No description provided for @logout.
   ///
@@ -1656,6 +1687,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Member'**
   String get member;
+
+  /// No description provided for @welcomeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome Back'**
+  String get welcomeBack;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to manage your tasks'**
+  String get loginSubtitle;
+
+  /// No description provided for @emailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email is required'**
+  String get emailRequired;
+
+  /// No description provided for @invalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email address'**
+  String get invalidEmail;
+
+  /// No description provided for @passwordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required'**
+  String get passwordRequired;
+
+  /// No description provided for @noAccountYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account yet? '**
+  String get noAccountYet;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
@@ -1685,7 +1752,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
    }
     case 'en': {
   switch (locale.countryCode) {
-    case 'US': return AppLocalizationsEnUs();
+    case 'GB': return AppLocalizationsEnGb();
+case 'US': return AppLocalizationsEnUs();
    }
   break;
    }

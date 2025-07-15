@@ -11,6 +11,14 @@ class LanguageLoadRequested extends LanguageEvent {
   const LanguageLoadRequested();
 }
 
+class LanguageLoadSystemRequested extends LanguageEvent {
+  const LanguageLoadSystemRequested();
+}
+
+class LanguageLoadProfileRequested extends LanguageEvent {
+  const LanguageLoadProfileRequested();
+}
+
 class LanguageChanged extends LanguageEvent {
   final String languageCode;
   final String countryCode;

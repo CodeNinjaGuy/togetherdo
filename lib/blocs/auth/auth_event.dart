@@ -58,3 +58,16 @@ class AuthUploadAvatarRequested extends AuthEvent {
   @override
   List<Object?> get props => [imagePath];
 }
+
+class AuthUpdateLanguageRequested extends AuthEvent {
+  final String languageCode;
+  final String countryCode;
+
+  const AuthUpdateLanguageRequested({
+    required this.languageCode,
+    required this.countryCode,
+  });
+
+  @override
+  List<Object?> get props => [languageCode, countryCode];
+}

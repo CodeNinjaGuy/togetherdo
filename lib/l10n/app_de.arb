@@ -8,6 +8,11 @@
   "password": "Passwort",
   "confirmPassword": "Passwort bestätigen",
   "displayName": "Anzeigename",
+  "confirmPasswordRequired": "Passwort-Bestätigung ist erforderlich",
+  "passwordsDoNotMatch": "Passwörter stimmen nicht überein",
+  "alreadyHaveAccount": "Bereits ein Konto? ",
+  "createAccount": "Konto erstellen",
+  "createAccountSubtitle": "Erstelle ein Konto, um deine Aufgaben zu verwalten",
   "createOrJoinList": "Erstelle deine erste Liste oder trete einer bei",
   "noLists": "Keine Listen vorhanden",
   "noSharedLists": "Keine geteilten Listen",
@@ -259,5 +264,11 @@
   "passwordConfirmHint": "Passwort wiederholen",
   "codeNotFound": "Code nicht gefunden",
   "alreadyMember": "Du bist bereits Mitglied",
-  "member": "Mitglied"
+  "member": "Mitglied",
+  "welcomeBack": "Willkommen zurück",
+  "loginSubtitle": "Melde dich an, um deine Aufgaben zu verwalten",
+  "emailRequired": "E-Mail ist erforderlich",
+  "invalidEmail": "Ungültige E-Mail-Adresse",
+  "passwordRequired": "Passwort ist erforderlich",
+  "noAccountYet": "Noch kein Konto? "
 } 

@@ -74,14 +74,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Konto erstellen',
+                      l10n.createAccount,
                       style: Theme.of(context).textTheme.headlineMedium
                           ?.copyWith(fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Erstelle ein Konto, um deine Aufgaben zu verwalten',
+                      l10n.createAccountSubtitle,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -98,6 +98,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             controller: _displayNameController,
                             labelText: l10n.displayName,
                             hintText: l10n.nameHint,
+                            textInputAction: TextInputAction.next,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return l10n.displayNameRequired;
@@ -114,6 +115,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             labelText: l10n.email,
                             hintText: l10n.emailHint,
                             keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'E-Mail ist erforderlich';
@@ -132,6 +134,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             labelText: l10n.password,
                             hintText: l10n.passwordMinLength,
                             obscureText: _obscurePassword,
+                            textInputAction: TextInputAction.next,
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword
@@ -146,7 +149,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Passwort ist erforderlich';
+                                return l10n.passwordRequired;
                               }
                               if (value.length < 6) {
                                 return l10n.passwordMinLength;
@@ -160,6 +163,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             labelText: l10n.confirmPassword,
                             hintText: l10n.passwordConfirmHint,
                             obscureText: _obscureConfirmPassword,
+                            textInputAction: TextInputAction.done,
+                            onFieldSubmitted: _handleRegister,
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscureConfirmPassword
@@ -175,10 +180,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Passwort-Bestätigung ist erforderlich';
+                                return l10n.confirmPasswordRequired;
                               }
                               if (value != _passwordController.text) {
-                                return 'Passwörter stimmen nicht überein';
+                                return l10n.passwordsDoNotMatch;
                               }
                               return null;
                             },
@@ -221,7 +226,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Bereits ein Konto? ',
+                          l10n.alreadyHaveAccount,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         TextButton(

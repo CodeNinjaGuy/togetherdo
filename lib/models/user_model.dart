@@ -9,6 +9,8 @@ class UserModel extends Equatable {
   final DateTime lastLoginAt;
   final String? fcmToken;
   final Map<String, bool> notificationSettings;
+  final String? languageCode;
+  final String? countryCode;
 
   const UserModel({
     required this.id,
@@ -26,6 +28,8 @@ class UserModel extends Equatable {
       'memberRemoved': true,
       'chatMessage': true,
     },
+    this.languageCode,
+    this.countryCode,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -48,6 +52,8 @@ class UserModel extends Equatable {
               'chatMessage': true,
             },
       ),
+      languageCode: json['languageCode'] as String?,
+      countryCode: json['countryCode'] as String?,
     );
   }
 
@@ -61,6 +67,8 @@ class UserModel extends Equatable {
       'lastLoginAt': lastLoginAt.toIso8601String(),
       'fcmToken': fcmToken,
       'notificationSettings': notificationSettings,
+      'languageCode': languageCode,
+      'countryCode': countryCode,
     };
   }
 
@@ -73,6 +81,8 @@ class UserModel extends Equatable {
     DateTime? lastLoginAt,
     String? fcmToken,
     Map<String, bool>? notificationSettings,
+    String? languageCode,
+    String? countryCode,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -83,6 +93,8 @@ class UserModel extends Equatable {
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
       fcmToken: fcmToken ?? this.fcmToken,
       notificationSettings: notificationSettings ?? this.notificationSettings,
+      languageCode: languageCode ?? this.languageCode,
+      countryCode: countryCode ?? this.countryCode,
     );
   }
 
@@ -96,5 +108,7 @@ class UserModel extends Equatable {
     lastLoginAt,
     fcmToken,
     notificationSettings,
+    languageCode,
+    countryCode,
   ];
 }

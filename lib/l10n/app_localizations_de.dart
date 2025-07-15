@@ -42,6 +42,21 @@ class AppLocalizationsDe extends AppLocalizations {
   String get displayName => 'Anzeigename';
 
   @override
+  String get confirmPasswordRequired => 'Passwort-Bestätigung ist erforderlich';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwörter stimmen nicht überein';
+
+  @override
+  String get alreadyHaveAccount => 'Bereits ein Konto? ';
+
+  @override
+  String get createAccount => 'Konto erstellen';
+
+  @override
+  String get createAccountSubtitle => 'Erstelle ein Konto, um deine Aufgaben zu verwalten';
+
+  @override
   String get logout => 'Abmelden';
 
   @override
@@ -805,6 +820,24 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get member => 'Mitglied';
+
+  @override
+  String get welcomeBack => 'Willkommen zurück';
+
+  @override
+  String get loginSubtitle => 'Melde dich an, um deine Aufgaben zu verwalten';
+
+  @override
+  String get emailRequired => 'E-Mail ist erforderlich';
+
+  @override
+  String get invalidEmail => 'Ungültige E-Mail-Adresse';
+
+  @override
+  String get passwordRequired => 'Passwort ist erforderlich';
+
+  @override
+  String get noAccountYet => 'Noch kein Konto? ';
 }
 
 /// The translations for German, as used in Austria (`de_AT`).

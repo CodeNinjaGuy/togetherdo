@@ -6,6 +6,8 @@ class AuthFormField extends StatelessWidget {
   final String hintText;
   final bool obscureText;
   final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final VoidCallback? onFieldSubmitted;
   final Widget? suffixIcon;
   final String? Function(String?)? validator;
 
@@ -16,6 +18,8 @@ class AuthFormField extends StatelessWidget {
     required this.hintText,
     this.obscureText = false,
     this.keyboardType,
+    this.textInputAction,
+    this.onFieldSubmitted,
     this.suffixIcon,
     this.validator,
   });
@@ -26,6 +30,10 @@ class AuthFormField extends StatelessWidget {
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      onFieldSubmitted: onFieldSubmitted != null
+          ? (_) => onFieldSubmitted!()
+          : null,
       validator: validator,
       decoration: InputDecoration(
         labelText: labelText,

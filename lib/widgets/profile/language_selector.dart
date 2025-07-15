@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_event.dart';
 import '../../blocs/language/language_bloc.dart';
 import '../../blocs/language/language_event.dart';
 import '../../blocs/language/language_state.dart';
@@ -23,11 +26,12 @@ class LanguageSelector extends StatelessWidget {
           currentCountry = state.countryCode;
         }
 
+        final l10n = AppLocalizations.of(context);
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: ListTile(
             leading: const Icon(Icons.language),
-            title: const Text('Sprache'),
+            title: Text(l10n?.language ?? 'Sprache'),
             subtitle: Text(
               _getLanguageDisplayName(currentLanguage, currentCountry),
             ),
@@ -46,7 +50,7 @@ class LanguageSelector extends StatelessWidget {
         return 'Deutsch (Deutschland)';
       case 'de-AT':
         return 'Deutsch (Österreich)';
-      case 'en-EN':
+      case 'en-GB':
         return 'English (England)';
       case 'en-US':
         return 'English (United States)';
@@ -60,11 +64,12 @@ class LanguageSelector extends StatelessWidget {
     String currentLanguage,
     String currentCountry,
   ) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Sprache auswählen'),
+          title: Text(l10n?.language ?? 'Sprache auswählen'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -87,7 +92,7 @@ class LanguageSelector extends StatelessWidget {
               _buildLanguageOption(
                 context,
                 'en',
-                'EN',
+                'GB',
                 'English (England)',
                 currentLanguage,
                 currentCountry,
@@ -105,7 +110,7 @@ class LanguageSelector extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Abbrechen'),
+              child: Text(l10n?.cancel ?? 'Abbrechen'),
             ),
           ],
         );
@@ -137,8 +142,12 @@ class LanguageSelector extends StatelessWidget {
       ),
       title: Text(displayName),
       onTap: () {
-        context.read<LanguageBloc>().add(
-          LanguageChanged(languageCode: languageCode, countryCode: countryCode),
+        // Sprache im Profil speichern
+        context.read<AuthBloc>().add(
+          AuthUpdateLanguageRequested(
+            languageCode: languageCode,
+            countryCode: countryCode,
+          ),
         );
         Navigator.of(context).pop();
       },

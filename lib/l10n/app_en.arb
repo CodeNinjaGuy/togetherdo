@@ -11,6 +11,11 @@
   "listCreatedSubtitle2": "to share.",
   "confirmPassword": "Confirm Password",
   "displayName": "Display Name",
+  "confirmPasswordRequired": "Confirm Password is required",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "alreadyHaveAccount": "Already have an account? ",   
+  "createAccount": "Create Account",
+  "createAccountSubtitle": "Create an account to manage your tasks",
   "logout": "Logout",
   "profile": "Profile",
   "pleaseEnterName": "Please enter a name",
@@ -259,5 +264,11 @@
   "passwordConfirmHint": "Confirm Password",
   "codeNotFound": "Code not found",
   "alreadyMember": "You are already a member",
-  "member": "Member"
+  "member": "Member",
+  "welcomeBack": "Welcome Back",
+  "loginSubtitle": "Sign in to manage your tasks",
+  "emailRequired": "Email is required",
+  "invalidEmail": "Invalid email address",
+  "passwordRequired": "Password is required",
+  "noAccountYet": "Don't have an account yet? "
 } 
