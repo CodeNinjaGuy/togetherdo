@@ -1,3 +1,8 @@
+//Copyright 2025 TogetherDo by Martin Bundschuh
+//Author: Martin Bundschuh
+//Email: martin.bundschuh@gmail.com
+//License: MIT
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
