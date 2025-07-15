@@ -27,11 +27,14 @@ class LanguageSelector extends StatelessWidget {
         }
 
         final l10n = AppLocalizations.of(context);
+        if (l10n == null) {
+          return const SizedBox.shrink();
+        }
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: ListTile(
             leading: const Icon(Icons.language),
-            title: Text(l10n?.language ?? 'Sprache'),
+            title: Text(l10n.language),
             subtitle: Text(
               _getLanguageDisplayName(currentLanguage, currentCountry),
             ),
@@ -65,11 +68,18 @@ class LanguageSelector extends StatelessWidget {
     String currentCountry,
   ) {
     final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return;
+    }
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        final l10n = AppLocalizations.of(context);
+        if (l10n == null) {
+          return const SizedBox.shrink();
+        }
         return AlertDialog(
-          title: Text(l10n?.language ?? 'Sprache auswählen'),
+          title: Text(l10n.language),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -110,7 +120,7 @@ class LanguageSelector extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n?.cancel ?? 'Abbrechen'),
+              child: Text(l10n.cancel),
             ),
           ],
         );
@@ -126,6 +136,10 @@ class LanguageSelector extends StatelessWidget {
     String currentLanguage,
     String currentCountry,
   ) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return const SizedBox.shrink();
+    }
     return ListTile(
       leading: Radio<String>(
         value: '$languageCode-$countryCode',

@@ -25,7 +25,10 @@ class _NotificationSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return const SizedBox.shrink();
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.notifications)),
@@ -68,7 +71,10 @@ class _NotificationSettingsScreenState
   }
 
   Widget _buildSettingsForm(NotificationSettings settings) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return const SizedBox.shrink();
+    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -254,6 +260,11 @@ class _NotificationSettingsScreenState
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return const SizedBox.shrink();
+    }
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: SwitchListTile(
@@ -270,7 +281,10 @@ class _NotificationSettingsScreenState
   }
 
   IconData _getIconForSetting(String title) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return Icons.notifications;
+    }
 
     switch (title) {
       case String s when s == l10n.newTodoCreated:
@@ -301,6 +315,10 @@ class _NotificationSettingsScreenState
   }
 
   void _updateSettings(NotificationSettings newSettings) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return;
+    }
     context.read<NotificationBloc>().add(
       NotificationSettingsChanged(newSettings),
     );

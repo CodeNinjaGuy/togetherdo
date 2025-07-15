@@ -67,14 +67,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _uploadAvatar() {
     // Avatar-Upload wird in einer späteren Version implementiert
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.avatarUpload)),
-    );
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return;
+    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.avatarUpload)));
   }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
     return Scaffold(
       appBar: AppBar(

@@ -25,7 +25,10 @@ class _AddShoppingItemDialogState extends State<AddShoppingItemDialog> {
   String? _selectedUnit;
 
   List<String> get _commonUnits {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return const [];
+    }
     return [
       l10n.unit_piece,
       l10n.unit_kg,
@@ -44,7 +47,10 @@ class _AddShoppingItemDialogState extends State<AddShoppingItemDialog> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return;
+    }
     _selectedUnit ??= l10n.unit_piece;
   }
 
@@ -82,7 +88,10 @@ class _AddShoppingItemDialogState extends State<AddShoppingItemDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return const SizedBox.shrink();
+    }
 
     return AlertDialog(
       title: Text(l10n.addItem),

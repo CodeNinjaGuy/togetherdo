@@ -46,6 +46,9 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return const SizedBox.shrink();
+    }
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -93,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 32),
                     Text(
-                      l10n?.welcomeBack ?? 'Willkommen zurück',
+                      l10n.welcomeBack,
                       style: theme.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: colorScheme.onSurface,
@@ -102,8 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      l10n?.loginSubtitle ??
-                          'Melde dich an, um deine Aufgaben zu verwalten',
+                      l10n.loginSubtitle,
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -123,8 +125,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             enabled: !_isLoading,
                             textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
-                              labelText: l10n?.email ?? 'E-Mail',
-                              hintText: l10n?.emailHint ?? 'deine@email.com',
+                              labelText: l10n.email,
+                              hintText: l10n.emailHint,
                               prefixIcon: Icon(
                                 Icons.email_outlined,
                                 color: colorScheme.onSurfaceVariant,
@@ -157,14 +159,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return l10n?.emailRequired ??
-                                    'E-Mail ist erforderlich';
+                                return l10n.emailRequired;
                               }
                               if (!RegExp(
                                 r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                               ).hasMatch(value)) {
-                                return l10n?.invalidEmail ??
-                                    'Ungültige E-Mail-Adresse';
+                                return l10n.invalidEmail;
                               }
                               return null;
                             },
@@ -179,8 +179,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             textInputAction: TextInputAction.done,
                             onFieldSubmitted: (_) => _handleLogin(),
                             decoration: InputDecoration(
-                              labelText: l10n?.password ?? 'Passwort',
-                              hintText: l10n?.passwordHint ?? 'Dein Passwort',
+                              labelText: l10n.password,
+                              hintText: l10n.passwordHint,
                               prefixIcon: Icon(
                                 Icons.lock_outlined,
                                 color: colorScheme.onSurfaceVariant,
@@ -226,12 +226,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return l10n?.passwordRequired ??
-                                    'Passwort ist erforderlich';
+                                return l10n.passwordRequired;
                               }
                               if (value.length < 6) {
-                                return l10n?.passwordMinLength ??
-                                    'Mindestens 6 Zeichen';
+                                return l10n.passwordMinLength;
                               }
                               return null;
                             },
@@ -265,7 +263,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     )
                                   : Text(
-                                      l10n?.login ?? 'Anmelden',
+                                      l10n.login,
                                       style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
@@ -284,7 +282,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          l10n?.noAccountYet ?? 'Noch kein Konto? ',
+                          l10n.noAccountYet,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -294,7 +292,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ? null
                               : () => context.go('/register'),
                           child: Text(
-                            l10n?.register ?? 'Registrieren',
+                            l10n.register,
                             style: TextStyle(
                               color: colorScheme.primary,
                               fontWeight: FontWeight.w600,

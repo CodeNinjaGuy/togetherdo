@@ -50,7 +50,10 @@ class _CreateListDialogState extends State<CreateListDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return const SizedBox.shrink();
+    }
 
     return BlocListener<ListBloc, ListState>(
       listener: (context, state) {

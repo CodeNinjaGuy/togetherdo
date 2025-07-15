@@ -4,6 +4,7 @@ import '../../repositories/list_repository.dart';
 import 'list_event.dart';
 import 'list_state.dart';
 import '../../utils/global_navigator.dart';
+import 'dart:developer';
 
 class ListBloc extends Bloc<ListEvent, ListState> {
   final ListRepository _listRepository;
@@ -116,9 +117,8 @@ class ListBloc extends Bloc<ListEvent, ListState> {
     ListJoinRequested event,
     Emitter<ListState> emit,
   ) async {
-    final l10n = AppLocalizations.of(
-      GlobalNavigator.navigatorKey.currentContext!,
-    );
+    final context = GlobalNavigator.navigatorKey.currentContext;
+    final l10n = context != null ? AppLocalizations.of(context) : null;
     try {
       final list = await _listRepository.getListByCode(event.code);
 
@@ -147,7 +147,9 @@ class ListBloc extends Bloc<ListEvent, ListState> {
         final lists = await _listRepository.getUserLists(event.userId);
         emit(ListLoadSuccess(lists: lists));
       } else {
-        emit(const ListJoinFailure(message: 'Code nicht gefunden'));
+        emit(
+          ListJoinFailure(message: l10n?.codeNotFound ?? 'Code nicht gefunden'),
+        );
       }
     } catch (e) {
       emit(ListJoinFailure(message: e.toString()));
@@ -159,14 +161,38 @@ class ListBloc extends Bloc<ListEvent, ListState> {
     Emitter<ListState> emit,
   ) async {
     try {
+      if (event.listId.isEmpty || event.userId.isEmpty) {
+        emit(
+          const ListLeaveFailure(
+            message: 'Listen-ID oder User-ID ist nicht gesetzt!',
+          ),
+        );
+        return;
+      }
+      log(
+        '[ListBloc] leaveList: listId=${event.listId}, userId=${event.userId}',
+      );
+      // Lokalisierung vor async holen
       await _listRepository.leaveList(event.listId, event.userId);
       emit(ListLeaveSuccess(listId: event.listId));
 
       // Lade die aktualisierte Liste
       final lists = await _listRepository.getUserLists(event.userId);
       emit(ListLoadSuccess(lists: lists));
-    } catch (e) {
-      emit(ListLeaveFailure(message: e.toString()));
+    } catch (e, stack) {
+      log(
+        '[ListBloc] Fehler beim Verlassen der Liste: $e\n$stack',
+        level: 1000,
+        stackTrace: stack,
+      );
+      String message = e.toString();
+      // KEIN Zugriff mehr auf BuildContext nach await!
+      if (e.toString().contains('owner_cannot_leave')) {
+        message = 'Der Besitzer kann die Liste nicht verlassen';
+      } else if (e.toString().contains('owner_cannot_delete')) {
+        message = 'Nur der Besitzer kann löschen';
+      }
+      emit(ListLeaveFailure(message: message));
     }
   }
 }

@@ -1,6 +1,4 @@
 import 'dart:math';
-import 'package:togetherdo/l10n/app_localizations.dart';
-import 'package:togetherdo/utils/global_navigator.dart';
 
 import '../models/list_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -235,31 +233,34 @@ class FirebaseListRepository implements ListRepository {
 
   @override
   Future<void> deleteList(String listId, String ownerId) async {
-    final l10n = AppLocalizations.of(
-      GlobalNavigator.navigatorKey.currentContext!,
-    )!;
     final docRef = _firestore.collection('lists').doc(listId);
     final doc = await docRef.get();
     if (!doc.exists) return;
-    final data = doc.data()!;
+    final data = doc.data();
+    if (data == null) {
+      throw Exception('Listendaten konnten nicht geladen werden!');
+    }
     if (data['ownerId'] != ownerId) {
-      throw Exception(l10n.onlyOwnerCanDelete);
+      throw Exception('owner_cannot_delete');
     }
     await docRef.delete();
   }
 
   @override
   Future<void> leaveList(String listId, String userId) async {
-    final l10n = AppLocalizations.of(
-      GlobalNavigator.navigatorKey.currentContext!,
-    )!;
+    if (listId.isEmpty || userId.isEmpty) {
+      throw Exception('Listen-ID oder User-ID ist nicht gesetzt!');
+    }
     final docRef = _firestore.collection('lists').doc(listId);
     final doc = await docRef.get();
     if (!doc.exists) return;
 
-    final data = doc.data()!;
+    final data = doc.data();
+    if (data == null) {
+      throw Exception('Listendaten konnten nicht geladen werden!');
+    }
     if (data['ownerId'] == userId) {
-      throw Exception(l10n.ownerCannotLeave);
+      throw Exception('owner_cannot_leave');
     }
 
     final memberIds = List<String>.from(data['memberIds'] ?? []);

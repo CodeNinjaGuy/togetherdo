@@ -22,7 +22,10 @@ class ListItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return const SizedBox.shrink();
+    }
     final isOwner = list.ownerId == currentUserId;
     final isMember = list.memberIds.contains(currentUserId);
     final canDelete = isOwner;
@@ -388,7 +391,10 @@ class ListItemWidget extends StatelessWidget {
   }
 
   void _showDeleteDialog(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return;
+    }
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -418,7 +424,19 @@ class ListItemWidget extends StatelessWidget {
   }
 
   void _showLeaveDialog(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return;
+    }
+    if (list.id.isEmpty || currentUserId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Fehler: Listen-ID oder User-ID ist nicht gesetzt!'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -448,6 +466,10 @@ class ListItemWidget extends StatelessWidget {
   }
 
   void _showShareDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      return;
+    }
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
