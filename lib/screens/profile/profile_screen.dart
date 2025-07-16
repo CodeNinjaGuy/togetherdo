@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:togetherdo/l10n/app_localizations.dart';
@@ -11,6 +13,7 @@ import '../../blocs/theme/theme_state.dart';
 import '../../widgets/profile/fiberoptics25_logo.dart';
 import '../../widgets/profile/language_selector.dart';
 import 'notification_settings_screen.dart';
+import 'profile_screen_desktop.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -83,6 +86,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    // Dynamische Plattformweiche mit MediaQuery
+    final width = MediaQuery.of(context).size.width;
+    final isDesktop = width > 700;
+    if (isDesktop) {
+      return const ProfileScreenDesktop();
+    }
+
+    // Mobile Variante (bestehendes Layout)
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.profile),

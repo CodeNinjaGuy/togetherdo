@@ -76,10 +76,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 });
                 switch (index) {
                   case 0:
-                    context.push('/');
+                    context.go('/');
                     break;
                   case 1:
-                    context.push('/profile');
+                    context.go('/profile');
                     break;
                 }
               },
