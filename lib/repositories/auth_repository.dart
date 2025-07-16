@@ -26,6 +26,7 @@ abstract class AuthRepository {
   });
   Future<String> uploadAvatar(String imagePath);
   Future<Map<String, String>?> getUserLanguage();
+  Future<void> deleteAccount();
 }
 
 class MockAuthRepository implements AuthRepository {
@@ -147,6 +148,15 @@ class MockAuthRepository implements AuthRepository {
       'languageCode': _currentUser!.languageCode ?? 'en',
       'countryCode': _currentUser!.countryCode ?? 'US',
     };
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    // Simuliere eine Verzögerung
+    await Future.delayed(const Duration(seconds: 2));
+
+    // Mock-Account-Löschung
+    _currentUser = null;
   }
 }
 
@@ -328,5 +338,93 @@ class FirebaseAuthRepository implements AuthRepository {
     }
 
     return null;
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) throw Exception('Nicht angemeldet');
+
+    try {
+      // Schritt 1: Aus allen beigetretenen Listen austreten
+      await _leaveAllJoinedLists(user.uid);
+
+      // Schritt 2: Alle erstellten Listen löschen
+      await _deleteAllCreatedLists(user.uid);
+
+      // Schritt 3: Alle Benutzerdaten aus Firestore löschen
+      await _firestore.collection('users').doc(user.uid).delete();
+
+      // Schritt 4: Firebase Auth Account löschen (mit Re-Authentifizierung)
+      await _deleteUserWithReAuth(user);
+    } catch (e) {
+      debugPrint('Fehler beim Löschen des Accounts: $e');
+      throw Exception('Fehler beim Löschen des Accounts: $e');
+    }
+  }
+
+  Future<void> _leaveAllJoinedLists(String userId) async {
+    try {
+      // Alle Listen abrufen, in denen der Benutzer Mitglied ist
+      final listsQuery = await _firestore
+          .collection('lists')
+          .where('memberIds', arrayContains: userId)
+          .get();
+
+      // Aus allen Listen austreten
+      for (final doc in listsQuery.docs) {
+        final data = doc.data();
+        final memberIds = List<String>.from(data['memberIds'] ?? []);
+        final memberNames = List<String>.from(data['memberNames'] ?? []);
+
+        // Benutzer aus der Liste entfernen
+        memberIds.remove(userId);
+        memberNames.removeWhere(
+          (name) => name.contains(userId),
+        ); // Vereinfachte Logik
+
+        await doc.reference.update({
+          'memberIds': memberIds,
+          'memberNames': memberNames,
+        });
+      }
+    } catch (e) {
+      debugPrint('Fehler beim Verlassen der Listen: $e');
+      // Nicht abbrechen, weiter mit nächstem Schritt
+    }
+  }
+
+  Future<void> _deleteAllCreatedLists(String userId) async {
+    try {
+      // Alle Listen abrufen, die der Benutzer erstellt hat
+      final listsQuery = await _firestore
+          .collection('lists')
+          .where('ownerId', isEqualTo: userId)
+          .get();
+
+      // Alle erstellten Listen löschen
+      for (final doc in listsQuery.docs) {
+        await doc.reference.delete();
+      }
+    } catch (e) {
+      debugPrint('Fehler beim Löschen der erstellten Listen: $e');
+      // Nicht abbrechen, weiter mit nächstem Schritt
+    }
+  }
+
+  Future<void> _deleteUserWithReAuth(fb_auth.User user) async {
+    try {
+      // Versuche direkt zu löschen
+      await user.delete();
+    } on fb_auth.FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        // Re-Authentifizierung erforderlich
+        throw Exception(
+          'Re-Authentifizierung erforderlich. Bitte melde dich erneut an, um deinen Account zu löschen.',
+        );
+      } else {
+        rethrow;
+      }
+    }
   }
 }

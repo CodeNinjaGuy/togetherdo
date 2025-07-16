@@ -417,6 +417,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Text(l10n.logout),
                     ),
                   ),
+
+                  const SizedBox(height: 16),
+
+                  // Account löschen Button (Apple Guideline 5.1.1)
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _showDeleteAccountDialog(context, l10n);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                        foregroundColor: Theme.of(context).colorScheme.onError,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.delete_forever),
+                          const SizedBox(width: 8),
+                          Text(l10n.deleteAccount),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Datenschutz & Sicherheit Info Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        _showPrivacySecurityInfo(context, l10n);
+                      },
+                      icon: const Icon(Icons.info_outline),
+                      label: Text(l10n.privacySecurity),
+                    ),
+                  ),
                 ],
               ),
             );
@@ -430,5 +468,339 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
+  }
+
+  void _showDeleteAccountDialog(BuildContext context, AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.warning, color: Theme.of(context).colorScheme.error),
+            const SizedBox(width: 8),
+            Text(l10n.deleteAccount),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.deleteAccountWarning,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.deleteAccountSteps,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              _buildChecklistItem(
+                context,
+                l10n.deleteAccountStep1,
+                Icons.logout,
+                Theme.of(context).colorScheme.primary,
+              ),
+              _buildChecklistItem(
+                context,
+                l10n.deleteAccountStep2,
+                Icons.delete_sweep,
+                Theme.of(context).colorScheme.secondary,
+              ),
+              _buildChecklistItem(
+                context,
+                l10n.deleteAccountStep3,
+                Icons.person_remove,
+                Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.errorContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        l10n.deleteAccountIrreversible,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onErrorContainer,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _startAccountDeletion(context, l10n);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            child: Text(l10n.deleteAccount),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChecklistItem(
+    BuildContext context,
+    String text,
+    IconData icon,
+    Color color,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(text, style: Theme.of(context).textTheme.bodyMedium),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _startAccountDeletion(BuildContext context, AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.deletingAccount),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(l10n.deletingAccountProgress),
+          ],
+        ),
+      ),
+    );
+
+    // Starte den Account-Löschprozess
+    context.read<AuthBloc>().add(const AuthDeleteAccountRequested());
+
+    // Listener für AuthState hinzufügen, um Fehler zu behandeln
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthBloc>().stream.listen((state) {
+        if (state is AuthFailure) {
+          if (context.mounted) {
+            Navigator.of(context).pop(); // Progress-Dialog schließen
+          }
+
+          // Prüfe auf Re-Authentifizierungsfehler
+          if (state.message.contains('Re-Authentifizierung')) {
+            if (context.mounted) {
+              _showReAuthRequiredDialog(context, l10n);
+            }
+          } else {
+            if (context.mounted) {
+              _showDeletionErrorDialog(context, l10n, state.message);
+            }
+          }
+        } else if (state is AuthUnauthenticated) {
+          // Account erfolgreich gelöscht
+          if (context.mounted) {
+            Navigator.of(context).pop(); // Progress-Dialog schließen
+            _showDeletionSuccessDialog(context, l10n);
+          }
+        }
+      });
+    });
+  }
+
+  void _showReAuthRequiredDialog(BuildContext context, AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.security,
+              color: Theme.of(context).colorScheme.secondary,
+            ),
+            const SizedBox(width: 8),
+            Text(l10n.reAuthRequired),
+          ],
+        ),
+        content: Text(l10n.reAuthRequiredMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Hier könnte man zur Login-Seite navigieren
+              // oder eine Re-Authentifizierung implementieren
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(l10n.pleaseLoginAgain)));
+            },
+            child: Text(l10n.loginAgain),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeletionErrorDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+    String error,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.error, color: Theme.of(context).colorScheme.error),
+            const SizedBox(width: 8),
+            Text(l10n.deletionError),
+          ],
+        ),
+        content: Text(error),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.ok),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeletionSuccessDialog(BuildContext context, AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.check_circle,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Text(l10n.accountDeleted),
+          ],
+        ),
+        content: Text(l10n.accountDeletedMessage),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.ok),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPrivacySecurityInfo(BuildContext context, AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.privacySecurity),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.privacySecurityDescription,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.privacySecuritySteps,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              _buildChecklistItem(
+                context,
+                l10n.privacySecurityStep1,
+                Icons.info_outline,
+                Theme.of(context).colorScheme.primary,
+              ),
+              _buildChecklistItem(
+                context,
+                l10n.privacySecurityStep2,
+                Icons.info_outline,
+                Theme.of(context).colorScheme.secondary,
+              ),
+              _buildChecklistItem(
+                context,
+                l10n.privacySecurityStep3,
+                Icons.info_outline,
+                Theme.of(context).colorScheme.tertiary,
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        l10n.privacySecurityIrreversible,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onPrimaryContainer,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancel),
+          ),
+        ],
+      ),
+    );
   }
 }

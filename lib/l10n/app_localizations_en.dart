@@ -838,6 +838,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noAccountYet => 'Don\'t have an account yet? ';
+
+  @override
+  String get deleteAccount => 'Delete Account';
+
+  @override
+  String get deleteAccountWarning => 'This action cannot be undone. All your data, lists and settings will be permanently deleted.';
+
+  @override
+  String get deleteAccountConfirm => 'Are you sure you want to delete your account?';
+
+  @override
+  String get deleteAccountSteps => 'The following steps will be performed:';
+
+  @override
+  String get deleteAccountStep1 => 'Leave all joined lists';
+
+  @override
+  String get deleteAccountStep2 => 'Delete all created lists';
+
+  @override
+  String get deleteAccountStep3 => 'Permanently delete account and all data';
+
+  @override
+  String get deleteAccountIrreversible => 'This action is irreversible. All your data will be permanently deleted.';
+
+  @override
+  String get deletingAccount => 'Deleting account...';
+
+  @override
+  String get deletingAccountProgress => 'Please wait while your account and all data are being deleted...';
+
+  @override
+  String get reAuthRequired => 'Re-authentication required';
+
+  @override
+  String get reAuthRequiredMessage => 'To delete your account, you need to sign in again. This is a security measure by Firebase.';
+
+  @override
+  String get pleaseLoginAgain => 'Please sign in again';
+
+  @override
+  String get loginAgain => 'Sign in again';
+
+  @override
+  String get deletionError => 'Deletion error';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get accountDeleted => 'Account deleted';
+
+  @override
+  String get accountDeletedMessage => 'Your account and all data have been successfully deleted.';
+
+  @override
+  String get privacySecurity => 'Privacy & Security';
+
+  @override
+  String get privacySecurityDescription => 'TogetherDo respects your privacy and protects your data. Here\'s how we handle your information:';
+
+  @override
+  String get privacySecuritySteps => 'Our privacy policy:';
+
+  @override
+  String get privacySecurityStep1 => 'No chat storage: Messages are not permanently stored';
+
+  @override
+  String get privacySecurityStep2 => 'No data sharing: We don\'t share your data with third parties';
+
+  @override
+  String get privacySecurityStep3 => 'No liability: We don\'t assume liability for data loss';
+
+  @override
+  String get privacySecurityIrreversible => 'Note: Deleting lists removes all associated data irreversibly.';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).

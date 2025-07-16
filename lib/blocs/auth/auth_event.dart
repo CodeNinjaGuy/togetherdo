@@ -71,3 +71,7 @@ class AuthUpdateLanguageRequested extends AuthEvent {
   @override
   List<Object?> get props => [languageCode, countryCode];
 }
+
+class AuthDeleteAccountRequested extends AuthEvent {
+  const AuthDeleteAccountRequested();
+}

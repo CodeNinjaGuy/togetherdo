@@ -838,6 +838,81 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get noAccountYet => 'Noch kein Konto? ';
+
+  @override
+  String get deleteAccount => 'Account löschen';
+
+  @override
+  String get deleteAccountWarning => 'Diese Aktion kann nicht rückgängig gemacht werden. Alle deine Daten, Listen und Einstellungen werden permanent gelöscht.';
+
+  @override
+  String get deleteAccountConfirm => 'Bist du sicher, dass du deinen Account löschen möchtest?';
+
+  @override
+  String get deleteAccountSteps => 'Folgende Schritte werden durchgeführt:';
+
+  @override
+  String get deleteAccountStep1 => 'Aus allen beigetretenen Listen austreten';
+
+  @override
+  String get deleteAccountStep2 => 'Alle erstellten Listen löschen';
+
+  @override
+  String get deleteAccountStep3 => 'Account und alle Daten permanent löschen';
+
+  @override
+  String get deleteAccountIrreversible => 'Diese Aktion ist irreversibel. Alle deine Daten werden unwiderruflich gelöscht.';
+
+  @override
+  String get deletingAccount => 'Account wird gelöscht...';
+
+  @override
+  String get deletingAccountProgress => 'Bitte warte, während dein Account und alle Daten gelöscht werden...';
+
+  @override
+  String get reAuthRequired => 'Re-Authentifizierung erforderlich';
+
+  @override
+  String get reAuthRequiredMessage => 'Für das Löschen deines Accounts ist eine erneute Anmeldung erforderlich. Dies ist eine Sicherheitsmaßnahme von Firebase.';
+
+  @override
+  String get pleaseLoginAgain => 'Bitte melde dich erneut an';
+
+  @override
+  String get loginAgain => 'Erneut anmelden';
+
+  @override
+  String get deletionError => 'Fehler beim Löschen';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get accountDeleted => 'Account gelöscht';
+
+  @override
+  String get accountDeletedMessage => 'Dein Account und alle Daten wurden erfolgreich gelöscht.';
+
+  @override
+  String get privacySecurity => 'Datenschutz & Sicherheit';
+
+  @override
+  String get privacySecurityDescription => 'TogetherDo respektiert deine Privatsphäre und schützt deine Daten. Hier erfährst du, wie wir mit deinen Informationen umgehen:';
+
+  @override
+  String get privacySecuritySteps => 'Unsere Datenschutzrichtlinien:';
+
+  @override
+  String get privacySecurityStep1 => 'Keine Chat-Speicherung: Nachrichten werden nicht dauerhaft gespeichert';
+
+  @override
+  String get privacySecurityStep2 => 'Keine Datenweitergabe: Wir geben deine Daten nicht an Dritte weiter';
+
+  @override
+  String get privacySecurityStep3 => 'Keine Haftung: Wir übernehmen keine Haftung für Datenverluste';
+
+  @override
+  String get privacySecurityIrreversible => 'Hinweis: Das Löschen von Listen entfernt alle zugehörigen Daten unwiderruflich.';
 }
 
 /// The translations for German, as used in Austria (`de_AT`).

@@ -1723,6 +1723,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Don\'t have an account yet? '**
   String get noAccountYet;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone. All your data, lists and settings will be permanently deleted.'**
+  String get deleteAccountWarning;
+
+  /// No description provided for @deleteAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete your account?'**
+  String get deleteAccountConfirm;
+
+  /// No description provided for @deleteAccountSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'The following steps will be performed:'**
+  String get deleteAccountSteps;
+
+  /// No description provided for @deleteAccountStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave all joined lists'**
+  String get deleteAccountStep1;
+
+  /// No description provided for @deleteAccountStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all created lists'**
+  String get deleteAccountStep2;
+
+  /// No description provided for @deleteAccountStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete account and all data'**
+  String get deleteAccountStep3;
+
+  /// No description provided for @deleteAccountIrreversible.
+  ///
+  /// In en, this message translates to:
+  /// **'This action is irreversible. All your data will be permanently deleted.'**
+  String get deleteAccountIrreversible;
+
+  /// No description provided for @deletingAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting account...'**
+  String get deletingAccount;
+
+  /// No description provided for @deletingAccountProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait while your account and all data are being deleted...'**
+  String get deletingAccountProgress;
+
+  /// No description provided for @reAuthRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-authentication required'**
+  String get reAuthRequired;
+
+  /// No description provided for @reAuthRequiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'To delete your account, you need to sign in again. This is a security measure by Firebase.'**
+  String get reAuthRequiredMessage;
+
+  /// No description provided for @pleaseLoginAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in again'**
+  String get pleaseLoginAgain;
+
+  /// No description provided for @loginAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get loginAgain;
+
+  /// No description provided for @deletionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion error'**
+  String get deletionError;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @accountDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted'**
+  String get accountDeleted;
+
+  /// No description provided for @accountDeletedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account and all data have been successfully deleted.'**
+  String get accountDeletedMessage;
+
+  /// No description provided for @privacySecurity.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & Security'**
+  String get privacySecurity;
+
+  /// No description provided for @privacySecurityDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'TogetherDo respects your privacy and protects your data. Here\'s how we handle your information:'**
+  String get privacySecurityDescription;
+
+  /// No description provided for @privacySecuritySteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Our privacy policy:'**
+  String get privacySecuritySteps;
+
+  /// No description provided for @privacySecurityStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'No chat storage: Messages are not permanently stored'**
+  String get privacySecurityStep1;
+
+  /// No description provided for @privacySecurityStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'No data sharing: We don\'t share your data with third parties'**
+  String get privacySecurityStep2;
+
+  /// No description provided for @privacySecurityStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'No liability: We don\'t assume liability for data loss'**
+  String get privacySecurityStep3;
+
+  /// No description provided for @privacySecurityIrreversible.
+  ///
+  /// In en, this message translates to:
+  /// **'Note: Deleting lists removes all associated data irreversibly.'**
+  String get privacySecurityIrreversible;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

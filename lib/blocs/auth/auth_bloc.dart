@@ -22,6 +22,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthUpdateProfileRequested>(_onAuthUpdateProfileRequested);
     on<AuthUploadAvatarRequested>(_onAuthUploadAvatarRequested);
     on<AuthUpdateLanguageRequested>(_onAuthUpdateLanguageRequested);
+    on<AuthDeleteAccountRequested>(_onAuthDeleteAccountRequested);
   }
 
   Future<void> _onAuthCheckRequested(
@@ -157,6 +158,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthAuthenticated(user: user));
     } catch (e) {
       emit(AuthProfileUpdateFailure(message: e.toString()));
+    }
+  }
+
+  Future<void> _onAuthDeleteAccountRequested(
+    AuthDeleteAccountRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+    try {
+      await _authRepository.deleteAccount();
+      emit(const AuthUnauthenticated());
+    } catch (e) {
+      emit(AuthFailure(message: e.toString()));
     }
   }
 }
