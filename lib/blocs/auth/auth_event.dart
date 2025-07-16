@@ -75,3 +75,11 @@ class AuthUpdateLanguageRequested extends AuthEvent {
 class AuthDeleteAccountRequested extends AuthEvent {
   const AuthDeleteAccountRequested();
 }
+
+class AuthReauthenticateRequested extends AuthEvent {
+  final String password;
+  const AuthReauthenticateRequested({required this.password});
+
+  @override
+  List<Object?> get props => [password];
+}

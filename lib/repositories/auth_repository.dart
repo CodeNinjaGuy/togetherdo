@@ -27,6 +27,7 @@ abstract class AuthRepository {
   Future<String> uploadAvatar(String imagePath);
   Future<Map<String, String>?> getUserLanguage();
   Future<void> deleteAccount();
+  Future<void> reauthenticate({required String password}); // NEU
 }
 
 class MockAuthRepository implements AuthRepository {
@@ -157,6 +158,12 @@ class MockAuthRepository implements AuthRepository {
 
     // Mock-Account-Löschung
     _currentUser = null;
+  }
+
+  @override
+  Future<void> reauthenticate({required String password}) async {
+    // Mock: immer erfolgreich
+    await Future.delayed(const Duration(milliseconds: 500));
   }
 }
 
@@ -425,6 +432,21 @@ class FirebaseAuthRepository implements AuthRepository {
       } else {
         rethrow;
       }
+    }
+  }
+
+  @override
+  Future<void> reauthenticate({required String password}) async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) throw Exception('Nicht angemeldet');
+    final cred = fb_auth.EmailAuthProvider.credential(
+      email: user.email!,
+      password: password,
+    );
+    try {
+      await user.reauthenticateWithCredential(cred);
+    } on fb_auth.FirebaseAuthException catch (e) {
+      throw Exception('Re-Authentifizierung fehlgeschlagen: ${e.message}');
     }
   }
 }

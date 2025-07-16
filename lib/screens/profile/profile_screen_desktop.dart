@@ -1,17 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:togetherdo/l10n/app_localizations.dart';
 import '../../blocs/auth/auth_bloc.dart';
-import '../../blocs/auth/auth_state.dart';
 import '../../blocs/auth/auth_event.dart';
+import '../../blocs/auth/auth_state.dart';
 import '../../blocs/theme/theme_bloc.dart';
-import '../../blocs/theme/theme_state.dart';
 import '../../blocs/theme/theme_event.dart';
+import '../../blocs/theme/theme_state.dart';
 import '../../widgets/profile/language_selector.dart';
 import 'notification_settings_screen.dart';
 
 class ProfileScreenDesktop extends StatefulWidget {
-  const ProfileScreenDesktop({Key? key}) : super(key: key);
+  const ProfileScreenDesktop({super.key});
 
   @override
   State<ProfileScreenDesktop> createState() => _ProfileScreenDesktopState();
@@ -19,6 +21,13 @@ class ProfileScreenDesktop extends StatefulWidget {
 
 class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
   int _selectedIndex = 0;
+  StreamSubscription? _authSubscription;
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +36,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final List<_ProfileSection> sections = [
+    final sections = [
       _ProfileSection(
         icon: Icons.person,
         label: l10n.profile,
@@ -65,11 +74,8 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
         children: [
           NavigationRail(
             selectedIndex: _selectedIndex,
-            onDestinationSelected: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
+            onDestinationSelected: (index) =>
+                setState(() => _selectedIndex = index),
             labelType: NavigationRailLabelType.all,
             destinations: [
               for (final section in sections)
@@ -107,37 +113,22 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
           children: [
             Row(
               children: [
-                Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundImage: user.avatarUrl != null
-                          ? NetworkImage(user.avatarUrl!)
-                          : null,
-                      child: user.avatarUrl == null
-                          ? Text(
-                              user.displayName.isNotEmpty
-                                  ? user.displayName[0].toUpperCase()
-                                  : 'U',
-                              style: const TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )
-                          : null,
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: IconButton(
-                        icon: const Icon(Icons.camera_alt),
-                        tooltip: l10n.avatarUpload,
-                        onPressed: () {
-                          // Avatar-Upload-Logik (optional)
-                        },
-                      ),
-                    ),
-                  ],
+                CircleAvatar(
+                  radius: 40,
+                  backgroundImage: user.avatarUrl != null
+                      ? NetworkImage(user.avatarUrl!)
+                      : null,
+                  child: user.avatarUrl == null
+                      ? Text(
+                          user.displayName.isNotEmpty
+                              ? user.displayName[0].toUpperCase()
+                              : 'U',
+                          style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
                 ),
                 const SizedBox(width: 32),
                 Expanded(
@@ -171,7 +162,6 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                         children: [
                           ElevatedButton(
                             onPressed: () {
-                              // Speichern
                               context.read<AuthBloc>().add(
                                 AuthUpdateProfileRequested(
                                   displayName: displayNameController.text
@@ -205,16 +195,13 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
-  }
+  String _formatDate(DateTime date) =>
+      '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
 
   Widget _buildNotificationSection(
     BuildContext context,
     AppLocalizations l10n,
-  ) {
-    return const NotificationSettingsScreen();
-  }
+  ) => const NotificationSettingsScreen();
 
   Widget _buildThemeSection(BuildContext context, AppLocalizations l10n) {
     return BlocBuilder<ThemeBloc, ThemeState>(
@@ -222,9 +209,11 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
         String currentTheme = 'Light';
         if (themeState is ThemeLoadSuccess) {
           currentTheme = themeState.themeName;
-        } else if (themeState is ThemeChangedSuccess) {
+        }
+        if (themeState is ThemeChangedSuccess) {
           currentTheme = themeState.themeName;
         }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -249,41 +238,21 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                     'Galaxy',
                     'Fiberoptics25',
                   ].map((theme) {
-                    String localizedThemeName;
-                    switch (theme) {
-                      case 'Light':
-                        localizedThemeName = l10n.theme_light;
-                        break;
-                      case 'Matrix':
-                        localizedThemeName = l10n.theme_matrix;
-                        break;
-                      case 'Neo':
-                        localizedThemeName = l10n.theme_neo;
-                        break;
-                      case 'Summer':
-                        localizedThemeName = l10n.theme_summer;
-                        break;
-                      case 'Aurora':
-                        localizedThemeName = l10n.theme_aurora;
-                        break;
-                      case 'Sunset':
-                        localizedThemeName = l10n.theme_sunset;
-                        break;
-                      case 'Ocean':
-                        localizedThemeName = l10n.theme_ocean;
-                        break;
-                      case 'Forest':
-                        localizedThemeName = l10n.theme_forest;
-                        break;
-                      case 'Galaxy':
-                        localizedThemeName = l10n.theme_galaxy;
-                        break;
-                      case 'Fiberoptics25':
-                        localizedThemeName = l10n.theme_fiberoptics25;
-                        break;
-                      default:
-                        localizedThemeName = theme;
-                    }
+                    final localizedThemeName =
+                        {
+                          'Light': l10n.theme_light,
+                          'Matrix': l10n.theme_matrix,
+                          'Neo': l10n.theme_neo,
+                          'Summer': l10n.theme_summer,
+                          'Aurora': l10n.theme_aurora,
+                          'Sunset': l10n.theme_sunset,
+                          'Ocean': l10n.theme_ocean,
+                          'Forest': l10n.theme_forest,
+                          'Galaxy': l10n.theme_galaxy,
+                          'Fiberoptics25': l10n.theme_fiberoptics25,
+                        }[theme] ??
+                        theme;
+
                     return DropdownMenuItem(
                       value: theme,
                       child: Text(localizedThemeName),
@@ -301,15 +270,14 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
     );
   }
 
-  Widget _buildLanguageSection(BuildContext context, AppLocalizations l10n) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(l10n.language, style: Theme.of(context).textTheme.titleMedium),
-        const LanguageSelector(),
-      ],
-    );
-  }
+  Widget _buildLanguageSection(BuildContext context, AppLocalizations l10n) =>
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.language, style: Theme.of(context).textTheme.titleMedium),
+          const LanguageSelector(),
+        ],
+      );
 
   Widget _buildPrivacySection(BuildContext context, AppLocalizations l10n) {
     return Column(
@@ -365,11 +333,120 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
             backgroundColor: Theme.of(context).colorScheme.error,
             foregroundColor: Theme.of(context).colorScheme.onError,
           ),
-          onPressed: () {
-            // TODO: Dialog und Lösch-Logik wie auf Mobile
-          },
+          onPressed: () => _startAccountDeletion(),
         ),
       ],
+    );
+  }
+
+  void _startAccountDeletion() async {
+    if (!mounted) return;
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
+    final authBloc = context.read<AuthBloc>();
+    final deletionStepNotifier = ValueNotifier<int>(0);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(l10n?.deletingAccount ?? 'Account wird gelöscht'),
+          content: ValueListenableBuilder<int>(
+            valueListenable: deletionStepNotifier,
+            builder: (context, step, _) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildStepRow(
+                    l10n?.deleteAccountStep1 ?? 'Aus allen Listen austreten',
+                    step > 0,
+                  ),
+                  _buildStepRow(
+                    l10n?.deleteAccountStep2 ?? 'Eigene Listen löschen',
+                    step > 1,
+                  ),
+                  _buildStepRow(
+                    l10n?.deleteAccountStep3 ?? 'Account löschen',
+                    step > 2,
+                  ),
+                  const SizedBox(height: 16),
+                  if (step < 3) ...[
+                    const LinearProgressIndicator(),
+                    const SizedBox(height: 8),
+                    Text(l10n?.deletingAccountProgress ?? 'Bitte warten ...'),
+                  ],
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+
+    await Future.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+    deletionStepNotifier.value = 1;
+    await Future.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+    deletionStepNotifier.value = 2;
+    await Future.delayed(
+      const Duration(seconds: 5),
+    ); // <-- hier auf 5 Sekunden erhöht
+    if (!mounted) return;
+    deletionStepNotifier.value = 3;
+    authBloc.add(const AuthDeleteAccountRequested());
+
+    _authSubscription = authBloc.stream.listen((state) async {
+      if (!mounted) return;
+      if (state is AuthFailure) {
+        navigator.pop();
+        await Future.delayed(const Duration(milliseconds: 100));
+        if (!mounted) return;
+        final msg = (state.message ?? '').toLowerCase();
+        if (msg.contains('reauth') ||
+            msg.contains('re-auth') ||
+            msg.contains('erneut') ||
+            msg.contains('authentifizierung')) {
+          await _showReAuthPasswordDialog(context);
+          // Nach erfolgreicher Re-Auth Account-Löschung erneut starten
+          if (mounted) _startAccountDeletion();
+        } else {
+          messenger.showSnackBar(SnackBar(content: Text(state.message)));
+        }
+      } else if (state is AuthUnauthenticated) {
+        navigator.pop();
+        await Future.delayed(const Duration(milliseconds: 100));
+        if (!mounted) return;
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n?.accountDeleted ?? 'Account deleted')),
+        );
+      }
+    });
+  }
+
+  Widget _buildStepRow(String text, bool done) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(
+            done ? Icons.check_circle : Icons.radio_button_unchecked,
+            color: done ? Colors.green : Colors.grey,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            text + (done ? ' ... erledigt' : ' ...'),
+            style: TextStyle(
+              color: done ? Colors.green : null,
+              fontWeight: done ? FontWeight.bold : null,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -383,4 +460,117 @@ class _ProfileSection {
     required this.label,
     required this.builder,
   });
+}
+
+Future<void> _showReAuthPasswordDialog(BuildContext context) async {
+  final l10n = AppLocalizations.of(context);
+  final TextEditingController passwordController = TextEditingController();
+  final formKey = GlobalKey<FormState>();
+  final authBloc = context.read<AuthBloc>();
+  bool loading = false;
+  String? errorMessage;
+
+  await showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Row(
+              children: [
+                Icon(
+                  Icons.security,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+                const SizedBox(width: 8),
+                Text(l10n?.reAuthRequired ?? 'Re-Authentifizierung'),
+              ],
+            ),
+            content: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l10n?.reAuthRequiredMessage ??
+                        'Bitte gib dein Passwort ein, um fortzufahren.',
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: l10n?.password ?? 'Passwort',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return l10n?.passwordRequired ??
+                            'Passwort erforderlich';
+                      }
+                      return null;
+                    },
+                  ),
+                  if (errorMessage != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n?.cancel ?? 'Abbrechen'),
+              ),
+              ElevatedButton(
+                onPressed: loading
+                    ? null
+                    : () async {
+                        if (!formKey.currentState!.validate()) return;
+                        setState(() => loading = true);
+                        try {
+                          await authBloc.stream.firstWhere(
+                            (state) => state is! AuthLoading,
+                          );
+                          authBloc.add(
+                            AuthReauthenticateRequested(
+                              password: passwordController.text,
+                            ),
+                          );
+                          final result = await authBloc.stream.firstWhere(
+                            (state) => state is! AuthLoading,
+                          );
+                          if (result is AuthFailure) {
+                            setState(() {
+                              errorMessage = result.message;
+                              loading = false;
+                            });
+                          } else {
+                            Navigator.of(context).pop();
+                          }
+                        } catch (e) {
+                          setState(() {
+                            errorMessage = e.toString();
+                            loading = false;
+                          });
+                        }
+                      },
+                child: loading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(l10n?.loginAgain ?? 'Erneut einloggen'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
 }
