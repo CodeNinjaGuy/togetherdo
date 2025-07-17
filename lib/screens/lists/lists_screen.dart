@@ -49,9 +49,9 @@ class _ListsScreenState extends State<ListsScreen> {
 
   void _navigateToList(ListModel list) {
     if (list.type == ListType.todo) {
-      context.push('/todo/${list.id}');
+      context.go('/todo/${list.id}');
     } else {
-      context.push('/shopping/${list.id}');
+      context.go('/shopping/${list.id}');
     }
   }
 

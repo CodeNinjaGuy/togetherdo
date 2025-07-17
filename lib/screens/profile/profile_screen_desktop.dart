@@ -405,7 +405,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
         navigator.pop();
         await Future.delayed(const Duration(milliseconds: 100));
         if (!mounted) return;
-        final msg = (state.message ?? '').toLowerCase();
+        final msg = (state.message).toLowerCase();
         if (msg.contains('reauth') ||
             msg.contains('re-auth') ||
             msg.contains('erneut') ||
@@ -550,7 +550,9 @@ Future<void> _showReAuthPasswordDialog(BuildContext context) async {
                               loading = false;
                             });
                           } else {
-                            Navigator.of(context).pop();
+                            if (context.mounted) {
+                              Navigator.of(context).pop();
+                            }
                           }
                         } catch (e) {
                           setState(() {
