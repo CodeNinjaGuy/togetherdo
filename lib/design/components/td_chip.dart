@@ -141,7 +141,14 @@ class TdTag extends StatelessWidget {
             Icon(icon, size: 12, color: fg),
             const SizedBox(width: 3),
           ],
-          Text(label, style: context.text.labelSmall?.copyWith(color: fg)),
+          Flexible(
+            child: Text(
+              label,
+              style: context.text.labelSmall?.copyWith(color: fg),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );

@@ -114,6 +114,7 @@ class ListCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        const SizedBox(width: TdSpace.sm),
                         Icon(
                           Icons.qr_code_2_rounded,
                           size: 16,
@@ -153,6 +154,8 @@ class _ListMenu extends StatelessWidget {
     final isMember = list.memberIds.contains(currentUserId);
     return PopupMenuButton<String>(
       tooltip: l10n.more,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(width: 36, height: 36),
       icon: Icon(Icons.more_horiz_rounded, color: context.td.muted),
       onSelected: (value) {
         switch (value) {

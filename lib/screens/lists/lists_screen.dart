@@ -261,19 +261,20 @@ class _ListsBody extends StatelessWidget {
             ),
           ),
           if (wide)
-            GridView(
-              shrinkWrap: true,
-              primary: false,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: context.tdLayout == TdLayoutSize.expanded
-                    ? 3
-                    : 2,
-                mainAxisSpacing: TdSpace.md,
-                crossAxisSpacing: TdSpace.md,
-                mainAxisExtent: 168,
+            LayoutBuilder(
+              builder: (context, c) => GridView(
+                shrinkWrap: true,
+                primary: false,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  // Karten mindestens 300 Punkte breit.
+                  crossAxisCount: (c.maxWidth / 300).floor().clamp(1, 4),
+                  mainAxisSpacing: TdSpace.md,
+                  crossAxisSpacing: TdSpace.md,
+                  mainAxisExtent: 168,
+                ),
+                children: cards,
               ),
-              children: cards,
             )
           else
             for (final c in cards)

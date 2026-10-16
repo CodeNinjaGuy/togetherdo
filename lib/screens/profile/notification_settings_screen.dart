@@ -226,15 +226,18 @@ class _Group extends StatelessWidget {
             children: [
               for (final (i, item) in items.indexed) ...[
                 if (i > 0) const Divider(indent: TdSpace.lg, endIndent: TdSpace.lg),
-                SwitchListTile.adaptive(
-                  value: item.value,
-                  onChanged: item.onChanged,
-                  secondary: Icon(item.icon, color: context.colors.primary),
-                  title: Text(item.title, style: context.text.bodyLarge),
-                  subtitle: Text(item.subtitle, style: context.text.bodySmall),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: TdSpace.lg,
-                    vertical: TdSpace.xs,
+                Material(
+                  type: MaterialType.transparency,
+                  child: SwitchListTile.adaptive(
+                    value: item.value,
+                    onChanged: item.onChanged,
+                    secondary: Icon(item.icon, color: context.colors.primary),
+                    title: Text(item.title, style: context.text.bodyLarge),
+                    subtitle: Text(item.subtitle, style: context.text.bodySmall),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: TdSpace.lg,
+                      vertical: TdSpace.xs,
+                    ),
                   ),
                 ),
               ],

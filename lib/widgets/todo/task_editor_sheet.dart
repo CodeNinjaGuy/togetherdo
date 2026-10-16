@@ -500,22 +500,21 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
         else
           Row(
             children: [
-              if (!_isNew && widget.chatRepository != null) ...[
+              if (!_isNew && widget.chatRepository != null)
                 TdIconButton(
                   icon: Icons.delete_outline_rounded,
                   tooltip: l10n.delete,
                   color: context.td.danger,
                   size: 52,
                   onPressed: _saving ? null : _delete,
+                )
+              else
+                Expanded(
+                  child: TdButton.secondary(
+                    label: l10n.cancel,
+                    onPressed: () => Navigator.of(context).maybePop(),
+                  ),
                 ),
-                const SizedBox(width: TdSpace.md),
-              ],
-              Expanded(
-                child: TdButton.secondary(
-                  label: l10n.cancel,
-                  onPressed: () => Navigator.of(context).maybePop(),
-                ),
-              ),
               const SizedBox(width: TdSpace.md),
               Expanded(
                 flex: 2,
