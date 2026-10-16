@@ -343,5 +343,71 @@
   "tooManyCodeAttempts": "Too many attempts. Please try again later.",
   "assignedToYou": "Assigned to you",
   "titleRequired": "Title is required",
-  "byYou": "you"
+  "byYou": "you",
+  "scanBarcode": "Scan barcode",
+  "scanHint": "Point the camera at the barcode",
+  "scanCount": "{count, plural, =0{Nothing added yet} =1{1 item added} other{{count} items added}}",
+  "@scanCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scanDone": "Done",
+  "torchOn": "Light on",
+  "torchOff": "Light off",
+  "scanCameraDenied": "Camera not allowed",
+  "scanCameraDeniedMessage": "ToGetherDo isn't allowed to use the camera yet. Allow access in Settings to scan barcodes.",
+  "scanCameraUnavailable": "No camera found",
+  "scanCameraUnavailableMessage": "There is no camera available on this device.",
+  "scanLookingUp": "Looking up product …",
+  "scanContinue": "Keep scanning",
+  "scanUnknownTitle": "Name this item",
+  "scanUnknownMessage": "This code isn't known yet. Enter a name – we'll remember it for everyone.",
+  "scanCodeLabel": "Code {code}",
+  "@scanCodeLabel": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "scanOfflineTitle": "No connection",
+  "scanOfflineMessage": "The product couldn't be looked up. You can still name the item.",
+  "scanDataAttribution": "Data: Open Food Facts (ODbL)",
+  "scanAdded": "{name} added",
+  "@scanAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "scanIncremented": "{name}: quantity increased",
+  "@scanIncremented": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "scanDemoHit": "Demo hit",
+  "scanBrandOptional": "Brand (optional)",
+  "scanPackageSizeOptional": "Package size (optional)",
+  "scanPackageSizeExample": "e.g. 500 g",
+  "scanAddAndRemember": "Add and remember",
+  "editItem": "Edit item",
+  "itemNameRequired": "Please enter a name",
+  "quantityInvalid": "Please enter a valid quantity",
+  "rescanProduct": "Rescan",
+  "removeProduct": "Remove product",
+  "productLinked": "Linked product",
+  "noProductLinked": "No product linked",
+  "itemSaved": "Saved",
+  "decreaseQuantity": "Less",
+  "increaseQuantity": "More",
+  "addManually": "Enter manually",
+  "useProduct": "Use",
+  "voiceInput": "Voice input"
 }

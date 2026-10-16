@@ -36,5 +36,7 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSCameraUsageDescription</key>
+	<string>TogetherDo uses the camera to scan barcodes for your shopping list.</string>
 </dict>
 </plist>

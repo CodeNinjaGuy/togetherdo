@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'package:equatable/equatable.dart';
 
 class ShoppingItemModel extends Equatable {
@@ -13,6 +18,12 @@ class ShoppingItemModel extends Equatable {
   final String? notes;
   final String listId;
 
+  /// Strichcode (EAN/UPC), falls der Artikel gescannt wurde.
+  final String? ean;
+
+  /// Produktbild aus dem Scan, `null` = Platzhalter anzeigen.
+  final String? imageUrl;
+
   const ShoppingItemModel({
     required this.id,
     required this.name,
@@ -25,6 +36,8 @@ class ShoppingItemModel extends Equatable {
     required this.userId,
     this.notes,
     required this.listId,
+    this.ean,
+    this.imageUrl,
   });
 
   factory ShoppingItemModel.fromJson(Map<String, dynamic> json) {
@@ -42,6 +55,8 @@ class ShoppingItemModel extends Equatable {
       userId: json['userId'] as String,
       notes: json['notes'] as String?,
       listId: json['listId'] as String,
+      ean: json['ean'] as String?,
+      imageUrl: json['imageUrl'] as String?,
     );
   }
 
@@ -58,6 +73,8 @@ class ShoppingItemModel extends Equatable {
       'userId': userId,
       'notes': notes,
       'listId': listId,
+      'ean': ean,
+      'imageUrl': imageUrl,
     };
   }
 
@@ -73,6 +90,9 @@ class ShoppingItemModel extends Equatable {
     String? userId,
     String? notes,
     String? listId,
+    String? ean,
+    String? imageUrl,
+    bool clearProduct = false,
   }) {
     return ShoppingItemModel(
       id: id ?? this.id,
@@ -86,6 +106,8 @@ class ShoppingItemModel extends Equatable {
       userId: userId ?? this.userId,
       notes: notes ?? this.notes,
       listId: listId ?? this.listId,
+      ean: clearProduct ? null : (ean ?? this.ean),
+      imageUrl: clearProduct ? null : (imageUrl ?? this.imageUrl),
     );
   }
 
@@ -109,5 +131,7 @@ class ShoppingItemModel extends Equatable {
     userId,
     notes,
     listId,
+    ean,
+    imageUrl,
   ];
 }

@@ -31,12 +31,14 @@ import 'repositories/todo_repository.dart';
 import 'repositories/shopping_repository.dart';
 import 'repositories/list_repository.dart';
 import 'repositories/chat_repository.dart';
+import 'repositories/product_repository.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/todo/todo_screen.dart';
 import 'screens/shopping/shopping_screen.dart';
+import 'screens/shopping/shopping_demo_screen.dart';
 import 'screens/lists/lists_screen.dart';
 import 'screens/chat/chat_screen.dart';
 import 'design/showcase/design_gallery_screen.dart';
@@ -46,6 +48,8 @@ import 'utils/global_navigator.dart';
 import 'firebase_options.dart';
 import 'services/messaging_service.dart';
 import 'services/firebase_emulator.dart';
+import 'services/product_lookup_service.dart';
+import 'config/app_info.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -90,6 +94,13 @@ void main() async {
         ),
         RepositoryProvider<ChatRepository>(
           create: (context) => FirestoreChatRepository(),
+        ),
+        // Produktsuche per Strichcode: Gerät → Firestore → Open Food Facts.
+        RepositoryProvider<ProductRepository>(
+          create: (context) => ProductRepository(
+            store: FirestoreProductStore(),
+            lookupService: ProductLookupService(appVersion: appVersion),
+          ),
         ),
       ],
       child: const TogetherDoApp(),
@@ -281,6 +292,11 @@ class TogetherDoAppView extends StatelessWidget {
         GoRoute(
           path: '/design/galerie',
           builder: (context, state) => const TdDesignGalleryScreen(),
+        ),
+        // Einkaufsliste mit Scanner im Demo-Modus (Simulator ohne Kamera).
+        GoRoute(
+          path: '/design/einkauf',
+          builder: (context, state) => const ShoppingDemoScreen(),
         ),
       ],
 

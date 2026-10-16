@@ -3,27 +3,55 @@
  * Written by Martin Bundschuh.
  */
 
-import 'package:togetherdo/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
 
-import '../../blocs/auth/auth_bloc.dart';
-import '../../blocs/auth/auth_state.dart';
-import '../../repositories/shopping_repository.dart';
+import '../../design/td_design.dart';
 import '../../models/shopping_item_model.dart';
+import 'product_thumbnail.dart';
 
+/// Zeile eines Einkaufsartikels: Haken-Ring, Produktbild, Name, Menge,
+/// Notiz und „gekauft von“. Tippen öffnet das Bearbeiten (wenn erlaubt).
+///
+/// Daten kommen rein, Aktionen gehen raus – kein Firebase in der Zeile,
+/// damit sie in Tests und in der Debug-Demo läuft.
 class ShoppingItemWidget extends StatefulWidget {
-  final ShoppingItemModel item;
-  final bool highlight;
-  final VoidCallback? onHighlightEnd;
-
   const ShoppingItemWidget({
     super.key,
     required this.item,
     this.highlight = false,
     this.onHighlightEnd,
+    this.canEdit = true,
+    this.canToggle = true,
+    this.onTogglePurchased,
+    this.onTap,
+    this.onDelete,
+    this.currentUserName,
+    this.index = 0,
   });
+
+  final ShoppingItemModel item;
+
+  /// Kurz aufblinken (nach Push-Benachrichtigung).
+  final bool highlight;
+  final VoidCallback? onHighlightEnd;
+
+  /// Bearbeiten/Löschen erlaubt (Besitzer oder Mitglied mit allowEdit).
+  final bool canEdit;
+
+  /// Abhaken erlaubt (jedes Mitglied).
+  final bool canToggle;
+  final ValueChanged<bool>? onTogglePurchased;
+  final VoidCallback? onTap;
+  final VoidCallback? onDelete;
+
+  /// Anzeigename des angemeldeten Nutzers („von dir“).
+  final String? currentUserName;
+
+  /// Position in der Liste für gestaffeltes Einblenden.
+  final int index;
 
   @override
   State<ShoppingItemWidget> createState() => _ShoppingItemWidgetState();
@@ -31,244 +59,280 @@ class ShoppingItemWidget extends StatefulWidget {
 
 class _ShoppingItemWidgetState extends State<ShoppingItemWidget>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Color?> _colorAnimation;
-  bool _isHighlighted = false;
-  bool _wasHighlighted = false;
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: TdMotion.slow,
+  );
+  bool _highlighting = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-    _colorAnimation = ColorTween(
-      begin: Colors.transparent,
-      end: Colors.green.withValues(alpha: 0.3),
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-    if (widget.highlight) {
-      _startHighlightAnimation();
-    }
+    if (widget.highlight) _startHighlight();
   }
 
   @override
   void didUpdateWidget(covariant ShoppingItemWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.highlight && !_wasHighlighted) {
-      _startHighlightAnimation();
+    if (widget.highlight && !oldWidget.highlight && !_highlighting) {
+      _startHighlight();
     }
   }
 
-  void _startHighlightAnimation() async {
-    if (!mounted) return;
-
-    setState(() {
-      _isHighlighted = true;
-      _wasHighlighted = true;
-    });
-
-    // Dezente Blink-Animation
-    for (int i = 0; i < 2; i++) {
+  Future<void> _startHighlight() async {
+    _highlighting = true;
+    for (var i = 0; i < 2; i++) {
       if (!mounted) return;
-      await _controller.forward();
-      await Future.delayed(const Duration(milliseconds: 200));
-      if (!mounted) return;
-      await _controller.reverse();
-      await Future.delayed(const Duration(milliseconds: 200));
+      await _pulse.forward();
+      await _pulse.reverse();
     }
-
-    // Nach dem Blinken das Highlight komplett entfernen
     if (!mounted) return;
-    setState(() {
-      _isHighlighted = false;
-      _wasHighlighted = false;
-    });
+    _highlighting = false;
     widget.onHighlightEnd?.call();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _pulse.dispose();
     super.dispose();
+  }
+
+  void _toggle() {
+    final onToggle = widget.onTogglePurchased;
+    if (onToggle == null) return;
+    final next = !widget.item.isPurchased;
+    HapticFeedback.lightImpact();
+    onToggle(next);
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _colorAnimation,
-      builder: (context, child) {
-        return Card(
-          color: _isHighlighted ? _colorAnimation.value : null,
-          margin: const EdgeInsets.only(bottom: 8),
-          elevation: _isHighlighted ? 4 : 1,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-            side: _isHighlighted
-                ? BorderSide(color: Colors.green, width: 1)
-                : BorderSide.none,
-          ),
-          child: _buildListTile(context),
-        );
-      },
-    );
-  }
+    final l10n = AppLocalizations.of(context)!;
+    final item = widget.item;
+    final scheme = context.colors;
+    final td = context.td;
+    final done = item.isPurchased;
+    final canToggle = widget.canToggle && widget.onTogglePurchased != null;
 
-  Widget _buildListTile(BuildContext context) {
-    return ListTile(
-      leading: Checkbox(
-        value: widget.item.isPurchased,
-        onChanged: _canEdit(context)
-            ? (value) async {
-                if (value != null) {
-                  final authState = context.read<AuthBloc>().state;
-                  final currentUser = authState is AuthAuthenticated
-                      ? authState.user
-                      : null;
-                  final updatedItem = widget.item.copyWith(
-                    isPurchased: value,
-                    purchasedBy: value ? currentUser?.displayName : null,
-                    purchasedAt: value ? DateTime.now() : null,
-                  );
-                  await (context.read<ShoppingRepository>()
-                          as FirebaseShoppingRepository)
-                      .updateItem(updatedItem);
-                }
-              }
-            : null,
-      ),
-      title: Text(
-        widget.item.name,
-        style: TextStyle(
-          decoration: widget.item.isPurchased
-              ? TextDecoration.lineThrough
-              : null,
-          color: widget.item.isPurchased
-              ? Theme.of(context).colorScheme.onSurfaceVariant
-              : null,
+    final boughtBy = item.purchasedBy;
+    final boughtLabel = boughtBy == null
+        ? null
+        : '${l10n.boughtBy} ${boughtBy == widget.currentUserName ? l10n.byYou : boughtBy}';
+
+    Widget row = Row(
+      children: [
+        _CheckRing(
+          done: done,
+          enabled: canToggle,
+          onTap: canToggle ? _toggle : null,
         ),
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+        const SizedBox(width: TdSpace.md),
+        Hero(
+          tag: 'artikel-${item.id}',
+          child: ProductThumbnail(
+            imageUrl: item.imageUrl,
+            size: 48,
+            dimmed: done,
+          ),
+        ),
+        const SizedBox(width: TdSpace.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondaryContainer,
-                  borderRadius: BorderRadius.circular(8),
+              AnimatedDefaultTextStyle(
+                duration: TdMotion.of(context, TdMotion.base),
+                style: context.text.bodyLarge!.copyWith(
+                  fontWeight: FontWeight.w600,
+                  decoration: done
+                      ? TextDecoration.lineThrough
+                      : TextDecoration.none,
+                  decorationColor: scheme.onSurfaceVariant,
+                  color: done ? scheme.onSurfaceVariant : scheme.onSurface,
                 ),
                 child: Text(
-                  widget.item.displayQuantity,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  item.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (widget.item.notes != null &&
-                  widget.item.notes!.isNotEmpty) ...[
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    widget.item.notes!,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontStyle: FontStyle.italic,
+              const SizedBox(height: TdSpace.xs),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: TdSpace.sm,
+                      vertical: 2,
                     ),
-                    overflow: TextOverflow.ellipsis,
+                    decoration: BoxDecoration(
+                      color: scheme.secondaryContainer.withValues(
+                        alpha: done ? 0.5 : 1,
+                      ),
+                      borderRadius: BorderRadius.circular(TdRadius.xs),
+                    ),
+                    child: Text(
+                      item.displayQuantity,
+                      style: context.text.labelMedium?.copyWith(
+                        color: scheme.onSecondaryContainer,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
+                  if (item.notes != null && item.notes!.isNotEmpty) ...[
+                    const SizedBox(width: TdSpace.sm),
+                    Expanded(
+                      child: Text(
+                        item.notes!,
+                        style: context.text.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              if (done && boughtLabel != null) ...[
+                const SizedBox(height: TdSpace.xs),
+                Row(
+                  children: [
+                    Icon(Icons.person_rounded, size: 14, color: scheme.primary),
+                    const SizedBox(width: TdSpace.xs),
+                    Flexible(
+                      child: Text(
+                        boughtLabel,
+                        style: context.text.labelSmall?.copyWith(
+                          color: scheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (item.purchasedAt != null) ...[
+                      const SizedBox(width: TdSpace.sm),
+                      Icon(Icons.schedule_rounded, size: 14, color: td.muted),
+                      const SizedBox(width: TdSpace.xs),
+                      Text(
+                        DateFormat.yMd(
+                          Localizations.localeOf(context).toString(),
+                        ).add_Hm().format(item.purchasedAt!),
+                        style: context.text.labelSmall?.copyWith(
+                          color: td.muted,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ],
           ),
-          if (widget.item.isPurchased && widget.item.purchasedBy != null) ...[
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(
-                  Icons.person,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    '${AppLocalizations.of(context)!.boughtBy} ${(context.read<AuthBloc>().state is AuthAuthenticated && (context.read<AuthBloc>().state as AuthAuthenticated).user.displayName == widget.item.purchasedBy) ? AppLocalizations.of(context)!.byYou : widget.item.purchasedBy!}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (widget.item.purchasedAt != null) ...[
-                  const SizedBox(width: 8),
-                  Icon(
-                    Icons.schedule,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    DateFormat(
-                      'dd.MM.yyyy HH:mm',
-                    ).format(widget.item.purchasedAt!),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ],
-      ),
-      trailing: _canEdit(context)
-          ? IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () => _showDeleteDialog(context),
-            )
-          : null,
-    );
-  }
-
-  bool _canEdit(BuildContext context) {
-    // Dummy-Check, ggf. anpassen
-    return true;
-  }
-
-  void _showDeleteDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.deleteItemTitle),
-        content: Text(
-          AppLocalizations.of(context)!.deleteItemContent(widget.item.name),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(AppLocalizations.of(context)!.cancel),
-          ),
-          TextButton(
-            onPressed: () async {
-              await (context.read<ShoppingRepository>()
-                      as FirebaseShoppingRepository)
-                  .deleteItem(widget.item.id);
-              if (!context.mounted) return;
-              Navigator.of(context).pop();
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: Text(AppLocalizations.of(context)!.delete),
+        if (widget.canEdit && widget.onDelete != null) ...[
+          const SizedBox(width: TdSpace.xs),
+          TdIconButton(
+            icon: Icons.delete_outline_rounded,
+            tooltip: l10n.delete,
+            size: 36,
+            color: td.muted,
+            onPressed: widget.onDelete,
           ),
         ],
+      ],
+    );
+
+    final card = AnimatedBuilder(
+      animation: _pulse,
+      builder: (context, child) {
+        final t = Curves.easeInOut.transform(_pulse.value);
+        return AnimatedOpacity(
+          duration: TdMotion.of(context, TdMotion.base),
+          opacity: done ? 0.7 : 1,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: TdSpace.sm),
+            decoration: BoxDecoration(
+              color: Color.lerp(
+                scheme.surface,
+                td.success.withValues(alpha: 0.18),
+                t,
+              ),
+              borderRadius: TdRadius.card,
+              border: Border.all(
+                color: Color.lerp(scheme.outlineVariant, td.success, t)!,
+                width: 1 + t,
+              ),
+              boxShadow: t > 0
+                  ? TdShadows.glow(td.success.withValues(alpha: t))
+                  : null,
+            ),
+            padding: const EdgeInsets.fromLTRB(
+              TdSpace.md,
+              TdSpace.md,
+              TdSpace.md,
+              TdSpace.md,
+            ),
+            child: child,
+          ),
+        );
+      },
+      child: row,
+    );
+
+    final tappable = widget.canEdit && widget.onTap != null
+        ? TdPressable(
+            onTap: widget.onTap,
+            scale: 0.985,
+            borderRadius: TdRadius.card,
+            child: card,
+          )
+        : card;
+
+    return TdFadeSlideIn(index: widget.index, child: tappable);
+  }
+}
+
+/// Runder Haken: leer mit Kante, gefüllt mit Verlauf und Haken, wenn
+/// gekauft. Kurzer Überschwinger beim Wechsel.
+class _CheckRing extends StatelessWidget {
+  const _CheckRing({required this.done, required this.enabled, this.onTap});
+
+  final bool done;
+  final bool enabled;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final td = context.td;
+    final scheme = context.colors;
+    final reduced = TdMotion.reduced(context);
+    return TdPressable(
+      onTap: onTap,
+      enabled: enabled,
+      scale: 0.85,
+      child: AnimatedContainer(
+        duration: TdMotion.of(context, TdMotion.base),
+        curve: reduced ? Curves.linear : TdMotion.spring,
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: done ? td.successGradient : null,
+          color: done ? null : Colors.transparent,
+          border: done
+              ? null
+              : Border.all(
+                  color: enabled ? scheme.outline : scheme.outlineVariant,
+                  width: 2,
+                ),
+        ),
+        child: AnimatedScale(
+          duration: TdMotion.of(context, TdMotion.base),
+          curve: reduced ? Curves.linear : TdMotion.spring,
+          scale: done ? 1 : 0,
+          child: const Icon(Icons.check_rounded, size: 18, color: Colors.white),
+        ),
       ),
     );
   }

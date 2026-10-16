@@ -1038,6 +1038,135 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get byYou => 'dir';
+
+  @override
+  String get scanBarcode => 'Strichcode scannen';
+
+  @override
+  String get scanHint => 'Richte die Kamera auf den Strichcode';
+
+  @override
+  String scanCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Artikel hinzugefügt',
+      one: '1 Artikel hinzugefügt',
+      zero: 'Noch nichts hinzugefügt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scanDone => 'Fertig';
+
+  @override
+  String get torchOn => 'Licht an';
+
+  @override
+  String get torchOff => 'Licht aus';
+
+  @override
+  String get scanCameraDenied => 'Kamera nicht erlaubt';
+
+  @override
+  String get scanCameraDeniedMessage => 'ToGetherDo darf die Kamera noch nicht verwenden. Erlaube den Zugriff in den Einstellungen, um Strichcodes zu scannen.';
+
+  @override
+  String get scanCameraUnavailable => 'Keine Kamera gefunden';
+
+  @override
+  String get scanCameraUnavailableMessage => 'Auf diesem Gerät steht keine Kamera zur Verfügung.';
+
+  @override
+  String get scanLookingUp => 'Produkt wird gesucht …';
+
+  @override
+  String get scanContinue => 'Weiter scannen';
+
+  @override
+  String get scanUnknownTitle => 'Artikel benennen';
+
+  @override
+  String get scanUnknownMessage => 'Dieser Code ist noch unbekannt. Gib einen Namen ein – wir merken ihn uns für alle.';
+
+  @override
+  String scanCodeLabel(String code) {
+    return 'Code $code';
+  }
+
+  @override
+  String get scanOfflineTitle => 'Kein Netz';
+
+  @override
+  String get scanOfflineMessage => 'Das Produkt konnte nicht nachgeschlagen werden. Du kannst den Artikel trotzdem benennen.';
+
+  @override
+  String get scanDataAttribution => 'Daten: Open Food Facts (ODbL)';
+
+  @override
+  String scanAdded(String name) {
+    return '$name hinzugefügt';
+  }
+
+  @override
+  String scanIncremented(String name) {
+    return '$name: Menge erhöht';
+  }
+
+  @override
+  String get scanDemoHit => 'Demo-Treffer';
+
+  @override
+  String get scanBrandOptional => 'Marke (optional)';
+
+  @override
+  String get scanPackageSizeOptional => 'Füllmenge (optional)';
+
+  @override
+  String get scanPackageSizeExample => 'z.B. 500 g';
+
+  @override
+  String get scanAddAndRemember => 'Hinzufügen und merken';
+
+  @override
+  String get editItem => 'Artikel bearbeiten';
+
+  @override
+  String get itemNameRequired => 'Bitte einen Namen eingeben';
+
+  @override
+  String get quantityInvalid => 'Bitte eine gültige Menge eingeben';
+
+  @override
+  String get rescanProduct => 'Neu scannen';
+
+  @override
+  String get removeProduct => 'Produkt entfernen';
+
+  @override
+  String get productLinked => 'Verknüpftes Produkt';
+
+  @override
+  String get noProductLinked => 'Kein Produkt verknüpft';
+
+  @override
+  String get itemSaved => 'Gespeichert';
+
+  @override
+  String get decreaseQuantity => 'Weniger';
+
+  @override
+  String get increaseQuantity => 'Mehr';
+
+  @override
+  String get addManually => 'Von Hand eingeben';
+
+  @override
+  String get useProduct => 'Übernehmen';
+
+  @override
+  String get voiceInput => 'Spracheingabe';
 }
 
 /// The translations for German, as used in Austria (`de_AT`).
