@@ -10,7 +10,12 @@
     "logs": "firebase functions:log",
     "test:rules": "node --test test/rules.test.mjs",
     "test:functions": "node --test --test-concurrency=1 test/functions.test.mjs",
-    "test:emulator": "firebase emulators:exec --only auth,firestore,functions,storage --project demo-togetherdo 'npm run test:rules && npm run test:functions'"
+    "test:emulator": "firebase emulators:exec --only auth,firestore,functions,storage --project demo-togetherdo 'npm run test:rules && npm run test:functions'",
+    "test:termine": "node --test test/termine_logik.test.mjs",
+    "test:storage": "firebase emulators:exec --config /private/tmp/claude-501/-Users-martinbundschuh-Documents-Coding-SecondBrain/33362639-af21-4c5b-aab9-8981333d62ff/scratchpad/togetherdo-kalender/storage-emulator/firebase.json --only auth,firestore,storage --project demo-togetherdo-storage 'FIRESTORE_EMULATOR_HOST=127.0.0.1:8091 FIREBASE_STORAGE_EMULATOR_HOST=127.0.0.1:9198 node --test --test-concurrency=1 test/storage.rules.test.mjs'",
+    "test:erinnerungen": "firebase emulators:exec --config test/emulator-kalender.json --only firestore --project demo-togetherdo-kal 'FIRESTORE_EMULATOR_HOST=127.0.0.1:8090 node --test --test-concurrency=1 test/erinnerungen.test.mjs'",
+    "test:monatsueberblick": "node --test test/monatsueberblick.test.mjs && firebase emulators:exec --config test/emulator-kalender.json --only firestore --project demo-togetherdo-kal 'FIRESTORE_EMULATOR_HOST=127.0.0.1:8090 node --test --test-concurrency=1 test/monatsueberblick_emulator.test.mjs'",
+    "test:termine-regeln": "firebase emulators:exec --config test/emulator-kalender.json --only firestore --project demo-togetherdo-kal 'FIRESTORE_EMULATOR_HOST=127.0.0.1:8090 node --test --test-concurrency=1 test/termine.rules.test.mjs'"
   },
   "engines": {
     "node": "22"
@@ -18,10 +23,12 @@
   "main": "lib/index.js",
   "dependencies": {
     "firebase-admin": "^13.4.0",
-    "firebase-functions": "^6.3.2"
+    "firebase-functions": "^6.3.2",
+    "nodemailer": "^7.0.5"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.1",
+    "@types/nodemailer": "^6.4.17",
     "firebase": "^11.10.0",
     "firebase-functions-test": "^3.4.1",
     "typescript": "^5.8.3"
