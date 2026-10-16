@@ -1,7 +1,7 @@
-//Copyright 2025 TogetherDo by Martin Bundschuh
-//Author: Martin Bundschuh
-//Email: martin.bundschuh@gmail.com
-//License: MIT
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
 
 import 'dart:async';
 
@@ -46,6 +46,7 @@ import 'utils/global_navigator.dart';
 import 'firebase_options.dart';
 import 'services/messaging_service.dart';
 import 'services/firebase_emulator.dart';
+import 'services/review_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -99,6 +100,9 @@ void main() async {
   // Push erst nach dem ersten Bild einrichten: Berechtigungsdialog und
   // APNs-Token dürfen den Start nicht blockieren (weißer Bildschirm).
   unawaited(MessagingService().initialize());
+
+  // Erste Nutzung merken (Bewertungsanfrage frühestens nach 3 Tagen).
+  unawaited(ReviewService.instance.recordAppStart());
 }
 
 class TogetherDoApp extends StatelessWidget {

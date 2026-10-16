@@ -1038,6 +1038,140 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get byYou => 'dir';
+
+  @override
+  String get fairnessTitle => 'Fair verteilt';
+
+  @override
+  String get fairnessThisWeek => 'Diese Woche';
+
+  @override
+  String get fairnessThisMonth => 'Dieser Monat';
+
+  @override
+  String get fairnessWeek => 'Woche';
+
+  @override
+  String get fairnessMonth => 'Monat';
+
+  @override
+  String get fairnessNothingYet => 'In diesem Zeitraum ist noch nichts erledigt.';
+
+  @override
+  String get fairnessBalanced => 'Gut verteilt – weiter so!';
+
+  @override
+  String fairnessTopCarrier(String name) {
+    return '$name hat am meisten getragen.';
+  }
+
+  @override
+  String fairnessNextTurn(String name) {
+    return 'Als Nächstes ist $name dran.';
+  }
+
+  @override
+  String get fairnessYou => 'Du';
+
+  @override
+  String fairnessPoints(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Punkte',
+      one: '1 Punkt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fairnessTasks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Aufgaben',
+      one: '1 Aufgabe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fairnessPercent(int percent) {
+    return '$percent %';
+  }
+
+  @override
+  String get fairnessShowStats => 'Statistik';
+
+  @override
+  String get fairnessStatsTitle => 'Wer trägt wie viel';
+
+  @override
+  String get fairnessRecentlyDone => 'Zuletzt erledigt';
+
+  @override
+  String get fairnessPointsLegend => 'Punkte nach Aufwand: leicht 1, mittel 2, schwer 3';
+
+  @override
+  String get fairnessShareList => 'Teile die Liste – dann siehst du hier, wer wie viel trägt.';
+
+  @override
+  String completedByAt(String name, String time) {
+    return '$name · $time';
+  }
+
+  @override
+  String get effortLabel => 'Aufwand';
+
+  @override
+  String get effortLight => 'leicht';
+
+  @override
+  String get effortMedium => 'mittel';
+
+  @override
+  String get effortHeavy => 'schwer';
+
+  @override
+  String get responsibleLabel => 'Zuständig';
+
+  @override
+  String get nobody => 'Niemand';
+
+  @override
+  String suggestedTurn(String name) {
+    return 'Vorschlag: $name ist dran';
+  }
+
+  @override
+  String get editTodoTitle => 'Aufgabe bearbeiten';
+
+  @override
+  String get dueLabel => 'Fällig';
+
+  @override
+  String get noDueDate => 'Kein Datum';
+
+  @override
+  String get removeDueDate => 'Datum entfernen';
+
+  @override
+  String get saveFailed => 'Speichern hat nicht geklappt. Bitte erneut versuchen.';
+
+  @override
+  String get rateApp => 'App bewerten';
+
+  @override
+  String get fairnessPointsTotal => 'Punkte gesamt';
+
+  @override
+  String get fairnessTopCarrierYou => 'Du hast am meisten getragen.';
+
+  @override
+  String get fairnessNextTurnYou => 'Als Nächstes bist du dran.';
+
+  @override
+  String get suggestedTurnYou => 'Vorschlag: du bist dran';
 }
 
 /// The translations for German, as used in Austria (`de_AT`).

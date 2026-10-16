@@ -1,4 +1,3 @@
-import 'package:togetherdo/l10n/app_localizations.dart';
 /*
  * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
  * Written by Martin Bundschuh.
@@ -7,6 +6,11 @@ import 'package:togetherdo/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:togetherdo/l10n/app_localizations.dart';
+
+import '../../design/td_design.dart';
+import '../../services/review_service.dart';
+import '../fairness/fairness_widgets.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
@@ -21,7 +25,18 @@ import '../common/user_avatar.dart';
 class TodoItemWidget extends StatelessWidget {
   final TodoModel todo;
 
-  const TodoItemWidget({super.key, required this.todo});
+  /// Öffnet das Bearbeiten-Sheet; `null` = keine Bearbeitung erlaubt.
+  final VoidCallback? onEdit;
+
+  /// Nach erfolgreichem eigenem Abhaken (für Bewertungsanfrage).
+  final VoidCallback? onCompleted;
+
+  const TodoItemWidget({
+    super.key,
+    required this.todo,
+    this.onEdit,
+    this.onCompleted,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -46,13 +61,13 @@ class TodoItemWidget extends StatelessWidget {
                 list.ownerId !=
                     currentUserId); // Benutzer ist nicht der Besitzer
 
-        // Berechtigung für das Erledigen des Todos
+        // Abhaken: jedes Mitglied (auch ohne allowEdit) – bei zugewiesenen
+        // Aufgaben nur die zuständige Person oder der Besitzer.
         final canComplete =
-            canEdit &&
-            (todo.assignedToUserId == null || // Allgemeines Todo
-                todo.assignedToUserId == currentUserId || // Zugewiesen an mich
-                (todo.assignedToUserId != null && isOwner) // Ich bin Besitzer
-                );
+            (isOwner || isMember) &&
+            (todo.assignedToUserId == null ||
+                todo.assignedToUserId == currentUserId ||
+                isOwner);
 
         // Visuelle Unterscheidung für Zuweisungen
         final isAssignedToMe = todo.assignedToUserId == currentUserId;
@@ -77,27 +92,32 @@ class TodoItemWidget extends StatelessWidget {
             ),
           ),
           child: ListTile(
+            onTap: onEdit,
             leading: Checkbox(
               value: todo.isCompleted,
               onChanged: canComplete
                   ? (value) async {
-                      if (value != null) {
-                        final authState = context.read<AuthBloc>().state;
-                        final currentUser = authState is AuthAuthenticated
-                            ? authState.user
-                            : null;
-
-                        final updatedTodo = todo.copyWith(
-                          isCompleted: value,
-                          completedByUserId: value ? currentUser?.id : null,
-                          completedByUserName: value
-                              ? currentUser?.displayName
-                              : null,
+                      if (value == null) return;
+                      final authState = context.read<AuthBloc>().state;
+                      if (authState is! AuthAuthenticated) return;
+                      final l10n = AppLocalizations.of(context)!;
+                      try {
+                        await context.read<TodoRepository>().setCompleted(
+                          todoId: todo.id,
+                          completed: value,
+                          userId: authState.user.id,
+                          userName: authState.user.displayName,
                         );
+                        if (value) onCompleted?.call();
+                      } catch (e) {
+                        ReviewService.instance.noteError();
+                        debugPrint('Abhaken fehlgeschlagen: $e');
                         if (context.mounted) {
-                          await (context.read<TodoRepository>()
-                                  as FirebaseTodoRepository)
-                              .updateTodo(updatedTodo);
+                          TdToast.show(
+                            context,
+                            l10n.saveFailed,
+                            variant: TdToastVariant.error,
+                          );
                         }
                       }
                     }
@@ -171,6 +191,14 @@ class TodoItemWidget extends StatelessWidget {
                     ),
                   ),
                 ],
+                const SizedBox(height: 4),
+                TdWeightTag(
+                  weight: tdWeightOf(todo.effort),
+                  label: effortLabel(
+                    AppLocalizations.of(context)!,
+                    todo.effort,
+                  ),
+                ),
                 if (todo.isCompleted && todo.completedByUserName != null) ...[
                   const SizedBox(height: 4),
                   Row(
@@ -183,7 +211,9 @@ class TodoItemWidget extends StatelessWidget {
                       const SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          '${AppLocalizations.of(context)!.completedBy} ${todo.completedByUserName}',
+                          todo.completedAt == null
+                              ? '${AppLocalizations.of(context)!.completedBy} ${todo.completedByUserName}'
+                              : '${AppLocalizations.of(context)!.completedBy} ${AppLocalizations.of(context)!.completedByAt(todo.completedByUserName!, DateFormat.MMMEd(Localizations.localeOf(context).toLanguageTag()).add_Hm().format(todo.completedAt!))}',
                           style: TextStyle(
                             fontSize: 12,
                             color: Theme.of(context).colorScheme.primary,
@@ -246,7 +276,7 @@ class TodoItemWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _buildPriorityChip(context),
-                if (canComplete)
+                if (canComplete && canEdit)
                   IconButton(
                     icon: const Icon(Icons.delete_outline),
                     onPressed: () => _showDeleteDialog(context),

@@ -2119,6 +2119,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'you'**
   String get byYou;
+
+  /// No description provided for @fairnessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fairly shared'**
+  String get fairnessTitle;
+
+  /// No description provided for @fairnessThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get fairnessThisWeek;
+
+  /// No description provided for @fairnessThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get fairnessThisMonth;
+
+  /// No description provided for @fairnessWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get fairnessWeek;
+
+  /// No description provided for @fairnessMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get fairnessMonth;
+
+  /// No description provided for @fairnessNothingYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing done in this period yet.'**
+  String get fairnessNothingYet;
+
+  /// No description provided for @fairnessBalanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Nicely balanced – keep it up!'**
+  String get fairnessBalanced;
+
+  /// No description provided for @fairnessTopCarrier.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has carried the most.'**
+  String fairnessTopCarrier(String name);
+
+  /// No description provided for @fairnessNextTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is up next.'**
+  String fairnessNextTurn(String name);
+
+  /// No description provided for @fairnessYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get fairnessYou;
+
+  /// No description provided for @fairnessPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 point} other{{count} points}}'**
+  String fairnessPoints(int count);
+
+  /// No description provided for @fairnessTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 task} other{{count} tasks}}'**
+  String fairnessTasks(int count);
+
+  /// No description provided for @fairnessPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String fairnessPercent(int percent);
+
+  /// No description provided for @fairnessShowStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get fairnessShowStats;
+
+  /// No description provided for @fairnessStatsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who carries how much'**
+  String get fairnessStatsTitle;
+
+  /// No description provided for @fairnessRecentlyDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently completed'**
+  String get fairnessRecentlyDone;
+
+  /// No description provided for @fairnessPointsLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'Points by effort: light 1, medium 2, heavy 3'**
+  String get fairnessPointsLegend;
+
+  /// No description provided for @fairnessShareList.
+  ///
+  /// In en, this message translates to:
+  /// **'Share the list to see who carries how much.'**
+  String get fairnessShareList;
+
+  /// No description provided for @completedByAt.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {time}'**
+  String completedByAt(String name, String time);
+
+  /// No description provided for @effortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Effort'**
+  String get effortLabel;
+
+  /// No description provided for @effortLight.
+  ///
+  /// In en, this message translates to:
+  /// **'light'**
+  String get effortLight;
+
+  /// No description provided for @effortMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'medium'**
+  String get effortMedium;
+
+  /// No description provided for @effortHeavy.
+  ///
+  /// In en, this message translates to:
+  /// **'heavy'**
+  String get effortHeavy;
+
+  /// No description provided for @responsibleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Responsible'**
+  String get responsibleLabel;
+
+  /// No description provided for @nobody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody'**
+  String get nobody;
+
+  /// No description provided for @suggestedTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestion: it\'s {name}\'s turn'**
+  String suggestedTurn(String name);
+
+  /// No description provided for @editTodoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit task'**
+  String get editTodoTitle;
+
+  /// No description provided for @dueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get dueLabel;
+
+  /// No description provided for @noDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'No date'**
+  String get noDueDate;
+
+  /// No description provided for @removeDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove date'**
+  String get removeDueDate;
+
+  /// No description provided for @saveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving didn\'t work. Please try again.'**
+  String get saveFailed;
+
+  /// No description provided for @rateApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate the app'**
+  String get rateApp;
+
+  /// No description provided for @fairnessPointsTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'points in total'**
+  String get fairnessPointsTotal;
+
+  /// No description provided for @fairnessTopCarrierYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You have carried the most.'**
+  String get fairnessTopCarrierYou;
+
+  /// No description provided for @fairnessNextTurnYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re up next.'**
+  String get fairnessNextTurnYou;
+
+  /// No description provided for @suggestedTurnYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestion: it\'s your turn'**
+  String get suggestedTurnYou;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

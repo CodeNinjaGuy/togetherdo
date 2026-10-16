@@ -18,6 +18,7 @@ import '../../widgets/profile/fiberoptics25_logo.dart';
 import '../../widgets/profile/language_selector.dart';
 import 'notification_settings_screen.dart';
 import 'profile_screen_desktop.dart';
+import '../../services/review_service.dart';
 import '../../widgets/common/legal_links_row.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -216,6 +217,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       },
                       icon: const Icon(Icons.notifications),
                       label: Text(l10n.notifications),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // App bewerten (Store-Seite)
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: ReviewService.instance.openStoreListing,
+                      icon: const Icon(Icons.star_rate_rounded),
+                      label: Text(l10n.rateApp),
                     ),
                   ),
 

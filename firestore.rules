@@ -6,7 +6,10 @@
 // - Listen sieht nur, wer in `allUserIds` steht (Besitzer + Mitglieder).
 // - Todos, Chats und Einkaufsartikel erben die Rechte ihrer Liste:
 //   lesen = Mitglied, schreiben = Besitzer oder Mitglied mit `allowEdit`.
-//   Abhaken im Einkauf dürfen alle Mitglieder.
+//   Abhaken im Einkauf und bei Todos dürfen alle Mitglieder.
+// - Fair verteilt (Todos): `effort` nur leicht/mittel/schwer, zuständig nur
+//   ein Mitglied der Liste, erledigt-von nur die eigene uid, Erledigt-Zeit
+//   nur die Serverzeit der Anfrage.
 // - Listen anlegen, per Code suchen und beitreten geht nur über die
 //   Cloud Functions (createList, previewListByCode, joinListByCode) – so
 //   lassen sich Codes nicht durchprobieren und keine Codes fälschen.
@@ -106,6 +109,32 @@ service cloud.firestore {
     }
 
     // ---------------------------------------------------------------- todos
+    // Gültige Werte für „fair verteilt“. Fehlende Felder sind erlaubt
+    // (alte Einträge; ohne Aufwand gilt „mittel“).
+    function validEffort(d) {
+      return d.get('effort', 'medium') in ['light', 'medium', 'heavy'];
+    }
+
+    function validAssignee(d, listId) {
+      return d.get('assignedToUserId', null) == null
+        || d.get('assignedToUserId', null) in listDoc(listId).data.allUserIds;
+    }
+
+    // Erledigt-von: nur man selbst (oder unverändert/geleert);
+    // Erledigt-Zeit: nur die Serverzeit dieser Anfrage (oder unverändert/geleert),
+    // und dann muss die Aufgabe von einem selbst erledigt sein.
+    function validCompletion(d, isCreate) {
+      let by = d.get('completedByUserId', null);
+      let at = d.get('completedAt', null);
+      return (by == null || by == request.auth.uid
+                || (!isCreate && unchanged('completedByUserId')))
+        && (at == null
+              || (!isCreate && unchanged('completedAt'))
+              || (at == request.time
+                    && by == request.auth.uid
+                    && d.get('isCompleted', false) == true));
+    }
+
     match /todos/{todoId} {
       allow read: if signedIn()
         && (resource.data.userId == request.auth.uid
@@ -114,13 +143,29 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.id == todoId
-        && canEditList(request.resource.data.listId);
+        && canEditList(request.resource.data.listId)
+        && validEffort(request.resource.data)
+        && validAssignee(request.resource.data, request.resource.data.listId)
+        && validCompletion(request.resource.data, true);
 
+      // Bearbeiten (Titel, Zuständigkeit, Aufwand …): Besitzer oder
+      // Mitglied mit allowEdit.
       allow update: if signedIn()
         && canEditList(resource.data.listId)
         && unchanged('listId')
         && unchanged('userId')
-        && unchanged('id');
+        && unchanged('id')
+        && validEffort(request.resource.data)
+        && (unchanged('assignedToUserId')
+            || validAssignee(request.resource.data, resource.data.listId))
+        && validCompletion(request.resource.data, false);
+
+      // Abhaken bzw. wieder öffnen: jedes Mitglied, nur die Erledigt-Felder.
+      allow update: if signedIn()
+        && isListMember(resource.data.listId)
+        && changedKeys().hasOnly(['isCompleted', 'completedByUserId',
+                                  'completedByUserName', 'completedAt'])
+        && validCompletion(request.resource.data, false);
 
       allow delete: if signedIn() && canEditList(resource.data.listId);
 

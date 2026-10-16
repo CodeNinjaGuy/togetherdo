@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'package:equatable/equatable.dart';
 import '../../models/todo_model.dart';
 
@@ -28,6 +33,7 @@ class TodoAddRequested extends TodoEvent {
   final String listId;
   final String? assignedToUserId;
   final String? assignedToUserName;
+  final TaskEffort effort;
 
   const TodoAddRequested({
     required this.title,
@@ -39,10 +45,12 @@ class TodoAddRequested extends TodoEvent {
     required this.listId,
     this.assignedToUserId,
     this.assignedToUserName,
+    this.effort = TaskEffort.medium,
   });
 
   @override
   List<Object?> get props => [
+    effort,
     title,
     description,
     dueDate,

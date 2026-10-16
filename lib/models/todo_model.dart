@@ -1,6 +1,43 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 enum TodoPriority { low, medium, high }
+
+/// Aufwand einer Aufgabe – Grundlage für „fair verteilt“.
+/// In Firestore als Text (`light`/`medium`/`heavy`) im Feld `effort`.
+/// Aufgaben ohne Angabe zählen als [medium].
+enum TaskEffort {
+  light(1),
+  medium(2),
+  heavy(3);
+
+  const TaskEffort(this.points);
+
+  /// Punkte für die Fairness-Statistik.
+  final int points;
+
+  static TaskEffort fromValue(Object? value) {
+    for (final e in TaskEffort.values) {
+      if (e.name == value) return e;
+    }
+    return TaskEffort.medium;
+  }
+}
+
+/// Liest Datumswerte robust: Firestore-Timestamp (neu, Serverzeit) oder
+/// ISO-Text (bestehende Felder).
+DateTime? parseFirestoreDate(Object? value) {
+  if (value == null) return null;
+  if (value is Timestamp) return value.toDate();
+  if (value is DateTime) return value;
+  if (value is String) return DateTime.tryParse(value);
+  return null;
+}
 
 class TodoModel extends Equatable {
   final String id;
@@ -18,6 +55,12 @@ class TodoModel extends Equatable {
   final String? completedByUserId;
   final String? completedByUserName;
 
+  /// Wann erledigt (Serverzeit). Fehlt bei alten Einträgen.
+  final DateTime? completedAt;
+
+  /// Aufwand; fehlt das Feld, gilt „mittel“.
+  final TaskEffort effort;
+
   const TodoModel({
     required this.id,
     required this.title,
@@ -33,18 +76,18 @@ class TodoModel extends Equatable {
     this.assignedToUserName,
     this.completedByUserId,
     this.completedByUserName,
+    this.completedAt,
+    this.effort = TaskEffort.medium,
   });
 
   factory TodoModel.fromJson(Map<String, dynamic> json) {
     return TodoModel(
       id: json['id'] as String,
       title: json['title'] as String,
-      description: json['description'] as String,
+      description: json['description'] as String? ?? '',
       isCompleted: json['isCompleted'] as bool? ?? false,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      dueDate: json['dueDate'] != null
-          ? DateTime.parse(json['dueDate'] as String)
-          : null,
+      createdAt: parseFirestoreDate(json['createdAt']) ?? DateTime.now(),
+      dueDate: parseFirestoreDate(json['dueDate']),
       priority: TodoPriority.values.firstWhere(
         (e) => e.toString() == 'TodoPriority.${json['priority']}',
         orElse: () => TodoPriority.medium,
@@ -56,9 +99,13 @@ class TodoModel extends Equatable {
       assignedToUserName: json['assignedToUserName'] as String?,
       completedByUserId: json['completedByUserId'] as String?,
       completedByUserName: json['completedByUserName'] as String?,
+      completedAt: parseFirestoreDate(json['completedAt']),
+      effort: TaskEffort.fromValue(json['effort']),
     );
   }
 
+  /// Felder zum Anlegen und Bearbeiten. `completedAt` fehlt bewusst: es
+  /// wird nur beim Abhaken als Serverzeit gesetzt (siehe Repository).
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -75,6 +122,7 @@ class TodoModel extends Equatable {
       'assignedToUserName': assignedToUserName,
       'completedByUserId': completedByUserId,
       'completedByUserName': completedByUserName,
+      'effort': effort.name,
     };
   }
 
@@ -93,6 +141,12 @@ class TodoModel extends Equatable {
     String? assignedToUserName,
     String? completedByUserId,
     String? completedByUserName,
+    DateTime? completedAt,
+    TaskEffort? effort,
+    bool clearAssignee = false,
+    bool clearDueDate = false,
+    bool clearCategory = false,
+    bool clearCompletion = false,
   }) {
     return TodoModel(
       id: id ?? this.id,
@@ -100,15 +154,25 @@ class TodoModel extends Equatable {
       description: description ?? this.description,
       isCompleted: isCompleted ?? this.isCompleted,
       createdAt: createdAt ?? this.createdAt,
-      dueDate: dueDate ?? this.dueDate,
+      dueDate: clearDueDate ? null : dueDate ?? this.dueDate,
       priority: priority ?? this.priority,
       userId: userId ?? this.userId,
-      category: category ?? this.category,
+      category: clearCategory ? null : category ?? this.category,
       listId: listId ?? this.listId,
-      assignedToUserId: assignedToUserId ?? this.assignedToUserId,
-      assignedToUserName: assignedToUserName ?? this.assignedToUserName,
-      completedByUserId: completedByUserId ?? this.completedByUserId,
-      completedByUserName: completedByUserName ?? this.completedByUserName,
+      assignedToUserId: clearAssignee
+          ? null
+          : assignedToUserId ?? this.assignedToUserId,
+      assignedToUserName: clearAssignee
+          ? null
+          : assignedToUserName ?? this.assignedToUserName,
+      completedByUserId: clearCompletion
+          ? null
+          : completedByUserId ?? this.completedByUserId,
+      completedByUserName: clearCompletion
+          ? null
+          : completedByUserName ?? this.completedByUserName,
+      completedAt: clearCompletion ? null : completedAt ?? this.completedAt,
+      effort: effort ?? this.effort,
     );
   }
 
@@ -143,5 +207,7 @@ class TodoModel extends Equatable {
     assignedToUserName,
     completedByUserId,
     completedByUserName,
+    completedAt,
+    effort,
   ];
 }

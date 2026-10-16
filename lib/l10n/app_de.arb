@@ -343,5 +343,93 @@
   "tooManyCodeAttempts": "Zu viele Versuche. Bitte später erneut probieren.",
   "assignedToYou": "Dir zugewiesen",
   "titleRequired": "Titel ist erforderlich",
-  "byYou": "dir"
+  "byYou": "dir",
+  "fairnessTitle": "Fair verteilt",
+  "fairnessThisWeek": "Diese Woche",
+  "fairnessThisMonth": "Dieser Monat",
+  "fairnessWeek": "Woche",
+  "fairnessMonth": "Monat",
+  "fairnessNothingYet": "In diesem Zeitraum ist noch nichts erledigt.",
+  "fairnessBalanced": "Gut verteilt – weiter so!",
+  "fairnessTopCarrier": "{name} hat am meisten getragen.",
+  "@fairnessTopCarrier": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "fairnessNextTurn": "Als Nächstes ist {name} dran.",
+  "@fairnessNextTurn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "fairnessYou": "Du",
+  "fairnessPoints": "{count, plural, =1{1 Punkt} other{{count} Punkte}}",
+  "@fairnessPoints": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fairnessTasks": "{count, plural, =1{1 Aufgabe} other{{count} Aufgaben}}",
+  "@fairnessTasks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fairnessPercent": "{percent} %",
+  "@fairnessPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "fairnessShowStats": "Statistik",
+  "fairnessStatsTitle": "Wer trägt wie viel",
+  "fairnessRecentlyDone": "Zuletzt erledigt",
+  "fairnessPointsLegend": "Punkte nach Aufwand: leicht 1, mittel 2, schwer 3",
+  "fairnessShareList": "Teile die Liste – dann siehst du hier, wer wie viel trägt.",
+  "completedByAt": "{name} · {time}",
+  "@completedByAt": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "effortLabel": "Aufwand",
+  "effortLight": "leicht",
+  "effortMedium": "mittel",
+  "effortHeavy": "schwer",
+  "responsibleLabel": "Zuständig",
+  "nobody": "Niemand",
+  "suggestedTurn": "Vorschlag: {name} ist dran",
+  "@suggestedTurn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "editTodoTitle": "Aufgabe bearbeiten",
+  "dueLabel": "Fällig",
+  "noDueDate": "Kein Datum",
+  "removeDueDate": "Datum entfernen",
+  "saveFailed": "Speichern hat nicht geklappt. Bitte erneut versuchen.",
+  "rateApp": "App bewerten",
+  "fairnessPointsTotal": "Punkte gesamt",
+  "fairnessTopCarrierYou": "Du hast am meisten getragen.",
+  "fairnessNextTurnYou": "Als Nächstes bist du dran.",
+  "suggestedTurnYou": "Vorschlag: du bist dran"
 }

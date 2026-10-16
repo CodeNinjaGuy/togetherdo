@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../repositories/todo_repository.dart';
 import 'todo_event.dart';
@@ -44,6 +49,7 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
         listId: event.listId,
         assignedToUserId: event.assignedToUserId,
         assignedToUserName: event.assignedToUserName,
+        effort: event.effort,
       );
       emit(TodoAddSuccess(todo: todo));
 
@@ -100,12 +106,24 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
       final currentState = state;
       if (currentState is TodoLoadSuccess) {
         final todo = currentState.todos.firstWhere((t) => t.id == event.todoId);
-        final updatedTodo = todo.copyWith(
-          isCompleted: event.isCompleted,
-          completedByUserId: event.completedByUserId,
-          completedByUserName: event.completedByUserName,
+        final userId = event.completedByUserId;
+        if (event.isCompleted && userId == null) {
+          throw StateError('Erledigt-von fehlt');
+        }
+        await _todoRepository.setCompleted(
+          todoId: todo.id,
+          completed: event.isCompleted,
+          userId: userId ?? todo.userId,
+          userName: event.completedByUserName,
         );
-        await _todoRepository.updateTodo(updatedTodo);
+        final updatedTodo = event.isCompleted
+            ? todo.copyWith(
+                isCompleted: true,
+                completedByUserId: userId,
+                completedByUserName: event.completedByUserName,
+                completedAt: DateTime.now(),
+              )
+            : todo.copyWith(isCompleted: false, clearCompletion: true);
 
         final updatedTodos = currentState.todos.map((t) {
           return t.id == event.todoId ? updatedTodo : t;

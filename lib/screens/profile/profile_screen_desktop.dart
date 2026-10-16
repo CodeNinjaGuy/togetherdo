@@ -17,6 +17,7 @@ import '../../blocs/theme/theme_state.dart';
 import '../../widgets/profile/editable_profile_avatar.dart';
 import '../../widgets/profile/language_selector.dart';
 import 'notification_settings_screen.dart';
+import '../../services/review_service.dart';
 import '../../widgets/common/legal_links_row.dart';
 
 class ProfileScreenDesktop extends StatefulWidget {
@@ -296,6 +297,12 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
         ),
         const SizedBox(height: 8),
         const LegalLinksRow(),
+        const SizedBox(height: 24),
+        OutlinedButton.icon(
+          onPressed: ReviewService.instance.openStoreListing,
+          icon: const Icon(Icons.star_rate_rounded),
+          label: Text(l10n.rateApp),
+        ),
       ],
     );
   }

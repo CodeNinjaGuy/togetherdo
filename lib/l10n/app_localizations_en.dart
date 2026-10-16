@@ -1038,6 +1038,140 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get byYou => 'you';
+
+  @override
+  String get fairnessTitle => 'Fairly shared';
+
+  @override
+  String get fairnessThisWeek => 'This week';
+
+  @override
+  String get fairnessThisMonth => 'This month';
+
+  @override
+  String get fairnessWeek => 'Week';
+
+  @override
+  String get fairnessMonth => 'Month';
+
+  @override
+  String get fairnessNothingYet => 'Nothing done in this period yet.';
+
+  @override
+  String get fairnessBalanced => 'Nicely balanced – keep it up!';
+
+  @override
+  String fairnessTopCarrier(String name) {
+    return '$name has carried the most.';
+  }
+
+  @override
+  String fairnessNextTurn(String name) {
+    return '$name is up next.';
+  }
+
+  @override
+  String get fairnessYou => 'You';
+
+  @override
+  String fairnessPoints(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count points',
+      one: '1 point',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fairnessTasks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tasks',
+      one: '1 task',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fairnessPercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String get fairnessShowStats => 'Statistics';
+
+  @override
+  String get fairnessStatsTitle => 'Who carries how much';
+
+  @override
+  String get fairnessRecentlyDone => 'Recently completed';
+
+  @override
+  String get fairnessPointsLegend => 'Points by effort: light 1, medium 2, heavy 3';
+
+  @override
+  String get fairnessShareList => 'Share the list to see who carries how much.';
+
+  @override
+  String completedByAt(String name, String time) {
+    return '$name · $time';
+  }
+
+  @override
+  String get effortLabel => 'Effort';
+
+  @override
+  String get effortLight => 'light';
+
+  @override
+  String get effortMedium => 'medium';
+
+  @override
+  String get effortHeavy => 'heavy';
+
+  @override
+  String get responsibleLabel => 'Responsible';
+
+  @override
+  String get nobody => 'Nobody';
+
+  @override
+  String suggestedTurn(String name) {
+    return 'Suggestion: it\'s $name\'s turn';
+  }
+
+  @override
+  String get editTodoTitle => 'Edit task';
+
+  @override
+  String get dueLabel => 'Due';
+
+  @override
+  String get noDueDate => 'No date';
+
+  @override
+  String get removeDueDate => 'Remove date';
+
+  @override
+  String get saveFailed => 'Saving didn\'t work. Please try again.';
+
+  @override
+  String get rateApp => 'Rate the app';
+
+  @override
+  String get fairnessPointsTotal => 'points in total';
+
+  @override
+  String get fairnessTopCarrierYou => 'You have carried the most.';
+
+  @override
+  String get fairnessNextTurnYou => 'You\'re up next.';
+
+  @override
+  String get suggestedTurnYou => 'Suggestion: it\'s your turn';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).

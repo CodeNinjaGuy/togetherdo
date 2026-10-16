@@ -343,5 +343,93 @@
   "tooManyCodeAttempts": "Too many attempts. Please try again later.",
   "assignedToYou": "Assigned to you",
   "titleRequired": "Title is required",
-  "byYou": "you"
+  "byYou": "you",
+  "fairnessTitle": "Fairly shared",
+  "fairnessThisWeek": "This week",
+  "fairnessThisMonth": "This month",
+  "fairnessWeek": "Week",
+  "fairnessMonth": "Month",
+  "fairnessNothingYet": "Nothing done in this period yet.",
+  "fairnessBalanced": "Nicely balanced – keep it up!",
+  "fairnessTopCarrier": "{name} has carried the most.",
+  "@fairnessTopCarrier": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "fairnessNextTurn": "{name} is up next.",
+  "@fairnessNextTurn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "fairnessYou": "You",
+  "fairnessPoints": "{count, plural, =1{1 point} other{{count} points}}",
+  "@fairnessPoints": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fairnessTasks": "{count, plural, =1{1 task} other{{count} tasks}}",
+  "@fairnessTasks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fairnessPercent": "{percent}%",
+  "@fairnessPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "fairnessShowStats": "Statistics",
+  "fairnessStatsTitle": "Who carries how much",
+  "fairnessRecentlyDone": "Recently completed",
+  "fairnessPointsLegend": "Points by effort: light 1, medium 2, heavy 3",
+  "fairnessShareList": "Share the list to see who carries how much.",
+  "completedByAt": "{name} · {time}",
+  "@completedByAt": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "effortLabel": "Effort",
+  "effortLight": "light",
+  "effortMedium": "medium",
+  "effortHeavy": "heavy",
+  "responsibleLabel": "Responsible",
+  "nobody": "Nobody",
+  "suggestedTurn": "Suggestion: it's {name}'s turn",
+  "@suggestedTurn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "editTodoTitle": "Edit task",
+  "dueLabel": "Due",
+  "noDueDate": "No date",
+  "removeDueDate": "Remove date",
+  "saveFailed": "Saving didn't work. Please try again.",
+  "rateApp": "Rate the app",
+  "fairnessPointsTotal": "points in total",
+  "fairnessTopCarrierYou": "You have carried the most.",
+  "fairnessNextTurnYou": "You're up next.",
+  "suggestedTurnYou": "Suggestion: it's your turn"
 }

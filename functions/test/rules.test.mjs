@@ -21,7 +21,9 @@ import {
   getDoc,
   getDocs,
   query,
+  serverTimestamp,
   setDoc,
+  Timestamp,
   updateDoc,
   where,
 } from 'firebase/firestore';
@@ -247,10 +249,134 @@ describe('todos', () => {
   test('Todo in andere Liste verschieben verboten', async () => {
     await assertFails(updateDoc(doc(db(owner), 'todos/T1'), { listId: 'RO' }));
   });
-  test('Mitglied ohne allowEdit darf lesen, aber nicht schreiben', async () => {
+  test('Mitglied ohne allowEdit darf lesen und abhaken, aber nicht bearbeiten', async () => {
     await assertSucceeds(getDoc(doc(db(viewer), 'todos/TRO')));
-    await assertFails(updateDoc(doc(db(viewer), 'todos/TRO'), { isCompleted: true }));
+    await assertFails(updateDoc(doc(db(viewer), 'todos/TRO'), { title: 'anders' }));
+    await assertFails(updateDoc(doc(db(viewer), 'todos/TRO'), { effort: 'light' }));
+    await assertFails(updateDoc(doc(db(viewer), 'todos/TRO'), { assignedToUserId: viewer }));
     await assertFails(setDoc(doc(db(viewer), 'todos/T5'), todoData('T5', viewer, 'RO')));
+    await assertSucceeds(
+      updateDoc(doc(db(viewer), 'todos/TRO'), {
+        isCompleted: true,
+        completedByUserId: viewer,
+        completedByUserName: 'Vera',
+        completedAt: serverTimestamp(),
+      }),
+    );
+    await assertSucceeds(
+      updateDoc(doc(db(viewer), 'todos/TRO'), {
+        isCompleted: false,
+        completedByUserId: null,
+        completedByUserName: null,
+        completedAt: null,
+      }),
+    );
+  });
+});
+
+describe('todos – fair verteilt', () => {
+  test('Aufwand nur leicht/mittel/schwer', async () => {
+    for (const effort of ['light', 'medium', 'heavy']) {
+      await assertSucceeds(setDoc(doc(db(member), `todos/E-${effort}`), { ...todoData(`E-${effort}`, member), effort }));
+    }
+    await assertFails(setDoc(doc(db(member), 'todos/E-x'), { ...todoData('E-x', member), effort: 'riesig' }));
+    await assertFails(setDoc(doc(db(member), 'todos/E-n'), { ...todoData('E-n', member), effort: 5 }));
+    await assertSucceeds(updateDoc(doc(db(member), 'todos/T1'), { effort: 'heavy' }));
+    await assertFails(updateDoc(doc(db(member), 'todos/T1'), { effort: 'extrem' }));
+  });
+  test('ohne Aufwand anlegen bleibt erlaubt (gilt als mittel)', async () => {
+    await assertSucceeds(setDoc(doc(db(member), 'todos/E-none'), todoData('E-none', member)));
+  });
+  test('zuständig nur Mitglieder der Liste', async () => {
+    await assertSucceeds(
+      setDoc(doc(db(owner), 'todos/A1'), { ...todoData('A1', owner), assignedToUserId: member, assignedToUserName: 'Max' }),
+    );
+    await assertFails(
+      setDoc(doc(db(owner), 'todos/A2'), { ...todoData('A2', owner), assignedToUserId: stranger }),
+    );
+    await assertSucceeds(updateDoc(doc(db(owner), 'todos/T1'), { assignedToUserId: member, assignedToUserName: 'Max' }));
+    await assertFails(updateDoc(doc(db(owner), 'todos/T1'), { assignedToUserId: stranger }));
+    await assertSucceeds(updateDoc(doc(db(owner), 'todos/T1'), { assignedToUserId: null, assignedToUserName: null }));
+  });
+  test('Bearbeiten (Titel, Fälligkeit, Zuständig, Aufwand) mit allowEdit', async () => {
+    await assertSucceeds(
+      updateDoc(doc(db(member), 'todos/T1'), {
+        title: 'Müll und Glas raus',
+        description: 'Dienstag',
+        dueDate: '2026-10-20T18:00:00.000',
+        assignedToUserId: owner,
+        assignedToUserName: 'Olga',
+        effort: 'light',
+      }),
+    );
+  });
+  test('erledigt-von nur die eigene uid', async () => {
+    await assertFails(
+      updateDoc(doc(db(member), 'todos/T1'), { isCompleted: true, completedByUserId: owner, completedAt: serverTimestamp() }),
+    );
+    await assertFails(updateDoc(doc(db(viewer), 'todos/TRO'), { isCompleted: true, completedByUserId: owner }));
+    await assertSucceeds(
+      updateDoc(doc(db(member), 'todos/T1'), {
+        isCompleted: true,
+        completedByUserId: member,
+        completedByUserName: 'Max',
+        completedAt: serverTimestamp(),
+      }),
+    );
+  });
+  test('Erledigt-Zeit nur Serverzeit, kein Zurückdatieren', async () => {
+    const past = Timestamp.fromDate(new Date('2026-01-01T00:00:00Z'));
+    await assertFails(
+      updateDoc(doc(db(member), 'todos/T1'), { isCompleted: true, completedByUserId: member, completedAt: past }),
+    );
+    await assertFails(
+      setDoc(doc(db(member), 'todos/C1'), {
+        ...todoData('C1', member),
+        isCompleted: true,
+        completedByUserId: member,
+        completedAt: past,
+      }),
+    );
+    // Serverzeit, aber im Namen eines anderen bzw. ohne erledigt: nein
+    await assertFails(
+      updateDoc(doc(db(owner), 'todos/T1'), { isCompleted: false, completedByUserId: owner, completedAt: serverTimestamp() }),
+    );
+  });
+  test('Bearbeiten lässt Erledigt-Angaben anderer unverändert stehen', async () => {
+    await assertSucceeds(
+      updateDoc(doc(db(member), 'todos/T1'), {
+        isCompleted: true,
+        completedByUserId: member,
+        completedByUserName: 'Max',
+        completedAt: serverTimestamp(),
+      }),
+    );
+    await assertSucceeds(updateDoc(doc(db(owner), 'todos/T1'), { title: 'Neu', effort: 'heavy' }));
+    // Besitzer öffnet wieder
+    await assertSucceeds(
+      updateDoc(doc(db(owner), 'todos/T1'), {
+        isCompleted: false,
+        completedByUserId: null,
+        completedByUserName: null,
+        completedAt: null,
+      }),
+    );
+  });
+  test('ältere App-Version: Abhaken ohne completedAt bleibt möglich', async () => {
+    await assertSucceeds(
+      updateDoc(doc(db(member), 'todos/T1'), { isCompleted: true, completedByUserId: member, completedByUserName: 'Max' }),
+    );
+    // altes Wieder-Öffnen ließ completedByUserId stehen
+    await assertSucceeds(updateDoc(doc(db(member), 'todos/T1'), { isCompleted: false }));
+  });
+  test('Statistik-Abfrage (listId + completedAt) für Mitglieder, nicht für Fremde', async () => {
+    const since = Timestamp.fromDate(new Date('2026-10-01T00:00:00Z'));
+    await assertSucceeds(
+      getDocs(query(collection(db(viewer), 'todos'), where('listId', '==', 'RO'), where('completedAt', '>=', since))),
+    );
+    await assertFails(
+      getDocs(query(collection(db(stranger), 'todos'), where('listId', '==', 'RO'), where('completedAt', '>=', since))),
+    );
   });
 });
 
