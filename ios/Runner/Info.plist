@@ -35,11 +35,6 @@
 	<string>TogetherDo uses the camera only when you choose to take a new profile picture.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>TogetherDo accesses your photos only when you choose a picture for your profile.</string>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIApplicationSupportsTimeSensitiveNotifications</key>
@@ -47,13 +42,6 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
-		<string>processing</string>
-		<string>fetch</string>
-	</array>
-	<key>BGTaskSchedulerPermittedIdentifiers</key>
-	<array>
-		<string>$(PRODUCT_BUNDLE_IDENTIFIER).refresh</string>
-		<string>$(PRODUCT_BUNDLE_IDENTIFIER).processing</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
