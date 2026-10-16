@@ -1,19 +1,179 @@
+// Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+// Written by Martin Bundschuh.
+//
+// Firestore-Regeln für ToGetherDo – Mitglieder-Prinzip.
+//
+// - Listen sieht nur, wer in `allUserIds` steht (Besitzer + Mitglieder).
+// - Todos, Chats und Einkaufsartikel erben die Rechte ihrer Liste:
+//   lesen = Mitglied, schreiben = Besitzer oder Mitglied mit `allowEdit`.
+//   Abhaken im Einkauf dürfen alle Mitglieder.
+// - Listen anlegen, per Code suchen und beitreten geht nur über die
+//   Cloud Functions (createList, previewListByCode, joinListByCode) – so
+//   lassen sich Codes nicht durchprobieren und keine Codes fälschen.
+// - Kontolöschung läuft serverseitig (deleteAccount / onUserDeleted).
+// - Alles, was hier nicht erlaubt ist (z. B. `shares`, `rateLimits`), ist verboten.
+//
+// Tests: functions/test/rules.test.mjs (Firestore-Emulator).
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // This rule allows anyone with your Firestore database reference to view, edit,
-    // and delete all data in your Firestore database. It is useful for getting
-    // started, but it is configured to expire after 30 days because it
-    // leaves your app open to attackers. At that time, all client
-    // requests to your Firestore database will be denied.
-    //
-    // Make sure to write security rules for your app before that time, or else
-    // all client requests to your Firestore database will be denied until you Update
-    // your rules
-    match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2026, 8, 6);
+    function signedIn() {
+      return request.auth != null;
     }
+
+    function listDoc(listId) {
+      return get(/databases/$(database)/documents/lists/$(listId));
+    }
+
+    function isListMember(listId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/lists/$(listId))
+        && request.auth.uid in listDoc(listId).data.allUserIds;
+    }
+
+    function canEditList(listId) {
+      let list = listDoc(listId).data;
+      return isListMember(listId)
+        && (list.ownerId == request.auth.uid
+            || (request.auth.uid in list.memberIds && list.get('allowEdit', true) != false));
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    function unchanged(field) {
+      return request.resource.data.get(field, null) == resource.data.get(field, null);
+    }
+
+    // ---------------------------------------------------------------- users
+    // Profil: nur die Person selbst schreibt. Einzelne Profile lesen dürfen
+    // Angemeldete (Namen/Profilbilder von Mitgliedern); Auflisten ist verboten.
+    match /users/{userId} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.id == userId;
+      allow update: if signedIn()
+        && request.auth.uid == userId
+        && unchanged('id');
+      allow delete: if signedIn() && request.auth.uid == userId;
+    }
+
+    // ---------------------------------------------------------------- lists
+    match /lists/{listId} {
+      // `resource == null`: Abfrage einer gelöschten Liste liefert „nicht
+      // vorhanden“ statt eines Rechtefehlers (Live-Ansicht bei Mitgliedern).
+      allow read: if signedIn()
+        && (resource == null
+            || request.auth.uid in resource.data.allUserIds
+            || resource.data.ownerId == request.auth.uid);
+
+      // Anlegen nur über die Function createList (eindeutiger Code).
+      allow create: if false;
+
+      // Besitzer: Name/Einstellungen ändern, Mitglieder entfernen – aber
+      // niemanden hinzufügen und Besitz/Code/Typ nicht ändern.
+      allow update: if signedIn()
+        && resource.data.ownerId == request.auth.uid
+        && unchanged('ownerId')
+        && unchanged('shareCode')
+        && unchanged('id')
+        && unchanged('type')
+        && unchanged('createdAt')
+        && request.resource.data.memberIds is list
+        && request.resource.data.memberIds.toSet()
+             .difference(resource.data.memberIds.toSet()).size() == 0
+        && request.resource.data.allUserIds.toSet()
+             == [request.auth.uid].toSet().union(request.resource.data.memberIds.toSet())
+        && request.resource.data.memberNames.size() == request.resource.data.memberIds.size();
+
+      // Mitglied: nur sich selbst austragen.
+      allow update: if signedIn()
+        && resource.data.ownerId != request.auth.uid
+        && request.auth.uid in resource.data.memberIds
+        && changedKeys().hasOnly(['memberIds', 'memberNames', 'allUserIds', 'updatedAt'])
+        && request.resource.data.memberIds.toSet()
+             == resource.data.memberIds.toSet().difference([request.auth.uid].toSet())
+        && request.resource.data.allUserIds.toSet()
+             == resource.data.allUserIds.toSet().difference([request.auth.uid].toSet())
+        && request.resource.data.memberNames.size() == request.resource.data.memberIds.size();
+
+      allow delete: if signedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // ---------------------------------------------------------------- todos
+    match /todos/{todoId} {
+      allow read: if signedIn()
+        && (resource.data.userId == request.auth.uid
+            || isListMember(resource.data.listId));
+
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.id == todoId
+        && canEditList(request.resource.data.listId);
+
+      allow update: if signedIn()
+        && canEditList(resource.data.listId)
+        && unchanged('listId')
+        && unchanged('userId')
+        && unchanged('id');
+
+      allow delete: if signedIn() && canEditList(resource.data.listId);
+
+      // Chat pro Todo
+      match /chatMessages/{messageId} {
+        function todoListId() {
+          return get(/databases/$(database)/documents/todos/$(todoId)).data.listId;
+        }
+
+        allow read: if signedIn() && isListMember(todoListId());
+
+        allow create: if signedIn()
+          && isListMember(todoListId())
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.todoId == todoId
+          && request.resource.data.id == messageId
+          && request.resource.data.message is string
+          && request.resource.data.message.size() <= 4000;
+
+        // Gelesen-Markierung durch Mitglieder; Text bleibt unverändert.
+        allow update: if signedIn()
+          && isListMember(todoListId())
+          && changedKeys().hasOnly(['isRead']);
+
+        allow delete: if signedIn()
+          && (canEditList(todoListId())
+              || resource.data.userId == request.auth.uid);
+      }
+    }
+
+    // ------------------------------------------------------- shopping_items
+    match /shopping_items/{itemId} {
+      allow read: if signedIn()
+        && (resource.data.userId == request.auth.uid
+            || isListMember(resource.data.listId));
+
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.id == itemId
+        && canEditList(request.resource.data.listId);
+
+      // Bearbeiten wie bei Todos; Abhaken („gekauft“) darf jedes Mitglied.
+      allow update: if signedIn()
+        && unchanged('listId')
+        && unchanged('userId')
+        && unchanged('id')
+        && (canEditList(resource.data.listId)
+            || (isListMember(resource.data.listId)
+                && changedKeys().hasOnly(['isPurchased', 'purchasedBy', 'purchasedAt'])));
+
+      allow delete: if signedIn() && canEditList(resource.data.listId);
+    }
+
+    // Alles andere (u. a. alte `shares`, `rateLimits`) ist für Clients gesperrt.
   }
 }
