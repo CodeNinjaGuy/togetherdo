@@ -1,148 +1,105 @@
-# TogetherDo - Eine professionelle Todo-App
+# ToGetherDo
 
-Eine moderne Flutter-App für die Verwaltung von Todos und Einkaufslisten mit Echtzeit-Updates und Firebase-Integration.
+Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+Written by Martin Bundschuh.
 
-## Features
+Gemeinsame Todo- und Einkaufslisten für Paare, Familien und WGs – Flutter-App
+(iOS, macOS, Android, Web) mit Firebase.
 
-### 📋 Listen-Management
-- Erstelle beliebig viele Todo- und Einkaufslisten
-- Übersicht aller Listen mit automatisch generierten 6-stelligen Codes
-- Einfaches Beitreten zu Listen über Codes
-- Listen nach Typ gruppiert (Todo/Einkaufslisten)
-- Besitzer können Listen löschen, Mitglieder können verlassen
-- **Bearbeitungsberechtigung**: Wähle beim Erstellen aus, ob andere Mitglieder bearbeiten dürfen
+## Was die App kann
 
-### ✅ Todo-Verwaltung
-- Erstelle, bearbeite und lösche Todos in spezifischen Listen
-- Optionales Fälligkeitsdatum mit Uhrzeit (24h-Format)
-- Prioritätsstufen (Niedrig, Mittel, Hoch)
-- Kategorisierung von Todos
-- Status-Tracking (Ausstehend/Erledigt)
-- **Flexible Gruppierung und Sortierung**:
-  - Gruppierung nach Status (Ausstehend/Erledigt) oder Benutzer
-  - Sortierung nach Fälligkeit, Priorität oder Erstellungsdatum
-  - Benutzer-Gruppierung zeigt "Allgemein" und zugewiesene Benutzer
-- Übersichtliche Listenansicht
-- **Echtzeit-Updates** - Änderungen werden sofort für alle Mitglieder sichtbar
-- **Bearbeitungsberechtigung**: Nur berechtigte Benutzer können Todos bearbeiten
-- **Todo-Zuweisungen**: Weise Todos bestimmten Mitgliedern zu
-  - Visuelle Unterscheidung: Hellgrüne Outline für dir zugewiesene Todos
-  - Hellblaue Darstellung für anderen zugewiesene Todos
-  - Berechtigungssteuerung: Zugewiesene Todos können nur vom zugewiesenen Benutzer erledigt werden
-  - "Erledigt von"-Anzeige: Zeigt an, wer das Todo erledigt hat
+- **Listen**: Todo- und Einkaufslisten anlegen, per 6-stelligem Code teilen
+  und beitreten. Besitzer bestimmen, ob Mitglieder bearbeiten dürfen
+  (`allowEdit`), können Mitglieder entfernen und die Liste löschen;
+  Mitglieder können austreten.
+- **Todos**: Titel, Beschreibung, Fälligkeit mit Uhrzeit, Priorität, Kategorie,
+  Zuweisung an ein Mitglied, „erledigt von“. Gruppieren nach Status oder
+  Person, sortieren nach Fälligkeit, Priorität oder Erstellung.
+- **Einkauf**: Artikel mit Menge, Einheit und Notiz, „gekauft von“.
+- **Chat pro Todo** mit Ungelesen-Zähler.
+- **Push** über Firebase Cloud Messaging, je Ereignis im Profil abschaltbar.
+- **Konto**: Registrierung/Anmeldung mit E-Mail, „Passwort vergessen“,
+  Profilbild (Kamera/Fotos), Kontolöschung mit allen Daten.
+- **Design**: 10 Themes (u. a. Fiberoptics25), Deutsch und Englisch,
+  Split-View auf iPad/Mac/Desktop.
 
-### 🛒 Einkaufslisten
-- Erstelle Einkaufslisten mit Menge und Einheit in spezifischen Listen
-- Markiere Items als gekauft
-- Notizen zu einzelnen Items
-- Tracking wer was gekauft hat
-- Responsive Listenansicht
-- **Echtzeit-Updates** - Gekaufte Items werden sofort synchronisiert
-- **Bearbeitungsberechtigung**: Nur berechtigte Benutzer können Items bearbeiten
+## Aufbau
 
-### 🔗 Listen teilen
-- Jede Liste erhält automatisch einen 6-stelligen Code
-- Einfaches Teilen von Codes mit anderen Nutzern
-- Beitreten zu fremden Listen über Codes
-- **Besitzer-Anzeige**: Zeigt den Namen des Listenbesitzers beim Beitritt an
-- Todo-Listen und Einkaufslisten teilbar
-- **Echtzeit-Synchronisation** zwischen allen Mitgliedern
-- **Bearbeitungsberechtigung**: Kontrolle über wer was bearbeiten darf
-- Besitzer können Listen löschen, Mitglieder können verlassen
+| Bereich | Ort |
+|---|---|
+| Zustand | BLoC je Bereich (`lib/blocs/`) |
+| Daten | Repositories mit Firebase-Implementierung (`lib/repositories/`) |
+| Texte | ARB-Dateien `lib/l10n/app_de.arb`, `app_en.arb` → `flutter gen-l10n` |
+| Rechtliche Links | `lib/config/legal_links.dart` (Datenschutz, Impressum) |
+| Cloud Functions | `functions/src/*.ts` (TypeScript, Region europe-west3) |
+| Firestore-Regeln | `firestore.rules`, Indizes `firestore.indexes.json` |
+| Storage-Regeln | `storage.rules` |
 
-### 💬 Chat pro Todo
-- Jeder Todo-Eintrag hat einen eigenen Chatraum
-- Chat-Icon im Todo-Listeneintrag öffnet den ChatScreen
-- Nachrichten werden in Echtzeit synchronisiert (Firestore)
-- Beim Löschen eines Todos wird auch der zugehörige Chat gelöscht
+### Firestore
 
-### 🔔 Push-Benachrichtigungen (Erweitert)
-- **Cloud Functions** für automatische Push-Benachrichtigungen
-- **Intelligente Benachrichtigungseinstellungen** im Profil-Screen
-- **Benutzerdefinierte Einstellungen**:
-  - Todo-Benachrichtigungen: Neues Todo erstellt, Todo erledigt, Todo gelöscht
-  - Member-Benachrichtigungen: Neuer Member beigetreten, Member verlassen
-  - Chat-Benachrichtigungen: Neue Chat-Nachricht im Todo-Chat
-  - Jede Einstellung kann individuell aktiviert/deaktiviert werden
-- **Firestore-Integration**: Einstellungen werden in Firestore gespeichert und von Cloud Functions berücksichtigt
-- **Intelligente Filterung**: Nur Benutzer mit aktivierten Einstellungen erhalten Benachrichtigungen
-- **FCM Token-Management**: Automatische Token-Aktualisierung in Firestore
-- **Multi-Plattform Support**: iOS, Android, macOS mit APNs/FCM
-- **Test-Benachrichtigungen**: Lokale Test-Benachrichtigungen im Profil-Screen
-- **Benutzerdefinierte Sounds**: Eigene Notification-Sounds für alle Plattformen
-- **Sound-Tests**: Separate Buttons für Standard- und Custom-Sound Tests
-- **Echtzeit-Synchronisation**: Einstellungsänderungen werden sofort wirksam
+- `users/{uid}` – Profil, FCM-Token, Benachrichtigungs-Einstellungen
+- `lists/{id}` – Name, Typ, Besitzer, `shareCode`, `memberIds`/`memberNames`,
+  `allUserIds` (Besitzer + Mitglieder), `allowEdit`
+- `todos/{id}` mit Unterkollektion `chatMessages`
+- `shopping_items/{id}`
+- `rateLimits/{uid}` – nur Server (Drosselung beim Beitritt)
 
-### 👤 Benutzerverwaltung
-- Registrierung und Login über Firebase Auth
-- Profilverwaltung mit Avatar-Upload (Firebase Storage)
-- Sichere Authentifizierung
-- Benutzerprofile mit Anzeigename
-
-### 🎨 Moderne UI/UX (erweitert)
-- Theme-Auswahl: Vier Themes (Light, Matrix, Neo, Summer) mit optimierten Kontrastfarben für beste Lesbarkeit
-- Kategorie-Auswahl beim Todo-Erstellen als Dropdown mit den wichtigsten Kategorien (Arbeit, Privat, Einkaufen, Haushalt, Gesundheit, Lernen, Sonstiges, Benutzerdefiniert)
-- Alle Listen- und Todo-Ansichten sind für Kontrast und Lesbarkeit optimiert
-- **Responsives Split-View-Layout:**
-  - Automatische Umschaltung zwischen einspaltigem Layout (Mobil) und Split-View (macOS/iPad/Desktop)
-  - Split-View zeigt links die Listenübersicht, rechts die Details (z.B. Todos, Chat)
-  - Moderne, adaptive UI für alle Bildschirmgrößen
-- **10 wunderschöne Themes:**
-  - Light, Matrix, Neo, Summer, Aurora, Sunset, Ocean, Forest, Galaxy, Fiberoptics25
-  - Jedes Theme mit einzigartigen Farben, Schriften und Stilen
-  - Aurora: Nordlichter-inspiriert mit grünen und blauen Akzenten
-  - Sunset: Warme Orange- und Rottöne für gemütliche Atmosphäre
-  - Ocean: Beruhigende Blau- und Türkistöne
-  - Forest: Natürliche Grüntöne für eine frische Umgebung
-  - Galaxy: Mystische Lila- und Violettöne für kosmische Atmosphäre
-  - **Fiberoptics25**: Technologie-inspiriertes Theme mit Orange-Rot, Blau und Akzentfarben aus dem FO25-Logo
-- **Badge-Counter für ungelesene Chat-Nachrichten:**
-  - Rote Badge-Anzeige am Chat-Icon bei ungelesenen Nachrichten
-  - Automatische Markierung als gelesen beim Öffnen des Chats
-  - Echtzeit-Updates der ungelesenen Nachrichtenanzahl
-
-## Technische Architektur
-
-### State Management
-- **BLOC Pattern** für saubere Architektur
-- Separate BLOCs für Auth, Todo, Shopping, Share, List, Theme und Notification
-- Event-driven Architecture
-- Predictable State Management
-
-### Datenmodelle
-- **UserModel**: Benutzerdaten mit Avatar
-- **ListModel**: Listen mit automatisch generierten Codes, Bearbeitungsberechtigung und Mitgliedernamen
-- **TodoModel**: Todos mit Priorität, Fälligkeit, Zuweisungen und "Erledigt von"-Information (zugeordnet zu Listen)
-- **ShoppingItemModel**: Einkaufslisten-Items mit Menge (zugeordnet zu Listen)
-- **ShareModel**: Geteilte Listen mit Codes und Mitgliedern
-- **ChatMessageModel**: Nachrichten mit todoId, userId, userName, message, timestamp
-- **NotificationSettingsModel**: Benachrichtigungseinstellungen für jeden Benutzer
-
-### Repository Pattern
-- Abstrakte Repository-Interfaces
-- **Firebase-Implementierungen** für Produktion
-- Mock-Implementierungen für Entwicklung
-
-### Firebase-Integration
-- **Firebase Auth**: Sichere Benutzerauthentifizierung
-- **Cloud Firestore**: Echtzeit-Datenbank mit Streams
-- **Firebase Storage**: Avatar-Upload (geplant)
-- **Firebase Cloud Functions**: Automatische Push-Benachrichtigungen mit Benutzer-Einstellungen
-- **Firebase Cloud Messaging**: Push-Benachrichtigungen für alle Plattformen
-- **Echtzeit-Synchronisation**: Alle Änderungen werden sofort übertragen
+Die Regeln folgen dem Mitglieder-Prinzip: Listen und deren Inhalte sieht nur,
+wer in `allUserIds` steht. Listen anlegen, per Code suchen und beitreten geht
+nur über Functions.
 
 ### Cloud Functions
-- **onTodoCreated**: Benachrichtigung bei neuem Todo (berücksichtigt Einstellungen)
-- **onTodoCompleted**: Benachrichtigung bei erledigtem Todo (berücksichtigt Einstellungen)
-- **onTodoDeleted**: Benachrichtigung bei gelöschtem Todo (berücksichtigt Einstellungen)
-- **onListMemberAdded**: Benachrichtigung bei neuem Member (berücksichtigt Einstellungen)
-- **onListMemberRemoved**: Benachrichtigung bei entferntem Member (berücksichtigt Einstellungen)
-- **onChatMessageCreated**: Benachrichtigung bei neuer Chat-Nachricht (berücksichtigt Einstellungen)
-- **sendTestNotification**: Test-Benachrichtigungen für Debugging
 
-## Installation
+| Function | Zweck |
+|---|---|
+| `createList` | Liste mit eindeutigem Code anlegen |
+| `previewListByCode`, `joinListByCode` | Vorschau und Beitritt per Code, gedrosselt (10 Fehlversuche/Stunde je Nutzer) |
+| `deleteAccount` | Konto vollständig löschen (frische Anmeldung nötig, Auth-Konto zuletzt) |
+| `onUserDeleted` | Aufräumen, wenn ein Konto anders gelöscht wird |
+| `onListDeleted` | Todos, Chats und Artikel gelöschter Listen mitlöschen |
+| `onTodo*`, `onShoppingItem*`, `onListMember*`, `onShoppingListMember*`, `onChatMessageCreated` | Push-Benachrichtigungen |
+| `sendTestNotification` | Test-Push an das eigene Gerät |
 
-1. **Flutter installieren**
-   ```bash
-   flutter --version
-   ```
+Kontolöschung: Eigene Listen mit weiteren Mitgliedern gehen an das am längsten
+beigetretene Mitglied über, Listen ohne Mitglieder werden samt Inhalt gelöscht.
+Eigene Todos, Artikel und Nachrichten, Zuweisungen, Profilbild und Profil
+(mit FCM-Token) werden entfernt.
+
+## Entwickeln
+
+```bash
+flutter pub get
+flutter gen-l10n
+flutter analyze
+flutter test
+```
+
+Version: nur `version:` in `pubspec.yaml` pflegen (iOS/macOS lesen
+`FLUTTER_BUILD_NAME`/`FLUTTER_BUILD_NUMBER`).
+
+### Lokal gegen die Firebase-Emulatoren (nie Produktion)
+
+```bash
+cd functions && npm install && npm run build && cd ..
+firebase emulators:start --only auth,firestore,functions,storage --project demo-togetherdo
+flutter run --dart-define=USE_FIREBASE_EMULATOR=true
+```
+
+Tests für Regeln und Functions:
+
+```bash
+cd functions && npm run build && npm run test:emulator
+```
+
+## Ausrollen (nur nach Freigabe)
+
+```bash
+firebase deploy --only firestore:rules,firestore:indexes,storage --project togetherdo-c9179
+firebase deploy --only functions --project togetherdo-c9179
+```
+
+## Datenschutz
+
+Daten liegen in Google Firebase (Firestore-Standort `eur3`, EU). Kein
+Tracking, keine Werbung. Datenschutzerklärung und Impressum: siehe
+`lib/config/legal_links.dart`.
