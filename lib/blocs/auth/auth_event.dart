@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
+import 'dart:typed_data';
+
 import 'package:equatable/equatable.dart';
 
 abstract class AuthEvent extends Equatable {
@@ -51,12 +58,17 @@ class AuthUpdateProfileRequested extends AuthEvent {
 }
 
 class AuthUploadAvatarRequested extends AuthEvent {
-  final String imagePath;
+  /// Bereits zugeschnittenes, verkleinertes JPEG.
+  final Uint8List jpegBytes;
 
-  const AuthUploadAvatarRequested({required this.imagePath});
+  const AuthUploadAvatarRequested({required this.jpegBytes});
 
   @override
-  List<Object?> get props => [imagePath];
+  List<Object?> get props => [jpegBytes];
+}
+
+class AuthRemoveAvatarRequested extends AuthEvent {
+  const AuthRemoveAvatarRequested();
 }
 
 class AuthUpdateLanguageRequested extends AuthEvent {

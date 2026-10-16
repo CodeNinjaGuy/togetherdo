@@ -318,9 +318,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get send => 'Senden';
 
   @override
-  String get avatarUpload => 'Avatar-Upload wird später implementiert';
-
-  @override
   String get profileSaving => 'Profil wird gespeichert...';
 
   @override
@@ -913,6 +910,51 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get privacySecurityIrreversible => 'Hinweis: Das Löschen von Listen entfernt alle zugehörigen Daten unwiderruflich.';
+
+  @override
+  String get avatarChange => 'Profilbild ändern';
+
+  @override
+  String get avatarSheetTitle => 'Profilbild';
+
+  @override
+  String get avatarTakePhoto => 'Foto aufnehmen';
+
+  @override
+  String get avatarChooseFromPhotos => 'Aus Fotos wählen';
+
+  @override
+  String get avatarChooseFile => 'Bild auswählen …';
+
+  @override
+  String get avatarRemove => 'Profilbild entfernen';
+
+  @override
+  String get avatarUpdated => 'Profilbild aktualisiert';
+
+  @override
+  String get avatarRemoved => 'Profilbild entfernt';
+
+  @override
+  String get avatarUploadFailed => 'Das Profilbild konnte gerade nicht gespeichert werden. Bitte versuche es später noch einmal.';
+
+  @override
+  String get avatarImageUnavailable => 'Dieses Bild kann nicht verwendet werden. Bitte wähle ein anderes.';
+
+  @override
+  String get avatarPermissionTitle => 'Zugriff erlauben';
+
+  @override
+  String get avatarCameraPermissionMessage => 'TogetherDo darf die Kamera noch nicht verwenden. Du kannst den Zugriff in den Einstellungen erlauben, um ein Profilfoto aufzunehmen.';
+
+  @override
+  String get avatarPhotosPermissionMessage => 'TogetherDo darf deine Fotos noch nicht verwenden. Du kannst den Zugriff in den Einstellungen erlauben, um ein Profilbild auszuwählen.';
+
+  @override
+  String get avatarOpenSettings => 'Einstellungen öffnen';
+
+  @override
+  String get avatarNotNow => 'Nicht jetzt';
 }
 
 /// The translations for German, as used in Austria (`de_AT`).

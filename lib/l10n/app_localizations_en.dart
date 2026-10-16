@@ -318,9 +318,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get send => 'Send';
 
   @override
-  String get avatarUpload => 'Avatar upload will be implemented later';
-
-  @override
   String get profileSaving => 'Profile is being saved...';
 
   @override
@@ -913,6 +910,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacySecurityIrreversible => 'Note: Deleting lists removes all associated data irreversibly.';
+
+  @override
+  String get avatarChange => 'Change profile picture';
+
+  @override
+  String get avatarSheetTitle => 'Profile picture';
+
+  @override
+  String get avatarTakePhoto => 'Take photo';
+
+  @override
+  String get avatarChooseFromPhotos => 'Choose from photos';
+
+  @override
+  String get avatarChooseFile => 'Choose image …';
+
+  @override
+  String get avatarRemove => 'Remove profile picture';
+
+  @override
+  String get avatarUpdated => 'Profile picture updated';
+
+  @override
+  String get avatarRemoved => 'Profile picture removed';
+
+  @override
+  String get avatarUploadFailed => 'The profile picture couldn\'t be saved right now. Please try again later.';
+
+  @override
+  String get avatarImageUnavailable => 'This image can\'t be used. Please choose a different one.';
+
+  @override
+  String get avatarPermissionTitle => 'Allow access';
+
+  @override
+  String get avatarCameraPermissionMessage => 'TogetherDo isn\'t allowed to use the camera yet. You can allow access in Settings to take a profile photo.';
+
+  @override
+  String get avatarPhotosPermissionMessage => 'TogetherDo isn\'t allowed to use your photos yet. You can allow access in Settings to choose a profile picture.';
+
+  @override
+  String get avatarOpenSettings => 'Open Settings';
+
+  @override
+  String get avatarNotNow => 'Not now';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).

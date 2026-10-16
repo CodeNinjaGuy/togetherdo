@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:togetherdo/l10n/app_localizations.dart';
@@ -8,6 +13,7 @@ import '../../blocs/auth/auth_state.dart';
 import '../../blocs/theme/theme_bloc.dart';
 import '../../blocs/theme/theme_event.dart';
 import '../../blocs/theme/theme_state.dart';
+import '../../widgets/profile/editable_profile_avatar.dart';
 import '../../widgets/profile/fiberoptics25_logo.dart';
 import '../../widgets/profile/language_selector.dart';
 import 'notification_settings_screen.dart';
@@ -64,17 +70,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isEditing = false;
       });
     }
-  }
-
-  void _uploadAvatar() {
-    // Avatar-Upload wird in einer späteren Version implementiert
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) {
-      return;
-    }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(l10n.avatarUpload)));
   }
 
   @override
@@ -148,46 +143,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Avatar Section
-                  Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 60,
-                        backgroundImage: authState.user.avatarUrl != null
-                            ? NetworkImage(authState.user.avatarUrl!)
-                            : null,
-                        child: authState.user.avatarUrl == null
-                            ? Text(
-                                authState.user.displayName.isNotEmpty
-                                    ? authState.user.displayName[0]
-                                          .toUpperCase()
-                                    : 'U',
-                                style: const TextStyle(
-                                  fontSize: 40,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              )
-                            : null,
-                      ),
-                      if (_isEditing)
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.camera_alt,
-                                color: Colors.white,
-                              ),
-                              onPressed: _uploadAvatar,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
+                  EditableProfileAvatar(user: authState.user),
                   const SizedBox(height: 24),
 
                   // Fiberoptics25 Logo (nur im Fiberoptics25 Theme sichtbar)

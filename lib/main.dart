@@ -40,10 +40,17 @@ import 'utils/app_theme.dart';
 import 'utils/global_navigator.dart';
 import 'firebase_options.dart';
 import 'services/messaging_service.dart';
+import 'services/firebase_emulator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Nur für lokale Tests: `--dart-define=USE_FIREBASE_EMULATOR=true`
+  // verbindet Auth, Firestore und Storage mit der Firebase Emulator Suite.
+  if (useFirebaseEmulator) {
+    await connectToFirebaseEmulator();
+  }
 
   // Messaging Service initialisieren
   await MessagingService().initialize();
@@ -187,7 +194,8 @@ class TogetherDoAppView extends StatelessWidget {
                           backgroundColor: Theme.of(context).colorScheme.error,
                         ),
                       );
-                    } else if (state is AuthAuthenticated) {
+                    } else if (state is AuthAuthenticated &&
+                        state is! AuthAvatarState) {
                       // Nach erfolgreicher Authentifizierung: Profilsprache laden
                       context.read<LanguageBloc>().add(
                         const LanguageLoadProfileRequested(),

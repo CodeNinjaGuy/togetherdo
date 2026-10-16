@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -9,6 +14,7 @@ import '../../blocs/auth/auth_state.dart';
 import '../../blocs/theme/theme_bloc.dart';
 import '../../blocs/theme/theme_event.dart';
 import '../../blocs/theme/theme_state.dart';
+import '../../widgets/profile/editable_profile_avatar.dart';
 import '../../widgets/profile/language_selector.dart';
 import 'notification_settings_screen.dart';
 
@@ -113,23 +119,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  radius: 40,
-                  backgroundImage: user.avatarUrl != null
-                      ? NetworkImage(user.avatarUrl!)
-                      : null,
-                  child: user.avatarUrl == null
-                      ? Text(
-                          user.displayName.isNotEmpty
-                              ? user.displayName[0].toUpperCase()
-                              : 'U',
-                          style: const TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      : null,
-                ),
+                EditableProfileAvatar(user: user, radius: 48),
                 const SizedBox(width: 32),
                 Expanded(
                   child: Column(

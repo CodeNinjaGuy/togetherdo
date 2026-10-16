@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -9,6 +14,7 @@ import '../../blocs/todo/todo_bloc.dart';
 import '../../blocs/todo/todo_event.dart';
 import '../../repositories/list_repository.dart';
 import '../../models/todo_model.dart';
+import '../common/user_avatar.dart';
 
 class AddTodoDialog extends StatefulWidget {
   final String listId;
@@ -252,9 +258,21 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
                       ..._availableUsers.map((user) {
                         return DropdownMenuItem<String>(
                           value: user['id'],
-                          child: Text(
-                            user['name']!,
-                            overflow: TextOverflow.ellipsis,
+                          child: Row(
+                            children: [
+                              UserAvatar(
+                                userId: user['id'],
+                                name: user['name']!,
+                                radius: 12,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  user['name']!,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
                         );
                       }),

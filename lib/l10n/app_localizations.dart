@@ -716,12 +716,6 @@ abstract class AppLocalizations {
   /// **'Send'**
   String get send;
 
-  /// No description provided for @avatarUpload.
-  ///
-  /// In en, this message translates to:
-  /// **'Avatar upload will be implemented later'**
-  String get avatarUpload;
-
   /// No description provided for @profileSaving.
   ///
   /// In en, this message translates to:
@@ -1873,6 +1867,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Note: Deleting lists removes all associated data irreversibly.'**
   String get privacySecurityIrreversible;
+
+  /// No description provided for @avatarChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change profile picture'**
+  String get avatarChange;
+
+  /// No description provided for @avatarSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile picture'**
+  String get avatarSheetTitle;
+
+  /// No description provided for @avatarTakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get avatarTakePhoto;
+
+  /// No description provided for @avatarChooseFromPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from photos'**
+  String get avatarChooseFromPhotos;
+
+  /// No description provided for @avatarChooseFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose image …'**
+  String get avatarChooseFile;
+
+  /// No description provided for @avatarRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove profile picture'**
+  String get avatarRemove;
+
+  /// No description provided for @avatarUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile picture updated'**
+  String get avatarUpdated;
+
+  /// No description provided for @avatarRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile picture removed'**
+  String get avatarRemoved;
+
+  /// No description provided for @avatarUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The profile picture couldn\'t be saved right now. Please try again later.'**
+  String get avatarUploadFailed;
+
+  /// No description provided for @avatarImageUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This image can\'t be used. Please choose a different one.'**
+  String get avatarImageUnavailable;
+
+  /// No description provided for @avatarPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow access'**
+  String get avatarPermissionTitle;
+
+  /// No description provided for @avatarCameraPermissionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'TogetherDo isn\'t allowed to use the camera yet. You can allow access in Settings to take a profile photo.'**
+  String get avatarCameraPermissionMessage;
+
+  /// No description provided for @avatarPhotosPermissionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'TogetherDo isn\'t allowed to use your photos yet. You can allow access in Settings to choose a profile picture.'**
+  String get avatarPhotosPermissionMessage;
+
+  /// No description provided for @avatarOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get avatarOpenSettings;
+
+  /// No description provided for @avatarNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get avatarNotNow;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

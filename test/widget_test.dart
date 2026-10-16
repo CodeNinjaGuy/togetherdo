@@ -11,7 +11,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:togetherdo/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  // Vorlage aus `flutter create` (Zähler-App). Die echte App braucht Firebase
+  // und hat keinen Zähler, daher übersprungen; Profilbild-Tests siehe
+  // avatar_test.dart.
+  testWidgets('Counter increments smoke test', skip: true, (
+    WidgetTester tester,
+  ) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const TogetherDoApp());
 

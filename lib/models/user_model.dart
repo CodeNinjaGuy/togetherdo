@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'package:equatable/equatable.dart';
 
 class UserModel extends Equatable {
@@ -83,12 +88,13 @@ class UserModel extends Equatable {
     Map<String, bool>? notificationSettings,
     String? languageCode,
     String? countryCode,
+    bool clearAvatarUrl = false,
   }) {
     return UserModel(
       id: id ?? this.id,
       email: email ?? this.email,
       displayName: displayName ?? this.displayName,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
+      avatarUrl: clearAvatarUrl ? null : (avatarUrl ?? this.avatarUrl),
       createdAt: createdAt ?? this.createdAt,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
       fcmToken: fcmToken ?? this.fcmToken,

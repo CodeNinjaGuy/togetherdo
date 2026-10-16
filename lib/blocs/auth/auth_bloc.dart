@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../repositories/auth_repository.dart';
 import 'auth_event.dart';
@@ -21,6 +26,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLogoutRequested>(_onAuthLogoutRequested);
     on<AuthUpdateProfileRequested>(_onAuthUpdateProfileRequested);
     on<AuthUploadAvatarRequested>(_onAuthUploadAvatarRequested);
+    on<AuthRemoveAvatarRequested>(_onAuthRemoveAvatarRequested);
     on<AuthUpdateLanguageRequested>(_onAuthUpdateLanguageRequested);
     on<AuthDeleteAccountRequested>(_onAuthDeleteAccountRequested);
     on<AuthReauthenticateRequested>(_onAuthReauthenticateRequested); // NEU
@@ -118,17 +124,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthUploadAvatarRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(const AuthProfileUpdateLoading());
+    final currentState = state;
+    if (currentState is! AuthAuthenticated) return;
+    final user = currentState.user;
+    emit(AuthAvatarUpdating(user: user));
     try {
-      final avatarUrl = await _authRepository.uploadAvatar(event.imagePath);
-      final currentState = state;
-      if (currentState is AuthAuthenticated) {
-        final updatedUser = currentState.user.copyWith(avatarUrl: avatarUrl);
-        // Nach erfolgreichem Avatar-Upload direkt zu AuthAuthenticated wechseln
-        emit(AuthAuthenticated(user: updatedUser));
-      }
+      final avatarUrl = await _authRepository.uploadAvatar(event.jpegBytes);
+      emit(AuthAvatarUpdated(user: user.copyWith(avatarUrl: avatarUrl)));
     } catch (e) {
-      emit(AuthProfileUpdateFailure(message: e.toString()));
+      emit(AuthAvatarUpdateFailure(user: user, message: e.toString()));
+    }
+  }
+
+  Future<void> _onAuthRemoveAvatarRequested(
+    AuthRemoveAvatarRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! AuthAuthenticated) return;
+    final user = currentState.user;
+    emit(AuthAvatarUpdating(user: user));
+    try {
+      await _authRepository.removeAvatar();
+      emit(AuthAvatarUpdated(user: user.copyWith(clearAvatarUrl: true)));
+    } catch (e) {
+      emit(AuthAvatarUpdateFailure(user: user, message: e.toString()));
     }
   }
 

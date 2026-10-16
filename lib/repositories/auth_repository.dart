@@ -1,4 +1,8 @@
-import 'dart:io';
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -24,7 +28,13 @@ abstract class AuthRepository {
     required String languageCode,
     required String countryCode,
   });
-  Future<String> uploadAvatar(String imagePath);
+
+  /// Lädt ein fertig aufbereitetes JPEG als Profilbild hoch, setzt die
+  /// Adresse im Nutzerprofil und in Firebase Auth und liefert sie zurück.
+  Future<String> uploadAvatar(Uint8List jpegBytes);
+
+  /// Entfernt das Profilbild (Datei, Profilfeld, Auth-photoURL).
+  Future<void> removeAvatar();
   Future<Map<String, String>?> getUserLanguage();
   Future<void> deleteAccount();
   Future<void> reauthenticate({required String password}); // NEU
@@ -129,12 +139,21 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<String> uploadAvatar(String imagePath) async {
+  Future<String> uploadAvatar(Uint8List jpegBytes) async {
     // Simuliere eine Verzögerung
     await Future.delayed(const Duration(seconds: 2));
 
     // Mock-Avatar-Upload - gibt eine simulierte URL zurück
-    return 'https://example.com/avatars/${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final url =
+        'https://example.com/avatars/${DateTime.now().millisecondsSinceEpoch}.jpg';
+    _currentUser = _currentUser?.copyWith(avatarUrl: url);
+    return url;
+  }
+
+  @override
+  Future<void> removeAvatar() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    _currentUser = _currentUser?.copyWith(clearAvatarUrl: true);
   }
 
   @override
@@ -317,16 +336,56 @@ class FirebaseAuthRepository implements AuthRepository {
     return UserModel.fromJson(updated);
   }
 
+  /// Feste Ablage je Nutzer – ein neues Bild überschreibt das alte.
+  static String avatarPath(String uid) => 'avatars/$uid.jpg';
+
   @override
-  Future<String> uploadAvatar(String imagePath) async {
+  Future<String> uploadAvatar(Uint8List jpegBytes) async {
     final user = _firebaseAuth.currentUser;
     if (user == null) throw Exception('Nicht angemeldet');
-    final file = File(imagePath);
-    final ref = _storage.ref().child(
-      'avatars/${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg',
+    final ref = _storage.ref(avatarPath(user.uid));
+    final snapshot = await ref.putData(
+      jpegBytes,
+      SettableMetadata(
+        contentType: 'image/jpeg',
+        cacheControl: 'public, max-age=31536000',
+      ),
     );
-    final uploadTask = await ref.putFile(file);
-    return await uploadTask.ref.getDownloadURL();
+    final downloadUrl = await snapshot.ref.getDownloadURL();
+    // Gleicher Pfad, neues Bild: Versionsparameter, damit Bild-Caches
+    // (App und Browser) die neue Datei laden.
+    final version = DateTime.now().millisecondsSinceEpoch;
+    final uri = Uri.parse(downloadUrl);
+    final url = uri
+        .replace(queryParameters: {...uri.queryParameters, 'v': '$version'})
+        .toString();
+    await _firestore.collection('users').doc(user.uid).set({
+      'avatarUrl': url,
+      'avatarUpdatedAt': DateTime.now().toIso8601String(),
+    }, SetOptions(merge: true));
+    await user.updatePhotoURL(url);
+    return url;
+  }
+
+  @override
+  Future<void> removeAvatar() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) throw Exception('Nicht angemeldet');
+    await _deleteAvatarFile(user.uid);
+    await _firestore.collection('users').doc(user.uid).set({
+      'avatarUrl': null,
+      'avatarUpdatedAt': DateTime.now().toIso8601String(),
+    }, SetOptions(merge: true));
+    await user.updatePhotoURL(null);
+  }
+
+  Future<void> _deleteAvatarFile(String uid) async {
+    try {
+      await _storage.ref(avatarPath(uid)).delete();
+    } on FirebaseException catch (e) {
+      // Kein Bild vorhanden ist kein Fehler.
+      if (e.code != 'object-not-found') rethrow;
+    }
   }
 
   @override
@@ -359,10 +418,17 @@ class FirebaseAuthRepository implements AuthRepository {
       // Schritt 2: Alle erstellten Listen löschen
       await _deleteAllCreatedLists(user.uid);
 
-      // Schritt 3: Alle Benutzerdaten aus Firestore löschen
+      // Schritt 3: Profilbild aus Firebase Storage löschen
+      try {
+        await _deleteAvatarFile(user.uid);
+      } catch (e) {
+        debugPrint('Profilbild konnte nicht gelöscht werden: $e');
+      }
+
+      // Schritt 4: Alle Benutzerdaten aus Firestore löschen
       await _firestore.collection('users').doc(user.uid).delete();
 
-      // Schritt 4: Firebase Auth Account löschen (mit Re-Authentifizierung)
+      // Schritt 5: Firebase Auth Account löschen (mit Re-Authentifizierung)
       await _deleteUserWithReAuth(user);
     } catch (e) {
       debugPrint('Fehler beim Löschen des Accounts: $e');

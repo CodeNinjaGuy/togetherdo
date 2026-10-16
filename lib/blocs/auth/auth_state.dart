@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'package:equatable/equatable.dart';
 import '../../models/user_model.dart';
 
@@ -58,4 +63,27 @@ class AuthProfileUpdateFailure extends AuthState {
 
   @override
   List<Object?> get props => [message];
+}
+
+/// Zustände rund ums Profilbild. Sie bleiben „angemeldet“, damit die
+/// Oberfläche während Upload/Fehler normal sichtbar bleibt.
+abstract class AuthAvatarState extends AuthAuthenticated {
+  const AuthAvatarState({required super.user});
+}
+
+class AuthAvatarUpdating extends AuthAvatarState {
+  const AuthAvatarUpdating({required super.user});
+}
+
+class AuthAvatarUpdated extends AuthAvatarState {
+  const AuthAvatarUpdated({required super.user});
+}
+
+class AuthAvatarUpdateFailure extends AuthAvatarState {
+  final String message;
+
+  const AuthAvatarUpdateFailure({required super.user, required this.message});
+
+  @override
+  List<Object?> get props => [user, message];
 }

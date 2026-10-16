@@ -1,0 +1,6 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+"NSCameraUsageDescription" = "TogetherDo verwendet die Kamera nur, wenn du ein neues Profilbild aufnehmen möchtest.";
+"NSPhotoLibraryUsageDescription" = "TogetherDo greift nur auf deine Fotos zu, wenn du ein Bild für dein Profil auswählst.";

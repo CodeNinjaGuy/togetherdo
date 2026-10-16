@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +12,7 @@ import '../../blocs/list/list_bloc.dart';
 import '../../blocs/list/list_event.dart';
 import '../../blocs/list/list_state.dart';
 import '../../models/list_model.dart';
+import '../common/user_avatar.dart';
 
 class ListItemWidget extends StatelessWidget {
   final ListModel list;
@@ -289,12 +295,12 @@ class ListItemWidget extends StatelessWidget {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Icon(
-                      Icons.person_outline,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    UserAvatar(
+                      userId: list.ownerId,
+                      name: list.ownerName,
+                      radius: 9,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 6),
                     Expanded(
                       child: Text(
                         '${l10n.owner}: ${list.ownerName}',

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +15,7 @@ import '../../models/todo_model.dart';
 import '../../models/list_model.dart';
 import '../../screens/chat/chat_screen.dart';
 import '../../repositories/chat_repository.dart';
+import '../common/user_avatar.dart';
 
 class TodoItemWidget extends StatelessWidget {
   final TodoModel todo;
@@ -139,12 +145,10 @@ class TodoItemWidget extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          isAssignedToMe ? Icons.person : Icons.person_outline,
-                          size: 14,
-                          color: isAssignedToMe
-                              ? Colors.green.shade700
-                              : Colors.blue.shade700,
+                        UserAvatar(
+                          userId: todo.assignedToUserId,
+                          name: todo.assignedToUserName ?? '?',
+                          radius: 9,
                         ),
                         const SizedBox(width: 4),
                         Flexible(
