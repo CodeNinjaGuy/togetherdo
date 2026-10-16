@@ -4,16 +4,28 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'td_palette.dart';
 
 /// Typografie-Skala. Überschriften in der Display-Schrift (rund, warm),
 /// Fließtext in der Grotesk (ruhig, gut lesbar).
 abstract final class TdTypography {
-  /// Schriften über google_fonts laden. Tests setzen `false`, dann bleibt
-  /// die Systemschrift (keine Netz- oder Asset-Zugriffe).
-  static bool useGoogleFonts = true;
+  /// Schriften, die als Assets gebündelt sind (pubspec.yaml, `fonts:`).
+  /// Unbekannte Namen fallen auf die Systemschrift zurück, damit die App
+  /// nie wegen einer Schrift bricht.
+  static const bundledFamilies = <String>{
+    'Manrope',
+    'Nunito',
+    'Source Code Pro',
+    'Orbitron',
+    'Pacifico',
+    'Space Mono',
+    'Playfair Display',
+    'Raleway',
+    'Lora',
+    'Audiowide',
+    'Roboto Mono',
+  };
 
   static TextTheme build(TdPalette p) {
     final base = p.isDark
@@ -68,14 +80,10 @@ abstract final class TdTypography {
     return theme;
   }
 
-  /// Holt eine Schrift aus google_fonts; bei unbekanntem Namen bleibt
-  /// die Systemschrift, damit die App nie wegen einer Schrift bricht.
+  /// Setzt die gebündelte Schriftfamilie auf alle Stile; bei unbekanntem
+  /// Namen bleibt die Systemschrift.
   static TextTheme _family(String family, TextTheme base) {
-    if (!useGoogleFonts) return base;
-    try {
-      return GoogleFonts.getTextTheme(family, base);
-    } catch (_) {
-      return base;
-    }
+    if (!bundledFamilies.contains(family)) return base;
+    return base.apply(fontFamily: family);
   }
 }

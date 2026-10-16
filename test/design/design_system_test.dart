@@ -29,10 +29,6 @@ Widget _wrap(
 }
 
 void main() {
-  setUpAll(() {
-    // Keine Schriften aus dem Netz im Test; Systemschrift genügt.
-    TdTypography.useGoogleFonts = false;
-  });
 
   group('Theme', () {
     test('alle Paletten bauen ein Theme mit TdTheme-Erweiterung', () {

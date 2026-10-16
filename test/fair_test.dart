@@ -102,7 +102,6 @@ Widget _app(Widget child, {Locale locale = const Locale('de', 'DE')}) {
 
 void main() {
   setUpAll(() {
-    TdTypography.useGoogleFonts = false;
     UserAvatarCache.instance.loaderOverride = (_) async => null;
   });
 

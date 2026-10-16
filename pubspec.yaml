@@ -37,8 +37,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
-  # UI & Icons
-  google_fonts: ^6.2.1
+  # UI & Icons (Schriften liegen als Assets unter assets/fonts/)
   flutter_svg: ^2.2.0
 
   # State Management
@@ -64,6 +63,8 @@ dependencies:
 
   # Image Handling
   image_picker: ^1.1.2
+  # Anhänge (PDF/Dateien) an Aufgaben und im Chat
+  file_picker: ^10.2.1
 
   # Navigation
   go_router: ^16.0.0
@@ -120,6 +121,7 @@ flutter:
   assets:
     - assets/images/
     - assets/sounds/
+    - assets/fonts/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -127,22 +129,84 @@ flutter:
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
 
-  # To add custom fonts to your application, add a fonts section here,
-  # in this "flutter" section. Each entry in this list should have a
-  # "family" key with the font family name, and a "fonts" key with a
-  # list giving the asset and other descriptors for the font. For
-  # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
-  #
-  # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/to/font-from-package
+  # Gebündelte Schriften (keine Netzladung zur Laufzeit). Lizenzen:
+  # assets/fonts/LICENSE-*.txt (SIL OFL 1.1, Roboto Mono: Apache 2.0).
+  fonts:
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope/Manrope-400.ttf
+          weight: 400
+        - asset: assets/fonts/Manrope/Manrope-500.ttf
+          weight: 500
+        - asset: assets/fonts/Manrope/Manrope-600.ttf
+          weight: 600
+        - asset: assets/fonts/Manrope/Manrope-700.ttf
+          weight: 700
+        - asset: assets/fonts/Manrope/Manrope-800.ttf
+          weight: 800
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito/Nunito-600.ttf
+          weight: 600
+        - asset: assets/fonts/Nunito/Nunito-700.ttf
+          weight: 700
+        - asset: assets/fonts/Nunito/Nunito-800.ttf
+          weight: 800
+    - family: Source Code Pro
+      fonts:
+        - asset: assets/fonts/SourceCodePro/SourceCodePro-400.ttf
+          weight: 400
+        - asset: assets/fonts/SourceCodePro/SourceCodePro-500.ttf
+          weight: 500
+        - asset: assets/fonts/SourceCodePro/SourceCodePro-600.ttf
+          weight: 600
+        - asset: assets/fonts/SourceCodePro/SourceCodePro-700.ttf
+          weight: 700
+    - family: Orbitron
+      fonts:
+        - asset: assets/fonts/Orbitron/Orbitron-700.ttf
+          weight: 700
+        - asset: assets/fonts/Orbitron/Orbitron-800.ttf
+          weight: 800
+    - family: Pacifico
+      fonts:
+        - asset: assets/fonts/Pacifico/Pacifico-400.ttf
+          weight: 400
+    - family: Space Mono
+      fonts:
+        - asset: assets/fonts/SpaceMono/SpaceMono-400.ttf
+          weight: 400
+        - asset: assets/fonts/SpaceMono/SpaceMono-700.ttf
+          weight: 700
+    - family: Playfair Display
+      fonts:
+        - asset: assets/fonts/PlayfairDisplay/PlayfairDisplay-700.ttf
+          weight: 700
+        - asset: assets/fonts/PlayfairDisplay/PlayfairDisplay-800.ttf
+          weight: 800
+    - family: Raleway
+      fonts:
+        - asset: assets/fonts/Raleway/Raleway-400.ttf
+          weight: 400
+        - asset: assets/fonts/Raleway/Raleway-500.ttf
+          weight: 500
+        - asset: assets/fonts/Raleway/Raleway-600.ttf
+          weight: 600
+        - asset: assets/fonts/Raleway/Raleway-700.ttf
+          weight: 700
+        - asset: assets/fonts/Raleway/Raleway-800.ttf
+          weight: 800
+    - family: Lora
+      fonts:
+        - asset: assets/fonts/Lora/Lora-700.ttf
+          weight: 700
+    - family: Audiowide
+      fonts:
+        - asset: assets/fonts/Audiowide/Audiowide-400.ttf
+          weight: 400
+    - family: Roboto Mono
+      fonts:
+        - asset: assets/fonts/RobotoMono/RobotoMono-500.ttf
+          weight: 500
+        - asset: assets/fonts/RobotoMono/RobotoMono-700.ttf
+          weight: 700

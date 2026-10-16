@@ -65,7 +65,7 @@ class TdPalette {
   final Color warning;
   final Color danger;
 
-  /// Schriftfamilien (google_fonts). `displayFont` für Überschriften,
+  /// Schriftfamilien (gebündelte Assets, siehe `TdTypography.bundledFamilies`). `displayFont` für Überschriften,
   /// `bodyFont` für Fließtext.
   final String bodyFont;
   final String displayFont;
