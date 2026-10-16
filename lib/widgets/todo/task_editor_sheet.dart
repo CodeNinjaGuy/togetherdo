@@ -8,6 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:togetherdo/l10n/app_localizations.dart';
 
+import '../../calendar/repositories/termin_repository.dart';
+import '../../calendar/services/verfuegbarkeit.dart';
 import '../../design/td_design.dart';
 import '../../fairness/fairness.dart';
 import '../../models/todo_model.dart';
@@ -33,6 +35,11 @@ Future<void> showTaskEditorSheet(
   bool canEdit = true,
 }) {
   final l10n = AppLocalizations.of(context)!;
+  // Urlaub im Familienkalender: Abwesende werden nicht vorgeschlagen.
+  final verfuegbarkeit = Verfuegbarkeit(
+    repository: FirebaseTerminRepository(),
+    listIds: [listId],
+  );
   final title = todo == null
       ? l10n.newTodoTitle
       : (canEdit ? l10n.editTodoTitle : l10n.taskDetails);
@@ -51,6 +58,8 @@ Future<void> showTaskEditorSheet(
       chatRepository: context.read<ChatRepository>(),
       attachmentRepository: context.read<AnhangRepository>(),
       attachmentService: context.read<AttachmentService>(),
+      absentOn: (tag) =>
+          verfuegbarkeit.abwesende(members.map((m) => m.id), tag),
     ),
   );
 }
@@ -71,6 +80,7 @@ class TaskEditorForm extends StatefulWidget {
     this.chatRepository,
     this.attachmentRepository,
     this.attachmentService,
+    this.absentOn,
     this.now,
   });
 
@@ -90,6 +100,10 @@ class TaskEditorForm extends StatefulWidget {
   final AnhangRepository? attachmentRepository;
   final AttachmentService? attachmentService;
 
+  /// Wer ist an diesem Tag abwesend (Urlaub im Kalender)? Ohne Angabe
+  /// gilt niemand als abwesend.
+  final Future<Set<String>> Function(DateTime tag)? absentOn;
+
   /// Nur für Tests.
   final DateTime? now;
 
@@ -107,6 +121,12 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
   bool _dueHasTime = false;
   String? _assigneeId;
   FairnessSuggestion? _suggestion;
+
+  /// Abwesende am Fälligkeitstag (sonst heute).
+  Set<String> _absent = const {};
+
+  /// Zuständigkeit von Hand gewählt: Vorschlag überschreibt sie nicht mehr.
+  bool _assigneeTouched = false;
   bool _saving = false;
   final AnhangVormerkung _vormerkung = AnhangVormerkung();
 
@@ -128,15 +148,39 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
     _dueHasTime = _due != null && (_due!.hour != 0 || _due!.minute != 0);
     _assigneeId = t?.assignedToUserId;
 
-    // Vorschlag nur, wenn mehrere Personen in der Liste sind. Die eigene
-    // Aufgabe zählt beim Bearbeiten nicht zur Last.
-    if (widget.members.length > 1) {
-      _suggestion = suggestNextAssignee(
-        members: widget.members,
-        todos: widget.listTodos.where((x) => x.id != t?.id),
-        now: widget.now ?? DateTime.now(),
-      );
-      if (_isNew) _assigneeId = _suggestion?.member.id;
+    _suggest();
+    _loadAbsence();
+  }
+
+  /// Vorschlag nur, wenn mehrere Personen in der Liste sind. Die eigene
+  /// Aufgabe zählt beim Bearbeiten nicht zur Last; Abwesende entfallen.
+  void _suggest() {
+    if (widget.members.length <= 1) return;
+    _suggestion = suggestNextAssignee(
+      members: widget.members,
+      todos: widget.listTodos.where((x) => x.id != widget.todo?.id),
+      now: widget.now ?? DateTime.now(),
+      absent: _absent,
+    );
+    if (_isNew && !_assigneeTouched) _assigneeId = _suggestion?.member.id;
+  }
+
+  /// Lädt die Abwesenheiten für den Fälligkeitstag (ohne Fälligkeit: heute)
+  /// und rechnet den Vorschlag neu.
+  Future<void> _loadAbsence() async {
+    final load = widget.absentOn;
+    if (load == null || widget.members.length <= 1) return;
+    final day = _due ?? widget.now ?? DateTime.now();
+    try {
+      final absent = await load(DateTime(day.year, day.month, day.day));
+      if (!mounted) return;
+      setState(() {
+        _absent = absent;
+        _suggest();
+      });
+    } catch (e) {
+      // Ohne Kalender (offline, keine Rechte) bleibt der Vorschlag wie er ist.
+      debugPrint('Abwesenheiten nicht geladen: $e');
     }
   }
 
@@ -183,6 +227,7 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
         time?.minute ?? 0,
       );
     });
+    _loadAbsence();
   }
 
   Future<void> _save() async {
@@ -359,10 +404,13 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
                 label: l10n.removeDueDate,
                 icon: Icons.close_rounded,
                 dense: true,
-                onTap: () => setState(() {
-                  _due = null;
-                  _dueHasTime = false;
-                }),
+                onTap: () {
+                  setState(() {
+                    _due = null;
+                    _dueHasTime = false;
+                  });
+                  _loadAbsence();
+                },
               ),
           ],
         ),
@@ -376,17 +424,27 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
               label: l10n.nobody,
               icon: Icons.groups_rounded,
               selected: _assigneeId == null,
-              onTap: editable ? () => setState(() => _assigneeId = null) : null,
+              onTap: editable
+                  ? () => setState(() {
+                      _assigneeTouched = true;
+                      _assigneeId = null;
+                    })
+                  : null,
             ),
             for (final m in widget.members)
               TdChip(
                 key: ValueKey('assignee-${m.id}'),
-                label: memberDisplayName(l10n, m, widget.currentUserId),
+                label: _absent.contains(m.id)
+                    ? '${memberDisplayName(l10n, m, widget.currentUserId)} · ${l10n.memberAway}'
+                    : memberDisplayName(l10n, m, widget.currentUserId),
                 leading: MemberAvatar(member: m, size: 20),
                 color: avatarDataOf(m).resolveColor(),
                 selected: _assigneeId == m.id,
                 onTap: editable
-                    ? () => setState(() => _assigneeId = m.id)
+                    ? () => setState(() {
+                        _assigneeTouched = true;
+                        _assigneeId = m.id;
+                      })
                     : null,
               ),
           ],
@@ -395,7 +453,10 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
           const SizedBox(height: TdSpace.sm),
           InkWell(
             borderRadius: TdRadius.control,
-            onTap: () => setState(() => _assigneeId = suggested.id),
+            onTap: () => setState(() {
+              _assigneeTouched = true;
+              _assigneeId = suggested.id;
+            }),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: TdSpace.xs),
               child: Row(

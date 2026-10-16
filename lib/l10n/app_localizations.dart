@@ -4039,6 +4039,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please allow access to the camera or photos in Settings.'**
   String get anhangZugriffVerweigert;
+
+  /// No description provided for @memberAway.
+  ///
+  /// In en, this message translates to:
+  /// **'away'**
+  String get memberAway;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

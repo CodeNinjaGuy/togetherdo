@@ -2271,6 +2271,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get anhangZugriffVerweigert => 'Bitte erlaube den Zugriff auf Kamera bzw. Fotos in den Einstellungen.';
+
+  @override
+  String get memberAway => 'abwesend';
 }
 
 /// The translations for German, as used in Austria (`de_AT`).

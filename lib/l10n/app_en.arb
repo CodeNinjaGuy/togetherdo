@@ -1098,5 +1098,6 @@
       }
     }
   },
-  "anhangZugriffVerweigert": "Please allow access to the camera or photos in Settings."
+  "anhangZugriffVerweigert": "Please allow access to the camera or photos in Settings.",
+  "memberAway": "away"
 }

@@ -10,6 +10,8 @@ import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
+import '../../calendar/repositories/termin_repository.dart';
+import '../../calendar/services/verfuegbarkeit.dart';
 import '../../design/td_design.dart';
 import '../../fairness/fairness.dart';
 import '../../models/list_model.dart';
@@ -52,6 +54,29 @@ class _TodoScreenState extends State<TodoScreen> {
 
   /// Stand der laufenden Woche (für die Bewertungsanfrage nach Erfolg).
   FairnessStats? _weekStats;
+
+  /// Urlaub laut Familienkalender: Abwesende sind heute nicht „dran“.
+  late final Verfuegbarkeit _verfuegbarkeit = Verfuegbarkeit(
+    repository: FirebaseTerminRepository(),
+    listIds: [widget.listId],
+  );
+  String? _absentKey;
+  Future<Set<String>> _absentToday = Future.value(const {});
+
+  /// Abwesende von heute; neu geladen, wenn sich die Mitglieder ändern.
+  Future<Set<String>> _absentFor(List<FairnessMember> members) {
+    final key = members.map((m) => m.id).join(',');
+    if (key != _absentKey) {
+      _absentKey = key;
+      _absentToday = _verfuegbarkeit
+          .abwesende(members.map((m) => m.id), DateTime.now())
+          .catchError((Object e) {
+            debugPrint('Abwesenheiten nicht geladen: $e');
+            return <String>{};
+          });
+    }
+    return _absentToday;
+  }
 
   @override
   void initState() {
@@ -323,16 +348,20 @@ class _TodoScreenState extends State<TodoScreen> {
             todos: doneTodos,
             now: now,
           );
-          return FairnessCard(
-            members: members,
-            doneTodos: doneTodos,
-            suggestion: suggestNextAssignee(
+          return FutureBuilder<Set<String>>(
+            future: _absentFor(members),
+            builder: (context, absentSnap) => FairnessCard(
               members: members,
-              todos: [...todos, ...doneTodos],
-              now: now,
+              doneTodos: doneTodos,
+              suggestion: suggestNextAssignee(
+                members: members,
+                todos: [...todos, ...doneTodos],
+                now: now,
+                absent: absentSnap.data ?? const {},
+              ),
+              currentUserId: currentUserId,
+              onOpenStats: () => _openStats(list, currentUserId),
             ),
-            currentUserId: currentUserId,
-            onOpenStats: () => _openStats(list, currentUserId),
           );
         },
       );

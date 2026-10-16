@@ -192,12 +192,22 @@ class FairnessSuggestion {
 /// erledigten Punkten dieser Woche plus offenen zugewiesenen Punkten.
 /// Gleichstand: weniger erledigte Punkte, dann Reihenfolge der Mitglieder.
 /// [todos] darf alle Aufgaben der Liste enthalten.
+///
+/// [absent]: Mitglieder, die am betreffenden Tag abwesend sind (Urlaub im
+/// Familienkalender, siehe `Verfuegbarkeit`). Sie werden nicht
+/// vorgeschlagen; ihre Last zählt trotzdem in [FairnessSuggestion.load].
+/// Sind alle abwesend, gibt es keinen Vorschlag.
 FairnessSuggestion? suggestNextAssignee({
   required List<FairnessMember> members,
   required Iterable<TodoModel> todos,
   required DateTime now,
+  Set<String> absent = const {},
 }) {
-  if (members.isEmpty) return null;
+  final available = [
+    for (final m in members)
+      if (!absent.contains(m.id)) m,
+  ];
+  if (available.isEmpty) return null;
   final weekStart = fairnessPeriodStart(FairnessPeriod.week, now);
   final done = <String, int>{for (final m in members) m.id: 0};
   final open = <String, int>{for (final m in members) m.id: 0};
@@ -211,8 +221,8 @@ FairnessSuggestion? suggestNextAssignee({
     }
   }
   final load = {for (final m in members) m.id: done[m.id]! + open[m.id]!};
-  var best = members.first;
-  for (final m in members.skip(1)) {
+  var best = available.first;
+  for (final m in available.skip(1)) {
     final byLoad = load[m.id]!.compareTo(load[best.id]!);
     if (byLoad < 0 || (byLoad == 0 && done[m.id]! < done[best.id]!)) {
       best = m;

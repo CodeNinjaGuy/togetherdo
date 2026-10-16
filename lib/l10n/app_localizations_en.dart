@@ -2271,6 +2271,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get anhangZugriffVerweigert => 'Please allow access to the camera or photos in Settings.';
+
+  @override
+  String get memberAway => 'away';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).

@@ -385,6 +385,35 @@ void main() {
         isNull,
       );
     });
+
+    test('Abwesende (Urlaub) werden nicht vorgeschlagen', () {
+      final todos = [
+        todo('1', doneBy: 'anna', doneAt: now, effort: TaskEffort.heavy),
+        todo('2', doneBy: 'ben', doneAt: now, effort: TaskEffort.medium),
+      ];
+      // Ohne Abwesenheit wäre Cleo dran (Last 0).
+      expect(
+        suggestNextAssignee(members: members, todos: todos, now: now)!.member,
+        cleo,
+      );
+      final s = suggestNextAssignee(
+        members: members,
+        todos: todos,
+        now: now,
+        absent: const {'cleo'},
+      )!;
+      expect(s.member, ben); // nächstgeringste Last
+      expect(s.load['cleo'], 0); // Last bleibt sichtbar
+      expect(
+        suggestNextAssignee(
+          members: members,
+          todos: todos,
+          now: now,
+          absent: const {'anna', 'ben', 'cleo'},
+        ),
+        isNull,
+      );
+    });
   });
 
   group('Bewertungsanfrage', () {
@@ -587,6 +616,56 @@ void main() {
         expect(repo.added.single['title'], 'Bad putzen');
         expect(repo.added.single['assignedToUserId'], 'ben');
         expect(repo.added.single['effort'], TaskEffort.heavy);
+      },
+    );
+
+    testWidgets(
+      'Sheet „Neue Aufgabe“: Wer laut Kalender Urlaub hat, wird nicht vorgeschlagen',
+      (tester) async {
+        final repo = _RecordingTodoRepository();
+        final gefragt = <DateTime>[];
+        await tester.pumpWidget(
+          _app(
+            TaskEditorForm(
+              listId: 'L1',
+              members: members,
+              currentUserId: 'anna',
+              repository: repo,
+              now: now,
+              absentOn: (tag) async {
+                gefragt.add(tag);
+                return {'ben'};
+              },
+              listTodos: [
+                todo(
+                  '1',
+                  doneBy: 'anna',
+                  doneAt: now,
+                  effort: TaskEffort.heavy,
+                ),
+                todo(
+                  '2',
+                  doneBy: 'cleo',
+                  doneAt: now,
+                  effort: TaskEffort.medium,
+                ),
+              ],
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        // Ohne Urlaub wäre Ben dran (siehe oben); Ben ist abwesend.
+        expect(find.text('Vorschlag: Cleo ist dran'), findsOneWidget);
+        expect(find.textContaining('· abwesend'), findsOneWidget);
+        expect(gefragt.single, DateTime(now.year, now.month, now.day));
+
+        await tester.enterText(find.byType(TextField).first, 'Müll');
+        await tester.pump();
+        await tester.ensureVisible(find.byKey(const ValueKey('task-save')));
+        await tester.tap(find.byKey(const ValueKey('task-save')));
+        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(repo.added.single['assignedToUserId'], 'cleo');
       },
     );
 

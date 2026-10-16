@@ -1098,5 +1098,9 @@
       }
     }
   },
-  "anhangZugriffVerweigert": "Bitte erlaube den Zugriff auf Kamera bzw. Fotos in den Einstellungen."
+  "anhangZugriffVerweigert": "Bitte erlaube den Zugriff auf Kamera bzw. Fotos in den Einstellungen.",
+  "memberAway": "abwesend",
+  "@memberAway": {
+    "description": "Kennzeichen hinter einem Mitglied, das am Tag der Aufgabe laut Kalender abwesend ist (Urlaub)"
+  }
 }
