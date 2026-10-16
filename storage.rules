@@ -5,10 +5,94 @@
 // Profilbilder liegen unter avatars/{uid}.jpg. Nur die Person selbst darf
 // ihr Bild schreiben oder löschen; angemeldete Nutzer dürfen Bilder lesen
 // (Anzeige bei Mitgliedern geteilter Listen, Chat, Zuweisungen).
+//
+// Anhänge an Terminen liegen unter termine/{listId}/{terminId}/{datei}
+// (Datei = Anhang-Kennung, Vorschau = <Kennung>_vorschau.jpg). Lesen und
+// Hochladen dürfen Mitglieder der Liste (Firestore lists/{listId}.allUserIds);
+// jede hochgeladene Datei trägt die Metadaten hochgeladenVon = eigene uid.
+// Bilder bis 10 MB, PDFs/Dokumente bis 20 MB; Überschreiben ist verboten.
+// Löschen darf, wer hochgeladen hat, die Listenbesitzerin oder ein
+// Mitglied mit Bearbeitungsrecht (allowEdit != false). Dieselben
+// Funktionen (istMitglied, darfBearbeiten, gueltigeDatei) gelten später für
+// Anhänge an Aufgaben unter todos/{listId}/{todoId}/{datei}.
 rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
+
+    // ---- Gemeinsame Prüfungen für Anhänge (Termine, später Aufgaben) ----
+
+    function angemeldet() {
+      return request.auth != null;
+    }
+
+    function listeVorhanden(listId) {
+      return firestore.exists(/databases/(default)/documents/lists/$(listId));
+    }
+
+    function liste(listId) {
+      return firestore.get(/databases/(default)/documents/lists/$(listId)).data;
+    }
+
+    // Mitglied der Liste (Besitzer steht ebenfalls in allUserIds).
+    function istMitglied(listId) {
+      return angemeldet()
+        && listeVorhanden(listId)
+        && request.auth.uid in liste(listId).allUserIds;
+    }
+
+    // Besitzer oder Mitglied, solange die Liste nicht auf Nur-Lesen steht.
+    function darfBearbeiten(listId) {
+      return angemeldet()
+        && listeVorhanden(listId)
+        && (liste(listId).ownerId == request.auth.uid
+          || (request.auth.uid in liste(listId).allUserIds
+            && liste(listId).allowEdit != false));
+    }
+
+    function istBild() {
+      return request.resource.contentType.matches('image/(jpeg|png|webp|heic|heif)')
+        && request.resource.size <= 10 * 1024 * 1024;
+    }
+
+    function istDokument() {
+      return request.resource.contentType in [
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'text/plain',
+          'application/rtf',
+          'application/vnd.ms-excel',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'application/vnd.ms-powerpoint',
+          'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+          'text/csv',
+          'text/calendar'
+        ]
+        && request.resource.size <= 20 * 1024 * 1024;
+    }
+
+    function gueltigeDatei() {
+      return istBild() || istDokument();
+    }
+
+    // Die neue Datei trägt die eigene uid als Hochlader.
+    function hochladerIstIch() {
+      return request.resource.metadata != null
+        && 'hochgeladenVon' in request.resource.metadata
+        && request.resource.metadata.hochgeladenVon == request.auth.uid;
+    }
+
+    // Die vorhandene Datei wurde von mir hochgeladen.
+    function hochladerWarIch() {
+      return angemeldet()
+        && resource.metadata != null
+        && 'hochgeladenVon' in resource.metadata
+        && resource.metadata.hochgeladenVon == request.auth.uid;
+    }
+
+    // ---- Profilbilder ----
+
     match /avatars/{fileName} {
       allow read: if request.auth != null;
 
@@ -19,6 +103,22 @@ service firebase.storage {
 
       allow delete: if request.auth != null
         && fileName == request.auth.uid + '.jpg';
+    }
+
+    // ---- Anhänge an Terminen ----
+
+    match /termine/{listId}/{terminId}/{datei} {
+      allow read: if istMitglied(listId);
+
+      allow create: if resource == null
+        && istMitglied(listId)
+        && hochladerIstIch()
+        && gueltigeDatei();
+
+      // Überschreiben ist nicht vorgesehen: neue Datei = neue Kennung.
+      allow update: if false;
+
+      allow delete: if hochladerWarIch() || darfBearbeiten(listId);
     }
 
     // Alles andere bleibt gesperrt.
