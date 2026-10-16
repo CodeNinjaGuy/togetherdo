@@ -3091,6 +3091,1044 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Account'**
   String get account;
+
+  /// No description provided for @anhangTitel.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments'**
+  String get anhangTitel;
+
+  /// No description provided for @anhangHinzufuegen.
+  ///
+  /// In en, this message translates to:
+  /// **'Add attachment'**
+  String get anhangHinzufuegen;
+
+  /// No description provided for @anhangQuelleTitel.
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like to attach?'**
+  String get anhangQuelleTitel;
+
+  /// No description provided for @anhangFotoAufnehmen.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get anhangFotoAufnehmen;
+
+  /// No description provided for @anhangFotoAufnehmenHinweis.
+  ///
+  /// In en, this message translates to:
+  /// **'Using the camera'**
+  String get anhangFotoAufnehmenHinweis;
+
+  /// No description provided for @anhangAusGalerie.
+  ///
+  /// In en, this message translates to:
+  /// **'From gallery'**
+  String get anhangAusGalerie;
+
+  /// No description provided for @anhangAusGalerieHinweis.
+  ///
+  /// In en, this message translates to:
+  /// **'One or more photos'**
+  String get anhangAusGalerieHinweis;
+
+  /// No description provided for @anhangDokument.
+  ///
+  /// In en, this message translates to:
+  /// **'Document'**
+  String get anhangDokument;
+
+  /// No description provided for @anhangDokumentHinweis.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF, Word, Excel and more'**
+  String get anhangDokumentHinweis;
+
+  /// No description provided for @anhangKeine.
+  ///
+  /// In en, this message translates to:
+  /// **'No attachments yet'**
+  String get anhangKeine;
+
+  /// No description provided for @anhangKeineHinweis.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos, PDFs and documents that belong here.'**
+  String get anhangKeineHinweis;
+
+  /// No description provided for @anhangOeffnen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get anhangOeffnen;
+
+  /// No description provided for @anhangTeilen.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get anhangTeilen;
+
+  /// No description provided for @anhangLoeschen.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get anhangLoeschen;
+
+  /// No description provided for @anhangLoeschenFrage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete “{name}”?'**
+  String anhangLoeschenFrage(String name);
+
+  /// No description provided for @anhangLoeschenHinweis.
+  ///
+  /// In en, this message translates to:
+  /// **'The file will be removed for everyone in this list.'**
+  String get anhangLoeschenHinweis;
+
+  /// No description provided for @anhangAbbrechen.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get anhangAbbrechen;
+
+  /// No description provided for @anhangSchliessen.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get anhangSchliessen;
+
+  /// No description provided for @anhangWeitereAktionen.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get anhangWeitereAktionen;
+
+  /// No description provided for @anhangWirdHochgeladen.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading…'**
+  String get anhangWirdHochgeladen;
+
+  /// No description provided for @anhangHochgeladen.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment uploaded'**
+  String get anhangHochgeladen;
+
+  /// No description provided for @anhangGeloescht.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment deleted'**
+  String get anhangGeloescht;
+
+  /// No description provided for @anhangLadeFehler.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment could not be loaded'**
+  String get anhangLadeFehler;
+
+  /// No description provided for @anhangErneut.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get anhangErneut;
+
+  /// No description provided for @anhangTypBild.
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get anhangTypBild;
+
+  /// No description provided for @anhangTypPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF'**
+  String get anhangTypPdf;
+
+  /// No description provided for @anhangTypDokument.
+  ///
+  /// In en, this message translates to:
+  /// **'Document'**
+  String get anhangTypDokument;
+
+  /// No description provided for @anhangGroesseKb.
+  ///
+  /// In en, this message translates to:
+  /// **'{kb} KB'**
+  String anhangGroesseKb(String kb);
+
+  /// No description provided for @anhangGroesseMb.
+  ///
+  /// In en, this message translates to:
+  /// **'{mb} MB'**
+  String anhangGroesseMb(String mb);
+
+  /// No description provided for @anhangZuGross.
+  ///
+  /// In en, this message translates to:
+  /// **'“{name}” is too large (at most {max})'**
+  String anhangZuGross(String name, String max);
+
+  /// No description provided for @anhangTypUnzulaessig.
+  ///
+  /// In en, this message translates to:
+  /// **'“{name}” has a file type that is not supported'**
+  String anhangTypUnzulaessig(String name);
+
+  /// No description provided for @anhangLimitErreicht.
+  ///
+  /// In en, this message translates to:
+  /// **'At most {max} attachments per entry'**
+  String anhangLimitErreicht(int max);
+
+  /// No description provided for @anhangFehlerAllgemein.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment could not be processed'**
+  String get anhangFehlerAllgemein;
+
+  /// No description provided for @anhangVonAnzahl.
+  ///
+  /// In en, this message translates to:
+  /// **'{index} of {gesamt}'**
+  String anhangVonAnzahl(int index, int gesamt);
+
+  /// No description provided for @anhangVorschauNichtMoeglich.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no preview for this file.'**
+  String get anhangVorschauNichtMoeglich;
+
+  /// No description provided for @kalTitel.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get kalTitel;
+
+  /// No description provided for @kalAnsichtSpuren.
+  ///
+  /// In en, this message translates to:
+  /// **'Lanes'**
+  String get kalAnsichtSpuren;
+
+  /// No description provided for @kalAnsichtAgenda.
+  ///
+  /// In en, this message translates to:
+  /// **'Agenda'**
+  String get kalAnsichtAgenda;
+
+  /// No description provided for @kalAnsichtMonat.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get kalAnsichtMonat;
+
+  /// No description provided for @kalHeute.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get kalHeute;
+
+  /// No description provided for @kalMorgen.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get kalMorgen;
+
+  /// No description provided for @kalDieseWoche.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get kalDieseWoche;
+
+  /// No description provided for @kalSpaeter.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get kalSpaeter;
+
+  /// No description provided for @kalAlle.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone'**
+  String get kalAlle;
+
+  /// No description provided for @kalNeuerTermin.
+  ///
+  /// In en, this message translates to:
+  /// **'New event'**
+  String get kalNeuerTermin;
+
+  /// No description provided for @kalTerminBearbeiten.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit event'**
+  String get kalTerminBearbeiten;
+
+  /// No description provided for @kalWannHabenAlleZeit.
+  ///
+  /// In en, this message translates to:
+  /// **'When is everyone free?'**
+  String get kalWannHabenAlleZeit;
+
+  /// No description provided for @kalFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get kalFilter;
+
+  /// No description provided for @kalListen.
+  ///
+  /// In en, this message translates to:
+  /// **'Lists'**
+  String get kalListen;
+
+  /// No description provided for @kalPersonen.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get kalPersonen;
+
+  /// No description provided for @kalArten.
+  ///
+  /// In en, this message translates to:
+  /// **'Types'**
+  String get kalArten;
+
+  /// No description provided for @kalArtTermin.
+  ///
+  /// In en, this message translates to:
+  /// **'Event'**
+  String get kalArtTermin;
+
+  /// No description provided for @kalArtArzt.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctor'**
+  String get kalArtArzt;
+
+  /// No description provided for @kalArtArbeit.
+  ///
+  /// In en, this message translates to:
+  /// **'Work'**
+  String get kalArtArbeit;
+
+  /// No description provided for @kalArtUrlaub.
+  ///
+  /// In en, this message translates to:
+  /// **'Vacation'**
+  String get kalArtUrlaub;
+
+  /// No description provided for @kalArtSchule.
+  ///
+  /// In en, this message translates to:
+  /// **'School'**
+  String get kalArtSchule;
+
+  /// No description provided for @kalArtGeburtstag.
+  ///
+  /// In en, this message translates to:
+  /// **'Birthday'**
+  String get kalArtGeburtstag;
+
+  /// No description provided for @kalArtSonstiges.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get kalArtSonstiges;
+
+  /// No description provided for @kalGanztaegig.
+  ///
+  /// In en, this message translates to:
+  /// **'All day'**
+  String get kalGanztaegig;
+
+  /// No description provided for @kalStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get kalStart;
+
+  /// No description provided for @kalEnde.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get kalEnde;
+
+  /// No description provided for @kalOrt.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get kalOrt;
+
+  /// No description provided for @kalNotiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get kalNotiz;
+
+  /// No description provided for @kalTitelFeld.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get kalTitelFeld;
+
+  /// No description provided for @kalTitelHinweis.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s happening?'**
+  String get kalTitelHinweis;
+
+  /// No description provided for @kalSchnelleingabeHinweis.
+  ///
+  /// In en, this message translates to:
+  /// **'Just type or speak: “Dentist Anna Tuesday 3 pm”'**
+  String get kalSchnelleingabeHinweis;
+
+  /// No description provided for @kalSchnelleingabeUebernehmen.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get kalSchnelleingabeUebernehmen;
+
+  /// No description provided for @kalSchnelleingabeErkannt.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognized'**
+  String get kalSchnelleingabeErkannt;
+
+  /// No description provided for @kalWiederholung.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get kalWiederholung;
+
+  /// No description provided for @kalWdhKeine.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get kalWdhKeine;
+
+  /// No description provided for @kalWdhTaeglich.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get kalWdhTaeglich;
+
+  /// No description provided for @kalWdhWoechentlich.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get kalWdhWoechentlich;
+
+  /// No description provided for @kalWdhMonatlich.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get kalWdhMonatlich;
+
+  /// No description provided for @kalWdhJaehrlich.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get kalWdhJaehrlich;
+
+  /// No description provided for @kalWdhAnTagen.
+  ///
+  /// In en, this message translates to:
+  /// **'On these days'**
+  String get kalWdhAnTagen;
+
+  /// No description provided for @kalWdhEnde.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends'**
+  String get kalWdhEnde;
+
+  /// No description provided for @kalWdhEndeNie.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get kalWdhEndeNie;
+
+  /// No description provided for @kalWdhEndeAm.
+  ///
+  /// In en, this message translates to:
+  /// **'On date'**
+  String get kalWdhEndeAm;
+
+  /// No description provided for @kalWdhEndeNach.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{After 1 time} other{After {count} times}}'**
+  String kalWdhEndeNach(int count);
+
+  /// No description provided for @kalWdhIntervall.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {count}'**
+  String kalWdhIntervall(int count);
+
+  /// No description provided for @kalWdhTaeglichN.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Daily} other{Every {count} days}}'**
+  String kalWdhTaeglichN(int count);
+
+  /// No description provided for @kalWdhWoechentlichN.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Weekly} other{Every {count} weeks}}'**
+  String kalWdhWoechentlichN(int count);
+
+  /// No description provided for @kalWdhMonatlichN.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Monthly} other{Every {count} months}}'**
+  String kalWdhMonatlichN(int count);
+
+  /// No description provided for @kalWdhJaehrlichN.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Yearly} other{Every {count} years}}'**
+  String kalWdhJaehrlichN(int count);
+
+  /// No description provided for @kalErinnerung.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder'**
+  String get kalErinnerung;
+
+  /// No description provided for @kalErinnerungKeine.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get kalErinnerungKeine;
+
+  /// No description provided for @kalErinnerungMinuten.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{At start} =1{1 minute before} other{{count} minutes before}}'**
+  String kalErinnerungMinuten(int count);
+
+  /// No description provided for @kalErinnerungStunden.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hour before} other{{count} hours before}}'**
+  String kalErinnerungStunden(int count);
+
+  /// No description provided for @kalErinnerungTage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day before} other{{count} days before}}'**
+  String kalErinnerungTage(int count);
+
+  /// No description provided for @kalLoeschenFrage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete event?'**
+  String get kalLoeschenFrage;
+
+  /// No description provided for @kalLoeschenSerieFrage.
+  ///
+  /// In en, this message translates to:
+  /// **'Just this one or the whole series?'**
+  String get kalLoeschenSerieFrage;
+
+  /// No description provided for @kalNurDiesesMal.
+  ///
+  /// In en, this message translates to:
+  /// **'Only this one'**
+  String get kalNurDiesesMal;
+
+  /// No description provided for @kalGanzeSerie.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole series'**
+  String get kalGanzeSerie;
+
+  /// No description provided for @kalTeilenIcs.
+  ///
+  /// In en, this message translates to:
+  /// **'Share calendar file'**
+  String get kalTeilenIcs;
+
+  /// No description provided for @kalKonfliktTitel.
+  ///
+  /// In en, this message translates to:
+  /// **'Heads-up'**
+  String get kalKonfliktTitel;
+
+  /// No description provided for @kalKonfliktBelegt.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} already has “{titel}” then'**
+  String kalKonfliktBelegt(String name, String titel);
+
+  /// No description provided for @kalKonfliktUrlaub.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is on vacation then'**
+  String kalKonfliktUrlaub(String name);
+
+  /// No description provided for @kalTrotzdemSpeichern.
+  ///
+  /// In en, this message translates to:
+  /// **'Save anyway'**
+  String get kalTrotzdemSpeichern;
+
+  /// No description provided for @kalKeineTermine.
+  ///
+  /// In en, this message translates to:
+  /// **'No events'**
+  String get kalKeineTermine;
+
+  /// No description provided for @kalKeineTermineHinweis.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the first event – everyone in the list will see it.'**
+  String get kalKeineTermineHinweis;
+
+  /// No description provided for @kalFreieZeitDauer.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get kalFreieZeitDauer;
+
+  /// No description provided for @kalFreieZeitZeitraum.
+  ///
+  /// In en, this message translates to:
+  /// **'Range'**
+  String get kalFreieZeitZeitraum;
+
+  /// No description provided for @kalFreieZeitNaechsteTage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Next day} other{Next {count} days}}'**
+  String kalFreieZeitNaechsteTage(int count);
+
+  /// No description provided for @kalFreieZeitKeine.
+  ///
+  /// In en, this message translates to:
+  /// **'No shared free time found.'**
+  String get kalFreieZeitKeine;
+
+  /// No description provided for @kalFreieZeitHinweis.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a slot to create an event there.'**
+  String get kalFreieZeitHinweis;
+
+  /// No description provided for @kalMinuten.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min'**
+  String kalMinuten(int count);
+
+  /// No description provided for @kalStunden.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hr} other{{count} hrs}}'**
+  String kalStunden(int count);
+
+  /// No description provided for @kalAufgabeFaellig.
+  ///
+  /// In en, this message translates to:
+  /// **'Task due'**
+  String get kalAufgabeFaellig;
+
+  /// No description provided for @kalJetzt.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get kalJetzt;
+
+  /// No description provided for @kalGespeichert.
+  ///
+  /// In en, this message translates to:
+  /// **'Event saved'**
+  String get kalGespeichert;
+
+  /// No description provided for @kalGeloescht.
+  ///
+  /// In en, this message translates to:
+  /// **'Event deleted'**
+  String get kalGeloescht;
+
+  /// No description provided for @kalUebersprungen.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped this time'**
+  String get kalUebersprungen;
+
+  /// No description provided for @kalFehler.
+  ///
+  /// In en, this message translates to:
+  /// **'That didn\'t work: {fehler}'**
+  String kalFehler(String fehler);
+
+  /// No description provided for @kalNaechsteTermine.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming events'**
+  String get kalNaechsteTermine;
+
+  /// No description provided for @kalZumKalender.
+  ///
+  /// In en, this message translates to:
+  /// **'Open calendar'**
+  String get kalZumKalender;
+
+  /// No description provided for @kalKeineNaechsten.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing planned.'**
+  String get kalKeineNaechsten;
+
+  /// No description provided for @kalUnbekannteNamen.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in the list: {namen}'**
+  String kalUnbekannteNamen(String namen);
+
+  /// No description provided for @kalListeWaehlen.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get kalListeWaehlen;
+
+  /// No description provided for @kalMailEinstellungen.
+  ///
+  /// In en, this message translates to:
+  /// **'Email notifications'**
+  String get kalMailEinstellungen;
+
+  /// No description provided for @kalMailErinnerungen.
+  ///
+  /// In en, this message translates to:
+  /// **'Event reminders'**
+  String get kalMailErinnerungen;
+
+  /// No description provided for @kalMailPush.
+  ///
+  /// In en, this message translates to:
+  /// **'Push'**
+  String get kalMailPush;
+
+  /// No description provided for @kalMailMail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get kalMailMail;
+
+  /// No description provided for @kalMailBeide.
+  ///
+  /// In en, this message translates to:
+  /// **'Both'**
+  String get kalMailBeide;
+
+  /// No description provided for @kalMailKeine.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get kalMailKeine;
+
+  /// No description provided for @kalMailWochenueberblick.
+  ///
+  /// In en, this message translates to:
+  /// **'Family weekly overview (Sunday evening)'**
+  String get kalMailWochenueberblick;
+
+  /// No description provided for @kalMailEinladungen.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive invitations by email'**
+  String get kalMailEinladungen;
+
+  /// No description provided for @kalMailHinweis.
+  ///
+  /// In en, this message translates to:
+  /// **'Emails come from noreply@seebubble.me. Every email has an unsubscribe link.'**
+  String get kalMailHinweis;
+
+  /// No description provided for @kalTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get kalTag;
+
+  /// No description provided for @kalPersonenAlle.
+  ///
+  /// In en, this message translates to:
+  /// **'For everyone'**
+  String get kalPersonenAlle;
+
+  /// No description provided for @kalAnhaenge.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments'**
+  String get kalAnhaenge;
+
+  /// No description provided for @kalMehr.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String kalMehr(int count);
+
+  /// No description provided for @kalErstelltVon.
+  ///
+  /// In en, this message translates to:
+  /// **'Added by {name}'**
+  String kalErstelltVon(String name);
+
+  /// No description provided for @kalBisZeit.
+  ///
+  /// In en, this message translates to:
+  /// **'until {zeit}'**
+  String kalBisZeit(String zeit);
+
+  /// No description provided for @kalTageAnzahl.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String kalTageAnzahl(int count);
+
+  /// No description provided for @kalDiktatHinweis.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening …'**
+  String get kalDiktatHinweis;
+
+  /// No description provided for @kalEinladenPerMail.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite by email'**
+  String get kalEinladenPerMail;
+
+  /// No description provided for @kalEinladenAdresse.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address'**
+  String get kalEinladenAdresse;
+
+  /// No description provided for @kalEinladenGesendet.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation sent'**
+  String get kalEinladenGesendet;
+
+  /// No description provided for @kalZuTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Day view'**
+  String get kalZuTag;
+
+  /// No description provided for @jahrTitel.
+  ///
+  /// In en, this message translates to:
+  /// **'Year overview'**
+  String get jahrTitel;
+
+  /// No description provided for @jahrZurueck.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous year'**
+  String get jahrZurueck;
+
+  /// No description provided for @jahrVor.
+  ///
+  /// In en, this message translates to:
+  /// **'Next year'**
+  String get jahrVor;
+
+  /// No description provided for @jahrBandTitel.
+  ///
+  /// In en, this message translates to:
+  /// **'Year band'**
+  String get jahrBandTitel;
+
+  /// No description provided for @jahrBandHinweis.
+  ///
+  /// In en, this message translates to:
+  /// **'Long-press and drag to plan time off – or tap the start and the end.'**
+  String get jahrBandHinweis;
+
+  /// No description provided for @jahrAuswahlStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start set: {datum} – now tap the end'**
+  String jahrAuswahlStart(String datum);
+
+  /// No description provided for @jahrAuswahlAbbrechen.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get jahrAuswahlAbbrechen;
+
+  /// No description provided for @jahrDichte.
+  ///
+  /// In en, this message translates to:
+  /// **'How busy the weeks are'**
+  String get jahrDichte;
+
+  /// No description provided for @jahrAlleFrei.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone off'**
+  String get jahrAlleFrei;
+
+  /// No description provided for @jahrAlleFreiKeine.
+  ///
+  /// In en, this message translates to:
+  /// **'No shared time off planned yet. Drag a range in the year band to add time off.'**
+  String get jahrAlleFreiKeine;
+
+  /// No description provided for @jahrAlleFreiChip.
+  ///
+  /// In en, this message translates to:
+  /// **'everyone off {zeitraum}'**
+  String jahrAlleFreiChip(String zeitraum);
+
+  /// No description provided for @jahrFeiertag.
+  ///
+  /// In en, this message translates to:
+  /// **'Public holiday'**
+  String get jahrFeiertag;
+
+  /// No description provided for @jahrFeiertage.
+  ///
+  /// In en, this message translates to:
+  /// **'Public holidays'**
+  String get jahrFeiertage;
+
+  /// No description provided for @jahrMonate.
+  ///
+  /// In en, this message translates to:
+  /// **'Months'**
+  String get jahrMonate;
+
+  /// No description provided for @jahrMonatOeffnen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {monat}'**
+  String jahrMonatOeffnen(String monat);
+
+  /// No description provided for @jahrUrlaubAuswahl.
+  ///
+  /// In en, this message translates to:
+  /// **'Time off: {zeitraum}'**
+  String jahrUrlaubAuswahl(String zeitraum);
+
+  /// No description provided for @vorschauTitel.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s coming in {monat}'**
+  String vorschauTitel(String monat);
+
+  /// No description provided for @vorschauHighlights.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlights'**
+  String get vorschauHighlights;
+
+  /// No description provided for @vorschauFreieWochenenden.
+  ///
+  /// In en, this message translates to:
+  /// **'Free weekends'**
+  String get vorschauFreieWochenenden;
+
+  /// No description provided for @vorschauKeineFreienWochenenden.
+  ///
+  /// In en, this message translates to:
+  /// **'No free weekend'**
+  String get vorschauKeineFreienWochenenden;
+
+  /// No description provided for @vorschauUnterwegs.
+  ///
+  /// In en, this message translates to:
+  /// **'Who\'s out and about'**
+  String get vorschauUnterwegs;
+
+  /// No description provided for @vorschauUrlaubstage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day off} other{{count} days off}}'**
+  String vorschauUrlaubstage(int count);
+
+  /// No description provided for @vorschauArbeitsstunden.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} h work'**
+  String vorschauArbeitsstunden(int count);
+
+  /// No description provided for @vorschauTermine.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 event} other{{count} events}}'**
+  String vorschauTermine(int count);
+
+  /// No description provided for @vorschauRuhig.
+  ///
+  /// In en, this message translates to:
+  /// **'A quiet month – nothing special planned.'**
+  String get vorschauRuhig;
+
+  /// No description provided for @vorschauAlleFrei.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone off'**
+  String get vorschauAlleFrei;
+
+  /// No description provided for @feiertagRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Public holidays'**
+  String get feiertagRegion;
+
+  /// No description provided for @feiertagKeine.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get feiertagKeine;
+
+  /// No description provided for @feiertagOesterreich.
+  ///
+  /// In en, this message translates to:
+  /// **'Austria'**
+  String get feiertagOesterreich;
+
+  /// No description provided for @feiertagDeutschland.
+  ///
+  /// In en, this message translates to:
+  /// **'Germany'**
+  String get feiertagDeutschland;
+
+  /// No description provided for @feiertagBundesland.
+  ///
+  /// In en, this message translates to:
+  /// **'State'**
+  String get feiertagBundesland;
+
+  /// No description provided for @kalJahr.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get kalJahr;
+
+  /// No description provided for @kalMailMonatsueberblick.
+  ///
+  /// In en, this message translates to:
+  /// **'Family month overview (start of month)'**
+  String get kalMailMonatsueberblick;
+
+  /// No description provided for @kalTermineAnzahl.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 event} other{{count} events}}'**
+  String kalTermineAnzahl(int count);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

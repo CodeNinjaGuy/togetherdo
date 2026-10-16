@@ -1,0 +1,23 @@
+{
+  "functions": {
+    "source": ".."
+  },
+  "emulators": {
+    "auth": {
+      "port": 9097
+    },
+    "functions": {
+      "port": 5003
+    },
+    "firestore": {
+      "port": 8090
+    },
+    "storage": {
+      "port": 9197
+    },
+    "ui": {
+      "enabled": false
+    },
+    "singleProjectMode": true
+  }
+}

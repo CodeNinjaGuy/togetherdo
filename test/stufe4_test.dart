@@ -22,7 +22,7 @@ import 'package:togetherdo/models/todo_model.dart';
 import 'package:togetherdo/navigation/app_shell.dart';
 import 'package:togetherdo/repositories/attachment_repository.dart';
 import 'package:togetherdo/repositories/todo_repository.dart';
-import 'package:togetherdo/services/attachment_service.dart';
+import 'package:togetherdo/services/aufgaben_anhang_service.dart';
 import 'package:togetherdo/utils/app_theme.dart';
 import 'package:togetherdo/utils/stream_utils.dart';
 import 'package:togetherdo/widgets/common/user_avatar.dart';

@@ -27,6 +27,12 @@ export function requireAuth(request: CallableRequest<unknown>): string {
   return uid;
 }
 
+/** Bucket der App (`<projekt>.firebasestorage.app`, wie in firebase_options). */
+export function appBucket() {
+  const projectId = process.env.GCLOUD_PROJECT ?? JSON.parse(process.env.FIREBASE_CONFIG ?? '{}').projectId;
+  return admin.storage().bucket(`${projectId}.firebasestorage.app`);
+}
+
 /** Löscht alle Dokumente einer Abfrage in Paketen (max. 400 je Batch). */
 export async function deleteQueryInBatches(
   query: admin.firestore.Query,
@@ -45,12 +51,6 @@ export async function deleteQueryInBatches(
     deleted += snap.size;
     if (snap.size < 400) return deleted;
   }
-}
-
-/** Bucket der App (`<projekt>.firebasestorage.app`, wie in firebase_options). */
-export function appBucket() {
-  const projectId = process.env.GCLOUD_PROJECT ?? JSON.parse(process.env.FIREBASE_CONFIG ?? '{}').projectId;
-  return admin.storage().bucket(`${projectId}.firebasestorage.app`);
 }
 
 /** Löscht alle Dateien unter einem Storage-Pfad (Anhänge, Chat-Bilder).

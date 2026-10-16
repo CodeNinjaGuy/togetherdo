@@ -6,17 +6,96 @@
 // ihr Bild schreiben oder löschen; angemeldete Nutzer dürfen Bilder lesen
 // (Anzeige bei Mitgliedern geteilter Listen, Chat, Zuweisungen).
 //
-// Anhänge an Aufgaben: todos/{listId}/{todoId}/{datei} (Bilder ≤ 10 MB,
-// PDF ≤ 20 MB), Bilder im Chat: chats/{listId}/{todoId}/{datei} (≤ 10 MB).
-// Lesen und Hochladen dürfen Mitglieder der Liste (Mitgliedschaft aus
-// Firestore `lists/{listId}.allUserIds`); löschen darf, wer hochgeladen
-// hat (Metadatum `uploadedBy`), oder wer die Liste bearbeiten darf.
+// Anhänge (Fotos, PDFs, Dokumente) an Aufgaben und Terminen liegen unter
+// todos/{listId}/{todoId}/{datei} bzw. termine/{listId}/{terminId}/{datei}
+// (Datei = Anhang-Kennung, Vorschau = <Kennung>_vorschau.jpg); Bilder im
+// Chat einer Aufgabe unter chats/{listId}/{todoId}/{datei} (nur Bilder).
+// Lesen und Hochladen dürfen Mitglieder der Liste (Firestore
+// lists/{listId}.allUserIds); jede hochgeladene Datei trägt das Metadatum
+// hochgeladenVon = eigene uid. Bilder bis 10 MB, PDFs/Dokumente bis 20 MB;
+// Überschreiben ist verboten. Löschen darf ein Mitglied, das die Datei
+// hochgeladen hat, die Listenbesitzerin oder ein Mitglied mit
+// Bearbeitungsrecht (allowEdit != false).
 //
 // Tests: functions/test/storage.rules.test.mjs (Storage- + Firestore-Emulator).
 rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
+
+    // ---- Gemeinsame Prüfungen für Anhänge (Aufgaben, Termine, Chat) ----
+
+    function angemeldet() {
+      return request.auth != null;
+    }
+
+    function listeVorhanden(listId) {
+      return firestore.exists(/databases/(default)/documents/lists/$(listId));
+    }
+
+    function liste(listId) {
+      return firestore.get(/databases/(default)/documents/lists/$(listId)).data;
+    }
+
+    // Mitglied der Liste (Besitzer steht ebenfalls in allUserIds).
+    function istMitglied(listId) {
+      return angemeldet()
+        && listeVorhanden(listId)
+        && request.auth.uid in liste(listId).allUserIds;
+    }
+
+    // Besitzer oder Mitglied, solange die Liste nicht auf Nur-Lesen steht.
+    function darfBearbeiten(listId) {
+      return angemeldet()
+        && listeVorhanden(listId)
+        && (liste(listId).ownerId == request.auth.uid
+          || (request.auth.uid in liste(listId).allUserIds
+            && liste(listId).allowEdit != false));
+    }
+
+    function istBild() {
+      return request.resource.contentType.matches('image/(jpeg|png|webp|heic|heif)')
+        && request.resource.size <= 10 * 1024 * 1024;
+    }
+
+    function istDokument() {
+      return request.resource.contentType in [
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'text/plain',
+          'application/rtf',
+          'application/vnd.ms-excel',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'application/vnd.ms-powerpoint',
+          'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+          'text/csv',
+          'text/calendar'
+        ]
+        && request.resource.size <= 20 * 1024 * 1024;
+    }
+
+    function gueltigeDatei() {
+      return istBild() || istDokument();
+    }
+
+    // Die neue Datei trägt die eigene uid als Hochlader.
+    function hochladerIstIch() {
+      return request.resource.metadata != null
+        && 'hochgeladenVon' in request.resource.metadata
+        && request.resource.metadata.hochgeladenVon == request.auth.uid;
+    }
+
+    // Die vorhandene Datei wurde von mir hochgeladen.
+    function hochladerWarIch() {
+      return angemeldet()
+        && resource.metadata != null
+        && 'hochgeladenVon' in resource.metadata
+        && resource.metadata.hochgeladenVon == request.auth.uid;
+    }
+
+    // ---- Profilbilder ----
+
     match /avatars/{fileName} {
       allow read: if request.auth != null;
 
@@ -29,67 +108,35 @@ service firebase.storage {
         && fileName == request.auth.uid + '.jpg';
     }
 
-    // ------------------------------------------------------------ Anhänge
-    function listDoc(listId) {
-      return firestore.get(/databases/(default)/documents/lists/$(listId));
+    // ---- Anhänge an Aufgaben und Terminen, Bilder im Chat ----
+
+    function darfLoeschen(listId) {
+      return istMitglied(listId) && (hochladerWarIch() || darfBearbeiten(listId));
     }
 
-    function isListMember(listId) {
-      return request.auth != null
-        && firestore.exists(/databases/(default)/documents/lists/$(listId))
-        && request.auth.uid in listDoc(listId).data.allUserIds;
-    }
-
-    function canEditList(listId) {
-      let list = listDoc(listId).data;
-      return list.ownerId == request.auth.uid
-        || (request.auth.uid in list.memberIds && list.get('allowEdit', true) != false);
-    }
-
-    function isImage() {
-      return request.resource.contentType.matches('image/(jpeg|png|webp|heic)')
-        && request.resource.size <= 10 * 1024 * 1024;
-    }
-
-    function isPdf() {
-      return request.resource.contentType == 'application/pdf'
-        && request.resource.size <= 20 * 1024 * 1024;
-    }
-
-    function uploadedBySelf() {
-      return request.resource.metadata != null
-        && 'uploadedBy' in request.resource.metadata
-        && request.resource.metadata.uploadedBy == request.auth.uid;
-    }
-
-    // Nur neue Dateien; Überschreiben ist nicht vorgesehen (Namen sind
-    // eindeutig, siehe AttachmentService).
-    function isNewFile() {
-      return resource == null;
-    }
-
-    function mayDelete(listId) {
-      return isListMember(listId)
-        && ((resource.metadata != null
-             && 'uploadedBy' in resource.metadata
-             && resource.metadata.uploadedBy == request.auth.uid)
-            || canEditList(listId));
-    }
-
-    match /todos/{listId}/{todoId}/{fileName} {
-      allow read: if isListMember(listId);
-      allow create: if isNewFile() && isListMember(listId)
-        && (isImage() || isPdf()) && uploadedBySelf();
+    match /todos/{listId}/{todoId}/{datei} {
+      allow read: if istMitglied(listId);
+      // Überschreiben ist nicht vorgesehen: neue Datei = neue Kennung.
+      allow create: if resource == null && istMitglied(listId)
+        && hochladerIstIch() && gueltigeDatei();
       allow update: if false;
-      allow delete: if mayDelete(listId);
+      allow delete: if darfLoeschen(listId);
     }
 
-    match /chats/{listId}/{todoId}/{fileName} {
-      allow read: if isListMember(listId);
-      allow create: if isNewFile() && isListMember(listId)
-        && isImage() && uploadedBySelf();
+    match /termine/{listId}/{terminId}/{datei} {
+      allow read: if istMitglied(listId);
+      allow create: if resource == null && istMitglied(listId)
+        && hochladerIstIch() && gueltigeDatei();
       allow update: if false;
-      allow delete: if mayDelete(listId);
+      allow delete: if darfLoeschen(listId);
+    }
+
+    match /chats/{listId}/{todoId}/{datei} {
+      allow read: if istMitglied(listId);
+      allow create: if resource == null && istMitglied(listId)
+        && hochladerIstIch() && istBild();
+      allow update: if false;
+      allow delete: if darfLoeschen(listId);
     }
 
     // Alles andere bleibt gesperrt.

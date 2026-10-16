@@ -686,5 +686,439 @@
   "theme_system": "Wie das Gerät",
   "aboutApp": "App",
   "version": "Version",
-  "account": "Konto"
+  "account": "Konto",
+  "anhangTitel": "Anhänge",
+  "anhangHinzufuegen": "Anhang hinzufügen",
+  "anhangQuelleTitel": "Was möchtest du anhängen?",
+  "anhangFotoAufnehmen": "Foto aufnehmen",
+  "anhangFotoAufnehmenHinweis": "Mit der Kamera",
+  "anhangAusGalerie": "Aus Galerie",
+  "anhangAusGalerieHinweis": "Ein oder mehrere Fotos",
+  "anhangDokument": "Dokument",
+  "anhangDokumentHinweis": "PDF, Word, Excel und mehr",
+  "anhangKeine": "Noch keine Anhänge",
+  "anhangKeineHinweis": "Fotos, PDFs und Dokumente, die hierher gehören.",
+  "anhangOeffnen": "Öffnen",
+  "anhangTeilen": "Teilen",
+  "anhangLoeschen": "Löschen",
+  "anhangLoeschenFrage": "„{name}“ wirklich löschen?",
+  "@anhangLoeschenFrage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "anhangLoeschenHinweis": "Die Datei wird für alle in dieser Liste entfernt.",
+  "anhangAbbrechen": "Abbrechen",
+  "anhangSchliessen": "Schließen",
+  "anhangWeitereAktionen": "Weitere Aktionen",
+  "anhangWirdHochgeladen": "Wird hochgeladen …",
+  "anhangHochgeladen": "Anhang hochgeladen",
+  "anhangGeloescht": "Anhang gelöscht",
+  "anhangLadeFehler": "Anhang konnte nicht geladen werden",
+  "anhangErneut": "Erneut versuchen",
+  "anhangTypBild": "Bild",
+  "anhangTypPdf": "PDF",
+  "anhangTypDokument": "Dokument",
+  "anhangGroesseKb": "{kb} kB",
+  "@anhangGroesseKb": {
+    "placeholders": {
+      "kb": {
+        "type": "String"
+      }
+    }
+  },
+  "anhangGroesseMb": "{mb} MB",
+  "@anhangGroesseMb": {
+    "placeholders": {
+      "mb": {
+        "type": "String"
+      }
+    }
+  },
+  "anhangZuGross": "„{name}“ ist zu groß (höchstens {max})",
+  "@anhangZuGross": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "anhangTypUnzulaessig": "„{name}“ hat einen Dateityp, der nicht unterstützt wird",
+  "@anhangTypUnzulaessig": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "anhangLimitErreicht": "Höchstens {max} Anhänge je Eintrag",
+  "@anhangLimitErreicht": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "anhangFehlerAllgemein": "Anhang konnte nicht verarbeitet werden",
+  "anhangVonAnzahl": "{index} von {gesamt}",
+  "@anhangVonAnzahl": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "gesamt": {
+        "type": "int"
+      }
+    }
+  },
+  "anhangVorschauNichtMoeglich": "Für diese Datei gibt es keine Vorschau.",
+  "kalTitel": "Kalender",
+  "kalAnsichtSpuren": "Spuren",
+  "kalAnsichtAgenda": "Agenda",
+  "kalAnsichtMonat": "Monat",
+  "kalHeute": "Heute",
+  "kalMorgen": "Morgen",
+  "kalDieseWoche": "Diese Woche",
+  "kalSpaeter": "Später",
+  "kalAlle": "Alle",
+  "kalNeuerTermin": "Neuer Termin",
+  "kalTerminBearbeiten": "Termin bearbeiten",
+  "kalWannHabenAlleZeit": "Wann haben alle Zeit?",
+  "kalFilter": "Filter",
+  "kalListen": "Listen",
+  "kalPersonen": "Personen",
+  "kalArten": "Arten",
+  "kalArtTermin": "Termin",
+  "kalArtArzt": "Arzt",
+  "kalArtArbeit": "Arbeit",
+  "kalArtUrlaub": "Urlaub",
+  "kalArtSchule": "Schule/Kita",
+  "kalArtGeburtstag": "Geburtstag",
+  "kalArtSonstiges": "Sonstiges",
+  "kalGanztaegig": "Ganztägig",
+  "kalStart": "Beginn",
+  "kalEnde": "Ende",
+  "kalOrt": "Ort",
+  "kalNotiz": "Notiz",
+  "kalTitelFeld": "Titel",
+  "kalTitelHinweis": "Was steht an?",
+  "kalSchnelleingabeHinweis": "Einfach tippen oder sprechen: „Zahnarzt Anna Dienstag 15 Uhr“",
+  "kalSchnelleingabeUebernehmen": "Übernehmen",
+  "kalSchnelleingabeErkannt": "Erkannt",
+  "kalWiederholung": "Wiederholung",
+  "kalWdhKeine": "Nie",
+  "kalWdhTaeglich": "Täglich",
+  "kalWdhWoechentlich": "Wöchentlich",
+  "kalWdhMonatlich": "Monatlich",
+  "kalWdhJaehrlich": "Jährlich",
+  "kalWdhAnTagen": "An diesen Tagen",
+  "kalWdhEnde": "Endet",
+  "kalWdhEndeNie": "Nie",
+  "kalWdhEndeAm": "Am Datum",
+  "kalWdhEndeNach": "{count, plural, =1{Nach 1 Mal} other{Nach {count} Malen}}",
+  "@kalWdhEndeNach": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalWdhIntervall": "Alle {count}",
+  "@kalWdhIntervall": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalWdhTaeglichN": "{count, plural, =1{Täglich} other{Alle {count} Tage}}",
+  "@kalWdhTaeglichN": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalWdhWoechentlichN": "{count, plural, =1{Wöchentlich} other{Alle {count} Wochen}}",
+  "@kalWdhWoechentlichN": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalWdhMonatlichN": "{count, plural, =1{Monatlich} other{Alle {count} Monate}}",
+  "@kalWdhMonatlichN": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalWdhJaehrlichN": "{count, plural, =1{Jährlich} other{Alle {count} Jahre}}",
+  "@kalWdhJaehrlichN": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalErinnerung": "Erinnerung",
+  "kalErinnerungKeine": "Keine",
+  "kalErinnerungMinuten": "{count, plural, =0{Zum Start} =1{1 Minute vorher} other{{count} Minuten vorher}}",
+  "@kalErinnerungMinuten": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalErinnerungStunden": "{count, plural, =1{1 Stunde vorher} other{{count} Stunden vorher}}",
+  "@kalErinnerungStunden": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalErinnerungTage": "{count, plural, =1{1 Tag vorher} other{{count} Tage vorher}}",
+  "@kalErinnerungTage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalLoeschenFrage": "Termin löschen?",
+  "kalLoeschenSerieFrage": "Nur dieses Mal oder die ganze Serie?",
+  "kalNurDiesesMal": "Nur dieses Mal",
+  "kalGanzeSerie": "Ganze Serie",
+  "kalTeilenIcs": "Kalenderdatei teilen",
+  "kalKonfliktTitel": "Hinweis",
+  "kalKonfliktBelegt": "{name} hat da schon „{titel}“",
+  "@kalKonfliktBelegt": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "titel": {
+        "type": "String"
+      }
+    }
+  },
+  "kalKonfliktUrlaub": "{name} ist da im Urlaub",
+  "@kalKonfliktUrlaub": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "kalTrotzdemSpeichern": "Trotzdem speichern",
+  "kalKeineTermine": "Keine Termine",
+  "kalKeineTermineHinweis": "Lege den ersten Termin an – alle in der Liste sehen ihn.",
+  "kalFreieZeitDauer": "Dauer",
+  "kalFreieZeitZeitraum": "Zeitraum",
+  "kalFreieZeitNaechsteTage": "{count, plural, =1{Nächster Tag} other{Nächste {count} Tage}}",
+  "@kalFreieZeitNaechsteTage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalFreieZeitKeine": "Keine gemeinsame freie Zeit gefunden.",
+  "kalFreieZeitHinweis": "Antippe ein Fenster, um dort einen Termin anzulegen.",
+  "kalMinuten": "{count} Min.",
+  "@kalMinuten": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalStunden": "{count, plural, =1{1 Std.} other{{count} Std.}}",
+  "@kalStunden": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalAufgabeFaellig": "Aufgabe fällig",
+  "kalJetzt": "Jetzt",
+  "kalGespeichert": "Termin gespeichert",
+  "kalGeloescht": "Termin gelöscht",
+  "kalUebersprungen": "Dieses Mal übersprungen",
+  "kalFehler": "Das hat nicht geklappt: {fehler}",
+  "@kalFehler": {
+    "placeholders": {
+      "fehler": {
+        "type": "String"
+      }
+    }
+  },
+  "kalNaechsteTermine": "Nächste Termine",
+  "kalZumKalender": "Zum Kalender",
+  "kalKeineNaechsten": "Nichts geplant.",
+  "kalUnbekannteNamen": "Nicht in der Liste: {namen}",
+  "@kalUnbekannteNamen": {
+    "placeholders": {
+      "namen": {
+        "type": "String"
+      }
+    }
+  },
+  "kalListeWaehlen": "Liste",
+  "kalMailEinstellungen": "E-Mail-Benachrichtigungen",
+  "kalMailErinnerungen": "Termin-Erinnerungen",
+  "kalMailPush": "Push",
+  "kalMailMail": "E-Mail",
+  "kalMailBeide": "Beides",
+  "kalMailKeine": "Keine",
+  "kalMailWochenueberblick": "Wochenüberblick der Familie (Sonntagabend)",
+  "kalMailEinladungen": "Einladungen per E-Mail erhalten",
+  "kalMailHinweis": "Mails kommen von noreply@seebubble.me. Jede Mail hat einen Abmelde-Link.",
+  "kalTag": "Tag",
+  "kalPersonenAlle": "Für alle",
+  "kalAnhaenge": "Anhänge",
+  "kalMehr": "+{count} weitere",
+  "@kalMehr": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalErstelltVon": "Eingetragen von {name}",
+  "@kalErstelltVon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "kalBisZeit": "bis {zeit}",
+  "@kalBisZeit": {
+    "placeholders": {
+      "zeit": {
+        "type": "String"
+      }
+    }
+  },
+  "kalTageAnzahl": "{count, plural, =1{1 Tag} other{{count} Tage}}",
+  "@kalTageAnzahl": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalDiktatHinweis": "Ich höre zu …",
+  "kalEinladenPerMail": "Per E-Mail einladen",
+  "kalEinladenAdresse": "E-Mail-Adresse",
+  "kalEinladenGesendet": "Einladung verschickt",
+  "kalZuTag": "Tagesansicht",
+  "jahrTitel": "Jahresüberblick",
+  "jahrZurueck": "Vorheriges Jahr",
+  "jahrVor": "Nächstes Jahr",
+  "jahrBandTitel": "Jahresband",
+  "jahrBandHinweis": "Lange drücken und ziehen, um Urlaub zu planen – oder Anfang und Ende antippen.",
+  "jahrAuswahlStart": "Anfang gewählt: {datum} – jetzt das Ende antippen",
+  "@jahrAuswahlStart": {
+    "placeholders": {
+      "datum": {
+        "type": "String"
+      }
+    }
+  },
+  "jahrAuswahlAbbrechen": "Auswahl aufheben",
+  "jahrDichte": "Wie voll die Wochen sind",
+  "jahrAlleFrei": "Alle frei",
+  "jahrAlleFreiKeine": "Noch kein gemeinsamer Urlaub geplant. Zieh im Jahresband einen Zeitraum, um Urlaub einzutragen.",
+  "jahrAlleFreiChip": "alle frei {zeitraum}",
+  "@jahrAlleFreiChip": {
+    "placeholders": {
+      "zeitraum": {
+        "type": "String"
+      }
+    }
+  },
+  "jahrFeiertag": "Feiertag",
+  "jahrFeiertage": "Feiertage",
+  "jahrMonate": "Monate",
+  "jahrMonatOeffnen": "{monat} öffnen",
+  "@jahrMonatOeffnen": {
+    "placeholders": {
+      "monat": {
+        "type": "String"
+      }
+    }
+  },
+  "jahrUrlaubAuswahl": "Urlaub: {zeitraum}",
+  "@jahrUrlaubAuswahl": {
+    "placeholders": {
+      "zeitraum": {
+        "type": "String"
+      }
+    }
+  },
+  "vorschauTitel": "Was kommt im {monat}",
+  "@vorschauTitel": {
+    "placeholders": {
+      "monat": {
+        "type": "String"
+      }
+    }
+  },
+  "vorschauHighlights": "Highlights",
+  "vorschauFreieWochenenden": "Freie Wochenenden",
+  "vorschauKeineFreienWochenenden": "Kein freies Wochenende",
+  "vorschauUnterwegs": "Wer ist wie viel unterwegs",
+  "vorschauUrlaubstage": "{count, plural, =1{1 Tag Urlaub} other{{count} Tage Urlaub}}",
+  "@vorschauUrlaubstage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "vorschauArbeitsstunden": "{count} Std. Arbeit",
+  "@vorschauArbeitsstunden": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "vorschauTermine": "{count, plural, =1{1 Termin} other{{count} Termine}}",
+  "@vorschauTermine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "vorschauRuhig": "Ein ruhiger Monat – nichts Besonderes geplant.",
+  "vorschauAlleFrei": "Alle frei",
+  "feiertagRegion": "Feiertage",
+  "feiertagKeine": "Keine",
+  "feiertagOesterreich": "Österreich",
+  "feiertagDeutschland": "Deutschland",
+  "feiertagBundesland": "Bundesland",
+  "kalJahr": "Jahr",
+  "kalMailMonatsueberblick": "Monatsüberblick der Familie (am Monatsanfang)",
+  "kalTermineAnzahl": "{count, plural, =1{1 Termin} other{{count} Termine}}",
+  "@kalTermineAnzahl": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

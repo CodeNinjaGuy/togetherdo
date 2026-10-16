@@ -63,8 +63,6 @@ dependencies:
 
   # Image Handling
   image_picker: ^1.1.2
-  # Anhänge (PDF/Dateien) an Aufgaben und im Chat
-  file_picker: ^10.2.1
 
   # Navigation
   go_router: ^16.0.0
@@ -83,6 +81,12 @@ dependencies:
 
   # Spracheingabe (Erkennung auf dem Gerät/System)
   speech_to_text: ^7.5.0
+
+  # Anhänge an Aufgaben, Terminen und im Chat (Dokumente wählen, Dateien
+  # teilen, Zwischenablage für Downloads)
+  file_picker: ^10.3.3
+  share_plus: ^12.0.0
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:

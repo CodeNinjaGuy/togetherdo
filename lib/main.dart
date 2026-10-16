@@ -47,7 +47,7 @@ import 'screens/lists/lists_screen.dart';
 import 'screens/chat/chat_screen.dart';
 import 'design/showcase/design_gallery_screen.dart';
 import 'design/showcase/today_screen.dart';
-import 'services/attachment_service.dart';
+import 'services/aufgaben_anhang_service.dart';
 import 'utils/app_theme.dart';
 import 'utils/global_navigator.dart';
 import 'firebase_options.dart';

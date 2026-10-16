@@ -3,10 +3,13 @@
  * Written by Martin Bundschuh.
  */
 
-// Storage-Regeltests (Anhänge an Aufgaben, Bilder im Chat) gegen den
-// Storage- und Firestore-Emulator (Mitgliedschaft per firestore.get):
-//   firebase emulators:exec --only firestore,storage --project demo-togetherdo \
-//     "npm --prefix functions run test:storage"
+// Regeltests für storage.rules gegen Storage- und Firestore-Emulator
+// (nie Produktion). Firestore liefert die Mitgliedschaft (lists/{id}).
+// Anhänge an Aufgaben (todos/…) und Terminen (termine/…) folgen denselben
+// Regeln und werden mit denselben Fällen geprüft; dazu Chat-Bilder.
+//   npm --prefix functions run test:emulator
+// Ports wie firebase.json (Firestore 8080, Storage 9199), überschreibbar
+// über FIRESTORE_EMULATOR_HOST / FIREBASE_STORAGE_EMULATOR_HOST.
 
 import { readFileSync } from 'node:fs';
 import { after, before, beforeEach, describe, test } from 'node:test';
@@ -16,28 +19,70 @@ import {
   initializeTestEnvironment,
 } from '@firebase/rules-unit-testing';
 import { doc, setDoc } from 'firebase/firestore';
-import { deleteObject, getBytes, ref, uploadBytes } from 'firebase/storage';
+import {
+  deleteObject,
+  getBytes,
+  getMetadata,
+  ref,
+  uploadBytes,
+} from 'firebase/storage';
 
 const PROJECT_ID = 'demo-togetherdo';
-const BUCKET = `${PROJECT_ID}.firebasestorage.app`;
 const [fsHost, fsPort] = (process.env.FIRESTORE_EMULATOR_HOST ?? '127.0.0.1:8080').split(':');
 const [stHost, stPort] = (process.env.FIREBASE_STORAGE_EMULATOR_HOST ?? '127.0.0.1:9199').split(':');
 
+let env;
+
 const owner = 'owner';
-const member = 'member';
-const viewer = 'viewer'; // Mitglied der Liste RO ohne allowEdit
+const member = 'member'; // Mitglied von L1 (allowEdit: true)
+const viewer = 'viewer'; // Mitglied von RO (allowEdit: false)
 const stranger = 'stranger';
 
-let env;
-const storage = (uid) => env.authenticatedContext(uid).storage(`gs://${BUCKET}`);
-const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xd9]);
-const pdf = new TextEncoder().encode('%PDF-1.4\n%%EOF');
-const meta = (uid, contentType) => ({ contentType, customMetadata: { uploadedBy: uid } });
+const MB = 1024 * 1024;
+
+/** Aufgaben und Termine: gleiche Regeln, gleiche Fälle. */
+const BEREICHE = ['todos', 'termine'];
+const now = '2026-10-16T10:00:00.000Z';
+
+function listData(id, extra = {}) {
+  return {
+    id,
+    name: 'Haushalt',
+    ownerId: owner,
+    ownerName: 'Olga',
+    type: 'todo',
+    createdAt: now,
+    updatedAt: now,
+    isShared: true,
+    shareCode: '123456',
+    memberIds: [member],
+    memberNames: ['Max'],
+    allUserIds: [owner, member],
+    allowEdit: true,
+    ...extra,
+  };
+}
+
+const st = (uid) => env.authenticatedContext(uid).storage();
+const anon = () => env.unauthenticatedContext().storage();
+
+/** Datei mit korrekten Metadaten hochladen. */
+function upload(storage, path, { uid, size = 16, contentType = 'image/jpeg', metadata } = {}) {
+  const meta = {
+    contentType,
+    customMetadata: metadata === null ? undefined : { hochgeladenVon: uid, name: 'datei', ...(metadata ?? {}) },
+  };
+  return uploadBytes(ref(storage, path), new Uint8Array(size), meta);
+}
 
 before(async () => {
   env = await initializeTestEnvironment({
     projectId: PROJECT_ID,
-    firestore: { host: fsHost, port: Number(fsPort) },
+    firestore: {
+      host: fsHost,
+      port: Number(fsPort),
+      rules: readFileSync(new URL('../../firestore.rules', import.meta.url), 'utf8'),
+    },
     storage: {
       host: stHost,
       port: Number(stPort),
@@ -55,77 +100,168 @@ beforeEach(async () => {
   await env.clearStorage();
   await env.withSecurityRulesDisabled(async (ctx) => {
     const f = ctx.firestore();
-    await setDoc(doc(f, 'lists/L1'), {
-      id: 'L1', ownerId: owner, memberIds: [member], allUserIds: [owner, member], allowEdit: true,
-    });
-    await setDoc(doc(f, 'lists/RO'), {
-      id: 'RO', ownerId: owner, memberIds: [viewer], allUserIds: [owner, viewer], allowEdit: false,
-    });
+    await setDoc(doc(f, 'lists/L1'), listData('L1'));
+    await setDoc(
+      doc(f, 'lists/RO'),
+      listData('RO', {
+        memberIds: [viewer],
+        memberNames: ['Vera'],
+        allUserIds: [owner, viewer],
+        allowEdit: false,
+        shareCode: '654321',
+      }),
+    );
+    const s = ctx.storage();
+    for (const b of BEREICHE) {
+      await upload(s, `${b}/L1/T1/vonOwner`, { uid: owner });
+      await upload(s, `${b}/L1/T1/vonOwner_vorschau.jpg`, { uid: owner });
+      await upload(s, `${b}/L1/T1/vonMember`, { uid: member, contentType: 'application/pdf' });
+      await upload(s, `${b}/RO/TRO/vonOwner`, { uid: owner });
+    }
   });
 });
 
-describe('todos/{listId}/{todoId}/{datei}', () => {
-  test('Mitglied lädt Bild und PDF hoch und liest', async () => {
-    const r = ref(storage(member), 'todos/L1/T1/a.jpg');
-    await assertSucceeds(uploadBytes(r, jpeg, meta(member, 'image/jpeg')));
-    await assertSucceeds(uploadBytes(ref(storage(member), 'todos/L1/T1/b.pdf'), pdf, meta(member, 'application/pdf')));
-    await assertSucceeds(getBytes(ref(storage(owner), 'todos/L1/T1/a.jpg')));
-  });
-  test('Mitglied ohne allowEdit darf anhängen (Liste RO)', async () => {
-    await assertSucceeds(uploadBytes(ref(storage(viewer), 'todos/RO/T9/a.jpg'), jpeg, meta(viewer, 'image/jpeg')));
-  });
-  test('Fremder weder lesen noch hochladen', async () => {
-    await env.withSecurityRulesDisabled(async (ctx) => {
-      await uploadBytes(ref(ctx.storage(`gs://${BUCKET}`), 'todos/L1/T1/x.jpg'), jpeg, meta(owner, 'image/jpeg'));
+for (const b of BEREICHE) {
+  describe(`${b} – lesen`, () => {
+    test('Mitglied liest Datei und Vorschau', async () => {
+      await assertSucceeds(getBytes(ref(st(member), `${b}/L1/T1/vonOwner`)));
+      await assertSucceeds(getMetadata(ref(st(member), `${b}/L1/T1/vonOwner_vorschau.jpg`)));
     });
-    await assertFails(getBytes(ref(storage(stranger), 'todos/L1/T1/x.jpg')));
-    await assertFails(uploadBytes(ref(storage(stranger), 'todos/L1/T1/y.jpg'), jpeg, meta(stranger, 'image/jpeg')));
-    await assertFails(uploadBytes(ref(storage(member), 'todos/RO/T1/y.jpg'), jpeg, meta(member, 'image/jpeg')));
-  });
-  test('falscher Typ, fremdes uploadedBy, fehlendes Metadatum', async () => {
-    await assertFails(uploadBytes(ref(storage(member), 'todos/L1/T1/z.zip'), jpeg, meta(member, 'application/zip')));
-    await assertFails(uploadBytes(ref(storage(member), 'todos/L1/T1/z.jpg'), jpeg, meta(owner, 'image/jpeg')));
-    await assertFails(uploadBytes(ref(storage(member), 'todos/L1/T1/z2.jpg'), jpeg, { contentType: 'image/jpeg' }));
-  });
-  test('zu groß: Bild > 10 MB, PDF > 20 MB', async () => {
-    const big = new Uint8Array(10 * 1024 * 1024 + 1);
-    await assertFails(uploadBytes(ref(storage(member), 'todos/L1/T1/big.jpg'), big, meta(member, 'image/jpeg')));
-    await assertSucceeds(uploadBytes(ref(storage(member), 'todos/L1/T1/big.pdf'), big, meta(member, 'application/pdf')));
-    const huge = new Uint8Array(20 * 1024 * 1024 + 1);
-    await assertFails(uploadBytes(ref(storage(member), 'todos/L1/T1/huge.pdf'), huge, meta(member, 'application/pdf')));
-  });
-  test('löschen: Urheber ja, Besitzer ja, anderes Mitglied ohne allowEdit nein', async () => {
-    await env.withSecurityRulesDisabled(async (ctx) => {
-      const s = ctx.storage(`gs://${BUCKET}`);
-      await uploadBytes(ref(s, 'todos/L1/T1/d1.jpg'), jpeg, meta(member, 'image/jpeg'));
-      await uploadBytes(ref(s, 'todos/L1/T1/d2.jpg'), jpeg, meta(member, 'image/jpeg'));
-      await uploadBytes(ref(s, 'todos/RO/T2/d3.jpg'), jpeg, meta(owner, 'image/jpeg'));
+    test('Besitzer liest', async () => {
+      await assertSucceeds(getBytes(ref(st(owner), `${b}/L1/T1/vonMember`)));
     });
-    await assertSucceeds(deleteObject(ref(storage(member), 'todos/L1/T1/d1.jpg')));
-    await assertSucceeds(deleteObject(ref(storage(owner), 'todos/L1/T1/d2.jpg')));
-    await assertFails(deleteObject(ref(storage(viewer), 'todos/RO/T2/d3.jpg')));
-    await assertFails(deleteObject(ref(storage(stranger), 'todos/RO/T2/d3.jpg')));
-  });
-  test('überschreiben verboten', async () => {
-    await env.withSecurityRulesDisabled(async (ctx) => {
-      await uploadBytes(ref(ctx.storage(`gs://${BUCKET}`), 'todos/L1/T1/o.jpg'), jpeg, meta(member, 'image/jpeg'));
+    test('Nur-Lese-Mitglied liest', async () => {
+      await assertSucceeds(getBytes(ref(st(viewer), `${b}/RO/TRO/vonOwner`)));
     });
-    await assertFails(uploadBytes(ref(storage(member), 'todos/L1/T1/o.jpg'), jpeg, meta(member, 'image/jpeg')));
+    test('Fremder und Unangemeldete lesen nicht', async () => {
+      await assertFails(getBytes(ref(st(stranger), `${b}/L1/T1/vonOwner`)));
+      await assertFails(getBytes(ref(anon(), `${b}/L1/T1/vonOwner`)));
+    });
+    test('Mitglied einer anderen Liste liest nicht', async () => {
+      await assertFails(getBytes(ref(st(viewer), `${b}/L1/T1/vonOwner`)));
+    });
+  });
+
+  describe(`${b} – hochladen`, () => {
+    test('Mitglied lädt Bild und PDF hoch', async () => {
+      await assertSucceeds(upload(st(member), `${b}/L1/T1/neu1`, { uid: member }));
+      await assertSucceeds(
+        upload(st(member), `${b}/L1/T1/neu2`, { uid: member, contentType: 'application/pdf' }),
+      );
+      await assertSucceeds(
+        upload(st(member), `${b}/L1/T1/neu3`, { uid: member, contentType: 'image/heic' }),
+      );
+      await assertSucceeds(
+        upload(st(member), `${b}/L1/T1/neu4`, { uid: member, contentType: 'text/calendar' }),
+      );
+    });
+    test('Nur-Lese-Mitglied darf anhängen', async () => {
+      await assertSucceeds(upload(st(viewer), `${b}/RO/TRO/neu`, { uid: viewer }));
+    });
+    test('Fremder lädt nicht hoch', async () => {
+      await assertFails(upload(st(stranger), `${b}/L1/T1/neu`, { uid: stranger }));
+      await assertFails(upload(anon(), `${b}/L1/T1/neu`, { uid: 'x' }));
+    });
+    test('falscher oder fehlender hochgeladenVon', async () => {
+      await assertFails(upload(st(member), `${b}/L1/T1/neu`, { uid: owner }));
+      await assertFails(upload(st(member), `${b}/L1/T1/neu`, { uid: member, metadata: null }));
+    });
+    test('zu groß: Bild über 10 MB, Dokument über 20 MB', async () => {
+      await assertFails(upload(st(member), `${b}/L1/T1/gross1`, { uid: member, size: 10 * MB + 1 }));
+      await assertSucceeds(
+        upload(st(member), `${b}/L1/T1/gross2`, {
+          uid: member,
+          size: 10 * MB + 1,
+          contentType: 'application/pdf',
+        }),
+      );
+      await assertFails(
+        upload(st(member), `${b}/L1/T1/gross3`, {
+          uid: member,
+          size: 20 * MB + 1,
+          contentType: 'application/pdf',
+        }),
+      );
+    });
+    test('falscher Typ', async () => {
+      await assertFails(upload(st(member), `${b}/L1/T1/zip`, { uid: member, contentType: 'application/zip' }));
+      await assertFails(upload(st(member), `${b}/L1/T1/html`, { uid: member, contentType: 'text/html' }));
+      await assertFails(upload(st(member), `${b}/L1/T1/gif`, { uid: member, contentType: 'image/gif' }));
+    });
+    test('Überschreiben verboten', async () => {
+      await assertFails(upload(st(owner), `${b}/L1/T1/vonOwner`, { uid: owner }));
+      await assertFails(upload(st(member), `${b}/L1/T1/vonMember`, { uid: member }));
+    });
+    test('unbekannte Liste', async () => {
+      await assertFails(upload(st(member), `${b}/GONE/T1/neu`, { uid: member }));
+    });
+  });
+
+  describe(`${b} – löschen`, () => {
+    test('Hochlader löscht eigenes', async () => {
+      await assertSucceeds(deleteObject(ref(st(member), `${b}/L1/T1/vonMember`)));
+    });
+    test('Besitzer löscht fremdes', async () => {
+      await assertSucceeds(deleteObject(ref(st(owner), `${b}/L1/T1/vonMember`)));
+    });
+    test('Mitglied mit Bearbeitungsrecht löscht fremdes', async () => {
+      await assertSucceeds(deleteObject(ref(st(member), `${b}/L1/T1/vonOwner`)));
+      await assertSucceeds(deleteObject(ref(st(member), `${b}/L1/T1/vonOwner_vorschau.jpg`)));
+    });
+    test('Nur-Lese-Mitglied löscht fremdes nicht', async () => {
+      await assertFails(deleteObject(ref(st(viewer), `${b}/RO/TRO/vonOwner`)));
+    });
+    test('Nur-Lese-Mitglied löscht eigenes', async () => {
+      await env.withSecurityRulesDisabled((ctx) =>
+        upload(ctx.storage(), `${b}/RO/TRO/vonViewer`, { uid: viewer }),
+      );
+      await assertSucceeds(deleteObject(ref(st(viewer), `${b}/RO/TRO/vonViewer`)));
+    });
+    test('Fremder löscht nicht', async () => {
+      await assertFails(deleteObject(ref(st(stranger), `${b}/L1/T1/vonOwner`)));
+      await assertFails(deleteObject(ref(anon(), `${b}/L1/T1/vonOwner`)));
+    });
+  });
+}
+
+describe('chats – Bilder im Chat', () => {
+  test('Mitglied schickt Bild, aber kein PDF', async () => {
+    await assertSucceeds(upload(st(member), 'chats/L1/T1/c1', { uid: member }));
+    await assertFails(upload(st(member), 'chats/L1/T1/c2', { uid: member, contentType: 'application/pdf' }));
+  });
+  test('Fremder und falscher Hochlader nicht', async () => {
+    await assertFails(upload(st(stranger), 'chats/L1/T1/s', { uid: stranger }));
+    await assertFails(upload(st(member), 'chats/L1/T1/s', { uid: owner }));
+  });
+  test('Mitglied liest, Fremder nicht; Urheber löscht', async () => {
+    await env.withSecurityRulesDisabled((ctx) => upload(ctx.storage(), 'chats/L1/T1/m', { uid: member }));
+    await assertSucceeds(getBytes(ref(st(owner), 'chats/L1/T1/m')));
+    await assertFails(getBytes(ref(st(stranger), 'chats/L1/T1/m')));
+    await assertSucceeds(deleteObject(ref(st(member), 'chats/L1/T1/m')));
   });
 });
 
-describe('chats/{listId}/{todoId}/{datei}', () => {
-  test('Mitglied schickt Bild, kein PDF', async () => {
-    await assertSucceeds(uploadBytes(ref(storage(member), 'chats/L1/T1/c.jpg'), jpeg, meta(member, 'image/jpeg')));
-    await assertFails(uploadBytes(ref(storage(member), 'chats/L1/T1/c.pdf'), pdf, meta(member, 'application/pdf')));
+describe('avatars', () => {
+  test('eigenes Profilbild schreiben, lesen, löschen', async () => {
+    await assertSucceeds(
+      uploadBytes(ref(st(owner), 'avatars/owner.jpg'), new Uint8Array(16), { contentType: 'image/jpeg' }),
+    );
+    await assertSucceeds(getBytes(ref(st(member), 'avatars/owner.jpg')));
+    await assertFails(getBytes(ref(anon(), 'avatars/owner.jpg')));
+    await assertSucceeds(deleteObject(ref(st(owner), 'avatars/owner.jpg')));
   });
-  test('Fremder nicht', async () => {
-    await assertFails(uploadBytes(ref(storage(stranger), 'chats/L1/T1/s.jpg'), jpeg, meta(stranger, 'image/jpeg')));
+  test('fremdes Profilbild schreiben verboten', async () => {
+    await assertFails(
+      uploadBytes(ref(st(stranger), 'avatars/owner.jpg'), new Uint8Array(16), { contentType: 'image/jpeg' }),
+    );
   });
 });
 
-describe('übrige Pfade', () => {
+describe('sonstige Pfade', () => {
   test('bleiben gesperrt', async () => {
-    await assertFails(uploadBytes(ref(storage(owner), 'sonstiges/x.jpg'), jpeg, meta(owner, 'image/jpeg')));
+    await assertFails(
+      uploadBytes(ref(st(owner), 'sonstiges/x.jpg'), new Uint8Array(16), { contentType: 'image/jpeg' }),
+    );
+    await assertFails(getBytes(ref(st(owner), 'sonstiges/x.jpg')));
   });
 });

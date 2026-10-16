@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../design/td_design.dart';
-import '../../services/attachment_service.dart';
+import '../../services/aufgaben_anhang_service.dart';
 
 /// Auswahl „Foto aufnehmen / Aus Fotos / Datei“ für Anhänge.
 Future<AttachmentSource?> showAttachmentSourceSheet(

@@ -10,7 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../design/td_design.dart';
 import '../../models/attachment_model.dart';
 import '../../repositories/attachment_repository.dart';
-import '../../services/attachment_service.dart';
+import '../../services/aufgaben_anhang_service.dart';
 import 'attachment_source_sheet.dart';
 
 /// Noch nicht hochgeladene Anhänge einer neuen Aufgabe. Das Formular lädt

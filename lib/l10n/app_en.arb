@@ -686,5 +686,439 @@
   "theme_system": "Match device",
   "aboutApp": "App",
   "version": "Version",
-  "account": "Account"
+  "account": "Account",
+  "anhangTitel": "Attachments",
+  "anhangHinzufuegen": "Add attachment",
+  "anhangQuelleTitel": "What would you like to attach?",
+  "anhangFotoAufnehmen": "Take photo",
+  "anhangFotoAufnehmenHinweis": "Using the camera",
+  "anhangAusGalerie": "From gallery",
+  "anhangAusGalerieHinweis": "One or more photos",
+  "anhangDokument": "Document",
+  "anhangDokumentHinweis": "PDF, Word, Excel and more",
+  "anhangKeine": "No attachments yet",
+  "anhangKeineHinweis": "Photos, PDFs and documents that belong here.",
+  "anhangOeffnen": "Open",
+  "anhangTeilen": "Share",
+  "anhangLoeschen": "Delete",
+  "anhangLoeschenFrage": "Delete “{name}”?",
+  "@anhangLoeschenFrage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "anhangLoeschenHinweis": "The file will be removed for everyone in this list.",
+  "anhangAbbrechen": "Cancel",
+  "anhangSchliessen": "Close",
+  "anhangWeitereAktionen": "More actions",
+  "anhangWirdHochgeladen": "Uploading…",
+  "anhangHochgeladen": "Attachment uploaded",
+  "anhangGeloescht": "Attachment deleted",
+  "anhangLadeFehler": "Attachment could not be loaded",
+  "anhangErneut": "Try again",
+  "anhangTypBild": "Image",
+  "anhangTypPdf": "PDF",
+  "anhangTypDokument": "Document",
+  "anhangGroesseKb": "{kb} KB",
+  "@anhangGroesseKb": {
+    "placeholders": {
+      "kb": {
+        "type": "String"
+      }
+    }
+  },
+  "anhangGroesseMb": "{mb} MB",
+  "@anhangGroesseMb": {
+    "placeholders": {
+      "mb": {
+        "type": "String"
+      }
+    }
+  },
+  "anhangZuGross": "“{name}” is too large (at most {max})",
+  "@anhangZuGross": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "anhangTypUnzulaessig": "“{name}” has a file type that is not supported",
+  "@anhangTypUnzulaessig": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "anhangLimitErreicht": "At most {max} attachments per entry",
+  "@anhangLimitErreicht": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "anhangFehlerAllgemein": "Attachment could not be processed",
+  "anhangVonAnzahl": "{index} of {gesamt}",
+  "@anhangVonAnzahl": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "gesamt": {
+        "type": "int"
+      }
+    }
+  },
+  "anhangVorschauNichtMoeglich": "There is no preview for this file.",
+  "kalTitel": "Calendar",
+  "kalAnsichtSpuren": "Lanes",
+  "kalAnsichtAgenda": "Agenda",
+  "kalAnsichtMonat": "Month",
+  "kalHeute": "Today",
+  "kalMorgen": "Tomorrow",
+  "kalDieseWoche": "This week",
+  "kalSpaeter": "Later",
+  "kalAlle": "Everyone",
+  "kalNeuerTermin": "New event",
+  "kalTerminBearbeiten": "Edit event",
+  "kalWannHabenAlleZeit": "When is everyone free?",
+  "kalFilter": "Filter",
+  "kalListen": "Lists",
+  "kalPersonen": "People",
+  "kalArten": "Types",
+  "kalArtTermin": "Event",
+  "kalArtArzt": "Doctor",
+  "kalArtArbeit": "Work",
+  "kalArtUrlaub": "Vacation",
+  "kalArtSchule": "School",
+  "kalArtGeburtstag": "Birthday",
+  "kalArtSonstiges": "Other",
+  "kalGanztaegig": "All day",
+  "kalStart": "Start",
+  "kalEnde": "End",
+  "kalOrt": "Location",
+  "kalNotiz": "Note",
+  "kalTitelFeld": "Title",
+  "kalTitelHinweis": "What's happening?",
+  "kalSchnelleingabeHinweis": "Just type or speak: “Dentist Anna Tuesday 3 pm”",
+  "kalSchnelleingabeUebernehmen": "Apply",
+  "kalSchnelleingabeErkannt": "Recognized",
+  "kalWiederholung": "Repeat",
+  "kalWdhKeine": "Never",
+  "kalWdhTaeglich": "Daily",
+  "kalWdhWoechentlich": "Weekly",
+  "kalWdhMonatlich": "Monthly",
+  "kalWdhJaehrlich": "Yearly",
+  "kalWdhAnTagen": "On these days",
+  "kalWdhEnde": "Ends",
+  "kalWdhEndeNie": "Never",
+  "kalWdhEndeAm": "On date",
+  "kalWdhEndeNach": "{count, plural, =1{After 1 time} other{After {count} times}}",
+  "@kalWdhEndeNach": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalWdhIntervall": "Every {count}",
+  "@kalWdhIntervall": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalWdhTaeglichN": "{count, plural, =1{Daily} other{Every {count} days}}",
+  "@kalWdhTaeglichN": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalWdhWoechentlichN": "{count, plural, =1{Weekly} other{Every {count} weeks}}",
+  "@kalWdhWoechentlichN": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalWdhMonatlichN": "{count, plural, =1{Monthly} other{Every {count} months}}",
+  "@kalWdhMonatlichN": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalWdhJaehrlichN": "{count, plural, =1{Yearly} other{Every {count} years}}",
+  "@kalWdhJaehrlichN": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalErinnerung": "Reminder",
+  "kalErinnerungKeine": "None",
+  "kalErinnerungMinuten": "{count, plural, =0{At start} =1{1 minute before} other{{count} minutes before}}",
+  "@kalErinnerungMinuten": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalErinnerungStunden": "{count, plural, =1{1 hour before} other{{count} hours before}}",
+  "@kalErinnerungStunden": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalErinnerungTage": "{count, plural, =1{1 day before} other{{count} days before}}",
+  "@kalErinnerungTage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalLoeschenFrage": "Delete event?",
+  "kalLoeschenSerieFrage": "Just this one or the whole series?",
+  "kalNurDiesesMal": "Only this one",
+  "kalGanzeSerie": "Whole series",
+  "kalTeilenIcs": "Share calendar file",
+  "kalKonfliktTitel": "Heads-up",
+  "kalKonfliktBelegt": "{name} already has “{titel}” then",
+  "@kalKonfliktBelegt": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "titel": {
+        "type": "String"
+      }
+    }
+  },
+  "kalKonfliktUrlaub": "{name} is on vacation then",
+  "@kalKonfliktUrlaub": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "kalTrotzdemSpeichern": "Save anyway",
+  "kalKeineTermine": "No events",
+  "kalKeineTermineHinweis": "Add the first event – everyone in the list will see it.",
+  "kalFreieZeitDauer": "Duration",
+  "kalFreieZeitZeitraum": "Range",
+  "kalFreieZeitNaechsteTage": "{count, plural, =1{Next day} other{Next {count} days}}",
+  "@kalFreieZeitNaechsteTage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalFreieZeitKeine": "No shared free time found.",
+  "kalFreieZeitHinweis": "Tap a slot to create an event there.",
+  "kalMinuten": "{count} min",
+  "@kalMinuten": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalStunden": "{count, plural, =1{1 hr} other{{count} hrs}}",
+  "@kalStunden": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalAufgabeFaellig": "Task due",
+  "kalJetzt": "Now",
+  "kalGespeichert": "Event saved",
+  "kalGeloescht": "Event deleted",
+  "kalUebersprungen": "Skipped this time",
+  "kalFehler": "That didn't work: {fehler}",
+  "@kalFehler": {
+    "placeholders": {
+      "fehler": {
+        "type": "String"
+      }
+    }
+  },
+  "kalNaechsteTermine": "Upcoming events",
+  "kalZumKalender": "Open calendar",
+  "kalKeineNaechsten": "Nothing planned.",
+  "kalUnbekannteNamen": "Not in the list: {namen}",
+  "@kalUnbekannteNamen": {
+    "placeholders": {
+      "namen": {
+        "type": "String"
+      }
+    }
+  },
+  "kalListeWaehlen": "List",
+  "kalMailEinstellungen": "Email notifications",
+  "kalMailErinnerungen": "Event reminders",
+  "kalMailPush": "Push",
+  "kalMailMail": "Email",
+  "kalMailBeide": "Both",
+  "kalMailKeine": "None",
+  "kalMailWochenueberblick": "Family weekly overview (Sunday evening)",
+  "kalMailEinladungen": "Receive invitations by email",
+  "kalMailHinweis": "Emails come from noreply@seebubble.me. Every email has an unsubscribe link.",
+  "kalTag": "Day",
+  "kalPersonenAlle": "For everyone",
+  "kalAnhaenge": "Attachments",
+  "kalMehr": "+{count} more",
+  "@kalMehr": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalErstelltVon": "Added by {name}",
+  "@kalErstelltVon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "kalBisZeit": "until {zeit}",
+  "@kalBisZeit": {
+    "placeholders": {
+      "zeit": {
+        "type": "String"
+      }
+    }
+  },
+  "kalTageAnzahl": "{count, plural, =1{1 day} other{{count} days}}",
+  "@kalTageAnzahl": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kalDiktatHinweis": "Listening …",
+  "kalEinladenPerMail": "Invite by email",
+  "kalEinladenAdresse": "Email address",
+  "kalEinladenGesendet": "Invitation sent",
+  "kalZuTag": "Day view",
+  "jahrTitel": "Year overview",
+  "jahrZurueck": "Previous year",
+  "jahrVor": "Next year",
+  "jahrBandTitel": "Year band",
+  "jahrBandHinweis": "Long-press and drag to plan time off – or tap the start and the end.",
+  "jahrAuswahlStart": "Start set: {datum} – now tap the end",
+  "@jahrAuswahlStart": {
+    "placeholders": {
+      "datum": {
+        "type": "String"
+      }
+    }
+  },
+  "jahrAuswahlAbbrechen": "Clear selection",
+  "jahrDichte": "How busy the weeks are",
+  "jahrAlleFrei": "Everyone off",
+  "jahrAlleFreiKeine": "No shared time off planned yet. Drag a range in the year band to add time off.",
+  "jahrAlleFreiChip": "everyone off {zeitraum}",
+  "@jahrAlleFreiChip": {
+    "placeholders": {
+      "zeitraum": {
+        "type": "String"
+      }
+    }
+  },
+  "jahrFeiertag": "Public holiday",
+  "jahrFeiertage": "Public holidays",
+  "jahrMonate": "Months",
+  "jahrMonatOeffnen": "Open {monat}",
+  "@jahrMonatOeffnen": {
+    "placeholders": {
+      "monat": {
+        "type": "String"
+      }
+    }
+  },
+  "jahrUrlaubAuswahl": "Time off: {zeitraum}",
+  "@jahrUrlaubAuswahl": {
+    "placeholders": {
+      "zeitraum": {
+        "type": "String"
+      }
+    }
+  },
+  "vorschauTitel": "What's coming in {monat}",
+  "@vorschauTitel": {
+    "placeholders": {
+      "monat": {
+        "type": "String"
+      }
+    }
+  },
+  "vorschauHighlights": "Highlights",
+  "vorschauFreieWochenenden": "Free weekends",
+  "vorschauKeineFreienWochenenden": "No free weekend",
+  "vorschauUnterwegs": "Who's out and about",
+  "vorschauUrlaubstage": "{count, plural, =1{1 day off} other{{count} days off}}",
+  "@vorschauUrlaubstage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "vorschauArbeitsstunden": "{count} h work",
+  "@vorschauArbeitsstunden": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "vorschauTermine": "{count, plural, =1{1 event} other{{count} events}}",
+  "@vorschauTermine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "vorschauRuhig": "A quiet month – nothing special planned.",
+  "vorschauAlleFrei": "Everyone off",
+  "feiertagRegion": "Public holidays",
+  "feiertagKeine": "None",
+  "feiertagOesterreich": "Austria",
+  "feiertagDeutschland": "Germany",
+  "feiertagBundesland": "State",
+  "kalJahr": "Year",
+  "kalMailMonatsueberblick": "Family month overview (start of month)",
+  "kalTermineAnzahl": "{count, plural, =1{1 event} other{{count} events}}",
+  "@kalTermineAnzahl": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
