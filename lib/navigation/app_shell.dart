@@ -190,8 +190,10 @@ class _RailHeader extends StatelessWidget {
       onTap: onTap,
       scale: 0.95,
       child: extended
-          ? Padding(
-              padding: const EdgeInsets.symmetric(horizontal: TdSpace.lg),
+          ? Container(
+              // Die Schiene gibt ihrem Kopf keine Breite vor.
+              width: 200,
+              padding: const EdgeInsets.symmetric(horizontal: TdSpace.md),
               child: Row(
                 children: [
                   avatar,

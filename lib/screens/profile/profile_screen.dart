@@ -524,32 +524,13 @@ class _Preview extends StatelessWidget {
           const SizedBox(height: 3),
           Row(
             children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: p.primary,
-                  shape: BoxShape.circle,
+              for (final c in [p.primary, p.secondary, p.tertiary])
+                Container(
+                  width: 6,
+                  height: 6,
+                  margin: const EdgeInsets.only(right: 2),
+                  decoration: BoxDecoration(color: c, shape: BoxShape.circle),
                 ),
-              ),
-              const SizedBox(width: 3),
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: p.secondary,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 3),
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: p.tertiary,
-                  shape: BoxShape.circle,
-                ),
-              ),
             ],
           ),
         ],
