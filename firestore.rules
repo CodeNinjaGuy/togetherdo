@@ -14,6 +14,9 @@
 //   Cloud Functions (createList, previewListByCode, joinListByCode) – so
 //   lassen sich Codes nicht durchprobieren und keine Codes fälschen.
 // - Kontolöschung läuft serverseitig (deleteAccount / onUserDeleted).
+// - `produkte/{ean}` ist der gemeinsame Zwischenspeicher des Strichcode-
+//   Scanners: Angemeldete lesen und legen an; Open-Facts-Daten (Quelle
+//   off/obf/opf) werden nie überschrieben, Löschen ist verboten.
 // - Alles, was hier nicht erlaubt ist (z. B. `shares`, `rateLimits`), ist verboten.
 //
 // Tests: functions/test/rules.test.mjs (Firestore-Emulator).
@@ -217,6 +220,42 @@ service cloud.firestore {
                 && changedKeys().hasOnly(['isPurchased', 'purchasedBy', 'purchasedAt'])));
 
       allow delete: if signedIn() && canEditList(resource.data.listId);
+    }
+
+    // ------------------------------------------------------------ produkte
+    // Zwischenspeicher für gescannte Strichcodes (Open Food Facts bzw. von
+    // Nutzern benannt). Dokument-ID = Strichcode (8 oder 12–14 Ziffern).
+    match /produkte/{ean} {
+      function validProduct(d) {
+        return d.keys().hasOnly(['ean', 'name', 'marke', 'menge', 'bildUrl',
+                                 'quelle', 'aktualisiertAm', 'erstelltVon'])
+          && d.ean == ean
+          && ean.matches('^[0-9]{8}$|^[0-9]{12,14}$')
+          && d.name is string && d.name.size() >= 1 && d.name.size() <= 120
+          && (d.get('marke', null) == null
+              || (d.marke is string && d.marke.size() <= 120))
+          && (d.get('menge', null) == null
+              || (d.menge is string && d.menge.size() <= 120))
+          && (d.get('bildUrl', null) == null
+              || (d.bildUrl is string && d.bildUrl.size() <= 500
+                  && d.bildUrl.matches('^https://.*')))
+          && d.quelle in ['off', 'obf', 'opf', 'nutzer']
+          && d.aktualisiertAm is string && d.aktualisiertAm.size() <= 40
+          // Von Nutzern benannte Produkte tragen den Urheber.
+          && (d.quelle != 'nutzer' || d.get('erstelltVon', null) == request.auth.uid);
+      }
+
+      allow read: if signedIn();
+
+      allow create: if signedIn() && validProduct(request.resource.data);
+
+      // Nur Nutzer-Einträge dürfen ersetzt werden (z. B. durch echte
+      // Open-Facts-Daten oder eine Korrektur); Open-Facts-Daten bleiben.
+      allow update: if signedIn()
+        && resource.data.quelle == 'nutzer'
+        && validProduct(request.resource.data);
+
+      allow delete: if false;
     }
 
     // Alles andere (u. a. alte `shares`, `rateLimits`) ist für Clients gesperrt.

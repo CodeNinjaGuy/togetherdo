@@ -76,10 +76,19 @@ dependencies:
   url_launcher: ^6.3.3
   in_app_review: ^2.0.12
 
+  # Barcode-Scanner und Produktsuche (Open Food Facts)
+  mobile_scanner: ^7.4.2
+  http: ^1.6.0
+
+  # Spracheingabe (Erkennung auf dem Gerät/System)
+  speech_to_text: ^7.5.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   integration_test:
+    sdk: flutter
+  flutter_driver:
     sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to

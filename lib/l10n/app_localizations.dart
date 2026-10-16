@@ -2335,6 +2335,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Suggestion: it\'s your turn'**
   String get suggestedTurnYou;
+
+  /// No description provided for @scanBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan barcode'**
+  String get scanBarcode;
+
+  /// No description provided for @scanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Point the camera at the barcode'**
+  String get scanHint;
+
+  /// No description provided for @scanCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Nothing added yet} =1{1 item added} other{{count} items added}}'**
+  String scanCount(int count);
+
+  /// No description provided for @scanDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get scanDone;
+
+  /// No description provided for @torchOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Light on'**
+  String get torchOn;
+
+  /// No description provided for @torchOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Light off'**
+  String get torchOff;
+
+  /// No description provided for @scanCameraDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera not allowed'**
+  String get scanCameraDenied;
+
+  /// No description provided for @scanCameraDeniedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'ToGetherDo isn\'t allowed to use the camera yet. Allow access in Settings to scan barcodes.'**
+  String get scanCameraDeniedMessage;
+
+  /// No description provided for @scanCameraUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No camera found'**
+  String get scanCameraUnavailable;
+
+  /// No description provided for @scanCameraUnavailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no camera available on this device.'**
+  String get scanCameraUnavailableMessage;
+
+  /// No description provided for @scanLookingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking up product …'**
+  String get scanLookingUp;
+
+  /// No description provided for @scanContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep scanning'**
+  String get scanContinue;
+
+  /// No description provided for @scanUnknownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Name this item'**
+  String get scanUnknownTitle;
+
+  /// No description provided for @scanUnknownMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This code isn\'t known yet. Enter a name – we\'ll remember it for everyone.'**
+  String get scanUnknownMessage;
+
+  /// No description provided for @scanCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Code {code}'**
+  String scanCodeLabel(String code);
+
+  /// No description provided for @scanOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get scanOfflineTitle;
+
+  /// No description provided for @scanOfflineMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The product couldn\'t be looked up. You can still name the item.'**
+  String get scanOfflineMessage;
+
+  /// No description provided for @scanDataAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Data: Open Food Facts (ODbL)'**
+  String get scanDataAttribution;
+
+  /// No description provided for @scanAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} added'**
+  String scanAdded(String name);
+
+  /// No description provided for @scanIncremented.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: quantity increased'**
+  String scanIncremented(String name);
+
+  /// No description provided for @scanDemoHit.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo hit'**
+  String get scanDemoHit;
+
+  /// No description provided for @scanBrandOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand (optional)'**
+  String get scanBrandOptional;
+
+  /// No description provided for @scanPackageSizeOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Package size (optional)'**
+  String get scanPackageSizeOptional;
+
+  /// No description provided for @scanPackageSizeExample.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 500 g'**
+  String get scanPackageSizeExample;
+
+  /// No description provided for @scanAddAndRemember.
+  ///
+  /// In en, this message translates to:
+  /// **'Add and remember'**
+  String get scanAddAndRemember;
+
+  /// No description provided for @editItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit item'**
+  String get editItem;
+
+  /// No description provided for @itemNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a name'**
+  String get itemNameRequired;
+
+  /// No description provided for @quantityInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid quantity'**
+  String get quantityInvalid;
+
+  /// No description provided for @rescanProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescan'**
+  String get rescanProduct;
+
+  /// No description provided for @removeProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove product'**
+  String get removeProduct;
+
+  /// No description provided for @productLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked product'**
+  String get productLinked;
+
+  /// No description provided for @noProductLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'No product linked'**
+  String get noProductLinked;
+
+  /// No description provided for @itemSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get itemSaved;
+
+  /// No description provided for @decreaseQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Less'**
+  String get decreaseQuantity;
+
+  /// No description provided for @increaseQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get increaseQuantity;
+
+  /// No description provided for @addManually.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter manually'**
+  String get addManually;
+
+  /// No description provided for @useProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Use'**
+  String get useProduct;
+
+  /// No description provided for @voiceInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input'**
+  String get voiceInput;
+
+  /// No description provided for @unit_cup.
+  ///
+  /// In en, this message translates to:
+  /// **'Cup'**
+  String get unit_cup;
+
+  /// No description provided for @unit_jar.
+  ///
+  /// In en, this message translates to:
+  /// **'Jar'**
+  String get unit_jar;
+
+  /// No description provided for @voiceListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening …'**
+  String get voiceListening;
+
+  /// No description provided for @voiceTapToSpeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap and speak, e.g. “2 kg tomatoes and 1 liter of milk”'**
+  String get voiceTapToSpeak;
+
+  /// No description provided for @voiceNothingUnderstood.
+  ///
+  /// In en, this message translates to:
+  /// **'I didn\'t catch that. Please try again.'**
+  String get voiceNothingUnderstood;
+
+  /// No description provided for @voiceUseResult.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Use 1 entry} other{Use {count} entries}}'**
+  String voiceUseResult(int count);
+
+  /// No description provided for @voiceAddAll.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Add 1 item} other{Add {count} items}}'**
+  String voiceAddAll(int count);
+
+  /// No description provided for @voiceRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Speak again'**
+  String get voiceRetry;
+
+  /// No description provided for @voiceStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get voiceStop;
+
+  /// No description provided for @voiceMicDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone not allowed'**
+  String get voiceMicDenied;
+
+  /// No description provided for @voiceMicDeniedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'ToGetherDo isn\'t allowed to use the microphone or speech recognition yet. Allow access in Settings to dictate items.'**
+  String get voiceMicDeniedMessage;
+
+  /// No description provided for @voiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input unavailable'**
+  String get voiceUnavailable;
+
+  /// No description provided for @voiceUnavailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech recognition isn\'t available on this device.'**
+  String get voiceUnavailableMessage;
+
+  /// No description provided for @voiceRecognized.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get voiceRecognized;
+
+  /// No description provided for @voiceDemoSpeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo sentence'**
+  String get voiceDemoSpeak;
+
+  /// No description provided for @voiceItemsAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item added} other{{count} items added}}'**
+  String voiceItemsAdded(int count);
+
+  /// No description provided for @voiceRemoveEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove entry'**
+  String get voiceRemoveEntry;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

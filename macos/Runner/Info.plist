@@ -36,5 +36,11 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSCameraUsageDescription</key>
+	<string>TogetherDo uses the camera to scan barcodes for your shopping list.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>TogetherDo uses the microphone only when you dictate items for your shopping list.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>TogetherDo turns what you say into shopping list items.</string>
 </dict>
 </plist>

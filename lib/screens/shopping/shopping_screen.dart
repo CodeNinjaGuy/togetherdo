@@ -9,12 +9,20 @@ import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
-import '../../widgets/shopping/shopping_item_widget.dart';
-import '../../widgets/shopping/add_shopping_item_dialog.dart';
-import '../../repositories/shopping_repository.dart';
-import '../../repositories/list_repository.dart';
-import '../../models/shopping_item_model.dart';
+import '../../design/td_design.dart';
 import '../../models/list_model.dart';
+import '../../models/product_info.dart';
+import '../../models/shopping_item_model.dart';
+import '../../repositories/list_repository.dart';
+import '../../repositories/product_repository.dart';
+import '../../repositories/shopping_repository.dart';
+import '../../services/scanner_session.dart';
+import '../../services/speech_service.dart';
+import '../../widgets/shopping/shopping_item_sheet.dart';
+import '../../widgets/shopping/shopping_item_widget.dart';
+import '../../widgets/shopping/shopping_quick_actions.dart';
+import '../../widgets/shopping/voice_input_sheet.dart';
+import 'barcode_scanner_screen.dart';
 
 class ShoppingScreen extends StatefulWidget {
   final String listId;
@@ -30,6 +38,8 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
   String? _highlightItemId;
   late final FirebaseShoppingRepository _shoppingRepository;
   late final FirebaseListRepository _listRepository;
+  late final Future<ListModel?> _listFuture;
+  final SpeechService _speech = DeviceSpeechService();
 
   @override
   void initState() {
@@ -38,255 +48,548 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
     _shoppingRepository =
         context.read<ShoppingRepository>() as FirebaseShoppingRepository;
     _listRepository = context.read<ListRepository>() as FirebaseListRepository;
+    _listFuture = _listRepository.getListById(widget.listId);
   }
 
   @override
   void didUpdateWidget(covariant ShoppingScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.highlightItemId != oldWidget.highlightItemId) {
-      debugPrint(
-        "HighlightItemId geändert: ${oldWidget.highlightItemId} -> ${widget.highlightItemId}",
-      );
-      setState(() {
-        _highlightItemId = widget.highlightItemId;
-      });
+      setState(() => _highlightItemId = widget.highlightItemId);
     }
   }
 
-  void _onHighlightEnd() {
-    setState(() {
-      _highlightItemId = null;
-    });
+  void _onHighlightEnd() => setState(() => _highlightItemId = null);
+
+  // ------------------------------------------------------------ Nutzer
+
+  AuthAuthenticated? get _auth {
+    final state = context.read<AuthBloc>().state;
+    return state is AuthAuthenticated ? state : null;
   }
 
-  void _showAddItemDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AddShoppingItemDialog(listId: widget.listId),
+  String get _userId => _auth?.user.id ?? '';
+  String? get _userName => _auth?.user.displayName;
+
+  ({bool canEdit, bool canToggle}) _rights(ListModel list) {
+    final uid = _userId;
+    final isOwner = list.ownerId == uid;
+    final isMember = list.memberIds.contains(uid);
+    return (
+      canEdit: isOwner || (isMember && list.allowEdit),
+      canToggle: isOwner || isMember,
     );
   }
+
+  // ----------------------------------------------------------- Aktionen
+
+  ScannerSession _session(AppLocalizations l10n) => ListScannerSession(
+    products: context.read<ProductRepository>(),
+    shopping: _shoppingRepository,
+    listId: widget.listId,
+    userId: _userId,
+    defaultUnit: l10n.unit_piece,
+  );
+
+  Future<void> _openScanner() async {
+    final l10n = AppLocalizations.of(context)!;
+    final added = await BarcodeScannerScreen.open<int>(
+      context,
+      session: _session(l10n),
+    );
+    if (!mounted || added == null || added == 0) return;
+    TdToast.show(
+      context,
+      l10n.scanCount(added),
+      variant: TdToastVariant.success,
+      icon: Icons.shopping_basket_rounded,
+    );
+  }
+
+  Future<ProductInfo?> _pickProduct() {
+    final l10n = AppLocalizations.of(context)!;
+    return BarcodeScannerScreen.open<ProductInfo>(
+      context,
+      session: _session(l10n),
+      pickMode: true,
+    );
+  }
+
+  /// Mikrofon im Sheet: ein Eintrag füllt die Felder.
+  Future<ShoppingItemDraft?> _voiceForSheet() async {
+    final drafts = await showVoiceInputSheet(
+      context,
+      speech: _speech,
+      singleEntry: true,
+    );
+    return drafts?.firstOrNull;
+  }
+
+  /// Mikrofon als Schnellaktion: ein Eintrag → Sheet vorausgefüllt,
+  /// mehrere → nach Bestätigung direkt in die Liste.
+  Future<void> _voiceQuickAdd() async {
+    final drafts = await showVoiceInputSheet(
+      context,
+      speech: _speech,
+      addDirectly: true,
+    );
+    if (drafts == null || drafts.isEmpty || !mounted) return;
+    if (drafts.length == 1) {
+      await _addManually(initial: drafts.first);
+      return;
+    }
+    final l10n = AppLocalizations.of(context)!;
+    var added = 0;
+    for (final d in drafts) {
+      if (await _saveDraft(d, l10n, quiet: true)) added++;
+    }
+    if (!mounted || added == 0) return;
+    TdToast.show(
+      context,
+      l10n.voiceItemsAdded(added),
+      variant: TdToastVariant.success,
+      icon: Icons.mic_rounded,
+    );
+  }
+
+  Future<void> _addManually({ShoppingItemDraft? initial}) async {
+    final draft = await showShoppingItemSheet(
+      context,
+      initial: initial,
+      onScan: barcodeScannerSupported ? _pickProduct : null,
+      onVoice: speechInputSupported ? _voiceForSheet : null,
+    );
+    if (draft == null || !mounted) return;
+    await _saveDraft(draft, AppLocalizations.of(context)!);
+  }
+
+  Future<bool> _saveDraft(
+    ShoppingItemDraft draft,
+    AppLocalizations l10n, {
+    bool quiet = false,
+  }) async {
+    try {
+      await _shoppingRepository.addItem(
+        name: draft.name,
+        quantity: draft.quantity,
+        unit: draft.unit ?? l10n.unit_piece,
+        userId: _userId,
+        notes: draft.notes,
+        listId: widget.listId,
+        ean: draft.ean,
+        imageUrl: draft.imageUrl,
+      );
+      if (!mounted) return true;
+      if (!quiet) {
+        TdToast.show(
+          context,
+          l10n.scanAdded(draft.name),
+          variant: TdToastVariant.success,
+          icon: Icons.add_shopping_cart_rounded,
+        );
+      }
+      return true;
+    } catch (e) {
+      if (!mounted) return false;
+      TdToast.show(
+        context,
+        '${l10n.loadError}: $e',
+        variant: TdToastVariant.error,
+      );
+      return false;
+    }
+  }
+
+  Future<void> _edit(ShoppingItemModel item) async {
+    final draft = await showShoppingItemSheet(
+      context,
+      initial: ShoppingItemDraft.fromItem(item),
+      isEdit: true,
+      onScan: barcodeScannerSupported ? _pickProduct : null,
+      onVoice: speechInputSupported ? _voiceForSheet : null,
+    );
+    if (draft == null || !mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+    final updated = item.copyWith(
+      name: draft.name,
+      quantity: draft.quantity,
+      unit: draft.unit,
+      notes: draft.notes,
+      ean: draft.ean,
+      imageUrl: draft.imageUrl,
+      clearProduct: draft.ean == null,
+    );
+    // `notes` leeren: copyWith lässt null durch, daher eigenes Objekt.
+    final toSave = draft.notes == null && item.notes != null
+        ? ShoppingItemModel(
+            id: updated.id,
+            name: updated.name,
+            quantity: updated.quantity,
+            unit: updated.unit,
+            isPurchased: updated.isPurchased,
+            purchasedBy: updated.purchasedBy,
+            purchasedAt: updated.purchasedAt,
+            createdAt: updated.createdAt,
+            userId: updated.userId,
+            listId: updated.listId,
+            ean: updated.ean,
+            imageUrl: updated.imageUrl,
+          )
+        : updated;
+    try {
+      await _shoppingRepository.updateItem(toSave);
+      if (!mounted) return;
+      TdToast.show(context, l10n.itemSaved, variant: TdToastVariant.success);
+    } catch (e) {
+      if (!mounted) return;
+      TdToast.show(
+        context,
+        '${l10n.loadError}: $e',
+        variant: TdToastVariant.error,
+      );
+    }
+  }
+
+  Future<void> _toggle(ShoppingItemModel item, bool value) async {
+    final updated = ShoppingItemModel(
+      id: item.id,
+      name: item.name,
+      quantity: item.quantity,
+      unit: item.unit,
+      isPurchased: value,
+      purchasedBy: value ? _userName : null,
+      purchasedAt: value ? DateTime.now() : null,
+      createdAt: item.createdAt,
+      userId: item.userId,
+      notes: item.notes,
+      listId: item.listId,
+      ean: item.ean,
+      imageUrl: item.imageUrl,
+    );
+    try {
+      await _shoppingRepository.updateItem(updated);
+    } catch (e) {
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
+      TdToast.show(
+        context,
+        '${l10n.loadError}: $e',
+        variant: TdToastVariant.error,
+      );
+    }
+  }
+
+  Future<void> _confirmDelete(ShoppingItemModel item) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteItemTitle),
+        content: Text(l10n.deleteItemContent(item.name)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: ctx.td.danger),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    await _shoppingRepository.deleteItem(item.id);
+  }
+
+  // -------------------------------------------------------------- Aufbau
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    if (l10n == null) {
-      return const SizedBox.shrink();
-    }
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.shoppingList)),
-      body: FutureBuilder<ListModel?>(
-        future: _listRepository.getListById(widget.listId),
-        builder: (context, listSnapshot) {
-          if (listSnapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    if (l10n == null) return const SizedBox.shrink();
 
-          final list = listSnapshot.data;
-          if (list == null) {
-            return Center(child: Text(l10n.listNotFound));
-          }
+    return FutureBuilder<ListModel?>(
+      future: _listFuture,
+      builder: (context, listSnapshot) {
+        final list = listSnapshot.data;
+        final rights = list == null
+            ? (canEdit: false, canToggle: false)
+            : _rights(list);
 
-          final authState = context.read<AuthBloc>().state;
-          final currentUserId = authState is AuthAuthenticated
-              ? authState.user.id
-              : '';
-          final isOwner = list.ownerId == currentUserId;
-          final isMember = list.memberIds.contains(currentUserId);
-          final canEdit = isOwner || (isMember && list.allowEdit);
-
-          return Column(
-            children: [
-              // Listen-Info Header
-              if (!canEdit && !isOwner)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  margin: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.outline.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.lock_outline,
-                        size: 20,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          l10n.readOnlyMode,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(list?.name ?? l10n.shoppingList),
+            actions: [
+              if (rights.canEdit && barcodeScannerSupported)
+                IconButton(
+                  tooltip: l10n.scanBarcode,
+                  icon: const Icon(Icons.qr_code_scanner_rounded),
+                  onPressed: _openScanner,
                 ),
-              // Shopping Items Stream
-              Expanded(
-                child: StreamBuilder<List<ShoppingItemModel>>(
-                  stream: _shoppingRepository.getItemsStream(widget.listId),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.hasError) {
-                      return Center(
-                        child: Text('${l10n.loadError}: ${snapshot.error}'),
-                      );
-                    }
-                    final items = snapshot.data ?? <ShoppingItemModel>[];
-
-                    if (items.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.shopping_cart_outlined,
-                              size: 80,
-                              color: Theme.of(context).colorScheme.outline,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              l10n.shoppingListEmpty,
-                              style: Theme.of(context).textTheme.headlineSmall,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              canEdit ? l10n.addFirstItem : l10n.listIsEmpty,
-                              style: Theme.of(context).textTheme.bodyLarge
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    // Gruppiere Items nach Status
-                    final pendingItems = items
-                        .where((item) => item.isPurchased == false)
-                        .toList();
-                    final purchasedItems = items
-                        .where((item) => item.isPurchased == true)
-                        .toList();
-
-                    return ListView(
-                      padding: const EdgeInsets.all(16),
-                      children: [
-                        if (pendingItems.isNotEmpty) ...[
-                          _buildSectionHeader(
-                            l10n.stillToBuy,
-                            pendingItems.length,
-                          ),
-                          const SizedBox(height: 8),
-                          ...pendingItems.map(
-                            (item) => ShoppingItemWidget(
-                              item: item,
-                              highlight: _highlightItemId == item.id,
-                              onHighlightEnd: _onHighlightEnd,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                        ],
-                        if (purchasedItems.isNotEmpty) ...[
-                          _buildSectionHeader(
-                            l10n.bought,
-                            purchasedItems.length,
-                          ),
-                          const SizedBox(height: 8),
-                          ...purchasedItems.map(
-                            (item) => ShoppingItemWidget(
-                              item: item,
-                              highlight: _highlightItemId == item.id,
-                              onHighlightEnd: _onHighlightEnd,
-                            ),
-                          ),
-                        ],
-                      ],
-                    );
-                  },
-                ),
-              ),
             ],
-          );
-        },
-      ),
-      floatingActionButton: FutureBuilder<ListModel?>(
-        future: _listRepository.getListById(widget.listId),
-        builder: (context, listSnapshot) {
-          if (listSnapshot.connectionState == ConnectionState.waiting) {
-            return const SizedBox.shrink();
-          }
-
-          final list = listSnapshot.data;
-          if (list == null) {
-            return const SizedBox.shrink();
-          }
-
-          final authState = context.read<AuthBloc>().state;
-          final currentUserId = authState is AuthAuthenticated
-              ? authState.user.id
-              : '';
-          final isOwner = list.ownerId == currentUserId;
-          final isMember = list.memberIds.contains(currentUserId);
-          final canEdit = isOwner || (isMember && list.allowEdit);
-
-          if (!canEdit) {
-            return const SizedBox.shrink(); // Kein FAB wenn keine Bearbeitungsberechtigung
-          }
-
-          return FloatingActionButton(
-            onPressed: _showAddItemDialog,
-            child: const Icon(Icons.add),
-          );
-        },
-      ),
+          ),
+          body: _buildBody(context, l10n, listSnapshot, rights),
+          floatingActionButton: rights.canEdit
+              ? ShoppingQuickActions(
+                  onAdd: () => _addManually(),
+                  onScan: barcodeScannerSupported ? _openScanner : null,
+                  onVoice: speechInputSupported ? _voiceQuickAdd : null,
+                )
+              : null,
+        );
+      },
     );
   }
 
-  Widget _buildSectionHeader(String title, int count) {
-    return Row(
+  Widget _buildBody(
+    BuildContext context,
+    AppLocalizations l10n,
+    AsyncSnapshot<ListModel?> listSnapshot,
+    ({bool canEdit, bool canToggle}) rights,
+  ) {
+    if (listSnapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final list = listSnapshot.data;
+    if (list == null) {
+      return Center(child: Text(l10n.listNotFound));
+    }
+
+    return Column(
       children: [
-        Text(
-          title,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(width: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            count.toString(),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-              fontWeight: FontWeight.bold,
+        if (!rights.canEdit)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              TdSpace.page,
+              TdSpace.lg,
+              TdSpace.page,
+              0,
             ),
+            child: TdCard(
+              variant: TdCardVariant.outlined,
+              padding: const EdgeInsets.all(TdSpace.md),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.lock_outline_rounded,
+                    size: 20,
+                    color: context.td.muted,
+                  ),
+                  const SizedBox(width: TdSpace.sm),
+                  Expanded(
+                    child: Text(
+                      l10n.readOnlyMode,
+                      style: context.text.bodySmall?.copyWith(
+                        color: context.td.muted,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        Expanded(
+          child: StreamBuilder<List<ShoppingItemModel>>(
+            stream: _shoppingRepository.getItemsStream(widget.listId),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text('${l10n.loadError}: ${snapshot.error}'),
+                );
+              }
+              return ShoppingItemsView(
+                items: snapshot.data ?? const [],
+                canEdit: rights.canEdit,
+                canToggle: rights.canToggle,
+                currentUserName: _userName,
+                highlightItemId: _highlightItemId,
+                onHighlightEnd: _onHighlightEnd,
+                onToggle: _toggle,
+                onEdit: _edit,
+                onDelete: _confirmDelete,
+                onAddFirst: rights.canEdit ? () => _addManually() : null,
+                onScanFirst: rights.canEdit && barcodeScannerSupported
+                    ? _openScanner
+                    : null,
+              );
+            },
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Die Artikelliste selbst: „Noch zu kaufen“ und „Gekauft“ mit Zählern,
+/// Leerzustand mit Schnellstart. Ohne Firebase, damit sie auch in der
+/// Debug-Demo und in Tests läuft.
+class ShoppingItemsView extends StatelessWidget {
+  const ShoppingItemsView({
+    super.key,
+    required this.items,
+    required this.canEdit,
+    required this.canToggle,
+    this.currentUserName,
+    this.highlightItemId,
+    this.onHighlightEnd,
+    this.onToggle,
+    this.onEdit,
+    this.onDelete,
+    this.onAddFirst,
+    this.onScanFirst,
+  });
+
+  final List<ShoppingItemModel> items;
+  final bool canEdit;
+  final bool canToggle;
+  final String? currentUserName;
+  final String? highlightItemId;
+  final VoidCallback? onHighlightEnd;
+  final void Function(ShoppingItemModel item, bool value)? onToggle;
+  final ValueChanged<ShoppingItemModel>? onEdit;
+  final ValueChanged<ShoppingItemModel>? onDelete;
+  final VoidCallback? onAddFirst;
+  final VoidCallback? onScanFirst;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    if (items.isEmpty) {
+      return Center(
+        child: SingleChildScrollView(
+          child: TdEmptyState(
+            icon: Icons.shopping_cart_outlined,
+            title: l10n.shoppingListEmpty,
+            message: canEdit ? l10n.addFirstItem : l10n.listIsEmpty,
+            action: canEdit
+                ? Wrap(
+                    spacing: TdSpace.sm,
+                    runSpacing: TdSpace.sm,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      if (onScanFirst != null)
+                        TdButton.primary(
+                          label: l10n.scanBarcode,
+                          icon: Icons.qr_code_scanner_rounded,
+                          onPressed: onScanFirst,
+                        ),
+                      TdButton.secondary(
+                        label: l10n.addManually,
+                        icon: Icons.edit_outlined,
+                        onPressed: onAddFirst,
+                      ),
+                    ],
+                  )
+                : null,
+          ),
+        ),
+      );
+    }
+
+    final pending = items.where((i) => !i.isPurchased).toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final purchased = items.where((i) => i.isPurchased).toList()
+      ..sort((a, b) {
+        final at = a.purchasedAt, bt = b.purchasedAt;
+        if (at == null || bt == null) return 0;
+        return bt.compareTo(at);
+      });
+
+    var index = 0;
+    Widget tile(ShoppingItemModel item) => ShoppingItemWidget(
+      key: ValueKey(item.id),
+      item: item,
+      index: index++,
+      highlight: highlightItemId == item.id,
+      onHighlightEnd: onHighlightEnd,
+      canEdit: canEdit,
+      canToggle: canToggle,
+      currentUserName: currentUserName,
+      onTogglePurchased: onToggle == null ? null : (v) => onToggle!(item, v),
+      onTap: onEdit == null ? null : () => onEdit!(item),
+      onDelete: onDelete == null ? null : () => onDelete!(item),
+    );
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        TdSpace.page,
+        TdSpace.lg,
+        TdSpace.page,
+        120,
+      ),
+      children: [
+        if (pending.isNotEmpty) ...[
+          _SectionHeader(title: l10n.stillToBuy, count: pending.length),
+          const SizedBox(height: TdSpace.sm),
+          ...pending.map(tile),
+          const SizedBox(height: TdSpace.lg),
+        ],
+        if (purchased.isNotEmpty) ...[
+          _SectionHeader(
+            title: l10n.bought,
+            count: purchased.length,
+            muted: true,
+          ),
+          const SizedBox(height: TdSpace.sm),
+          ...purchased.map(tile),
+        ],
+      ],
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    required this.title,
+    required this.count,
+    this.muted = false,
+  });
+
+  final String title;
+  final int count;
+  final bool muted;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = context.colors;
+    return Padding(
+      padding: const EdgeInsets.only(left: TdSpace.xs),
+      child: Row(
+        children: [
+          Text(
+            title,
+            style: context.text.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: muted ? context.td.muted : null,
+            ),
+          ),
+          const SizedBox(width: TdSpace.sm),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: TdSpace.sm,
+              vertical: 2,
+            ),
+            decoration: BoxDecoration(
+              color: muted
+                  ? scheme.surfaceContainerHighest
+                  : scheme.primaryContainer,
+              borderRadius: BorderRadius.circular(TdRadius.pill),
+            ),
+            child: TdAnimatedCounter(
+              value: count,
+              style: context.text.labelMedium?.copyWith(
+                color: muted ? context.td.muted : scheme.onPrimaryContainer,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

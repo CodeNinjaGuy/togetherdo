@@ -422,6 +422,104 @@ describe('shopping_items', () => {
   });
 });
 
+describe('shopping_items bearbeiten (Scanner)', () => {
+  test('Besitzer bearbeitet Name, Menge, Einheit, Notiz und Produktfelder', async () => {
+    await assertSucceeds(
+      updateDoc(doc(db(owner), 'shopping_items/I1'), {
+        name: 'Hafermilch',
+        quantity: 2,
+        unit: 'Stück',
+        notes: 'Bio',
+        ean: '4008400202020',
+        imageUrl: 'https://images.openfoodfacts.org/x.jpg',
+      }),
+    );
+    // Produkt wieder lösen (Felder auf null).
+    await assertSucceeds(updateDoc(doc(db(owner), 'shopping_items/I1'), { ean: null, imageUrl: null }));
+  });
+  test('Anlegen mit Strichcode und Bild erlaubt, Schlüsselfelder bleiben fest', async () => {
+    await assertSucceeds(
+      setDoc(doc(db(owner), 'shopping_items/I4'), {
+        ...itemData('I4', owner),
+        ean: '3017620422003',
+        imageUrl: 'https://images.openfoodfacts.org/n.jpg',
+      }),
+    );
+    await assertFails(updateDoc(doc(db(owner), 'shopping_items/I4'), { listId: 'L1' }));
+    await assertFails(updateDoc(doc(db(owner), 'shopping_items/I4'), { userId: viewer }));
+  });
+  test('Mitglied ohne allowEdit darf Produktfelder nicht ändern', async () => {
+    await assertFails(updateDoc(doc(db(viewer), 'shopping_items/I1'), { ean: '3017620422003' }));
+    await assertFails(updateDoc(doc(db(viewer), 'shopping_items/I1'), { quantity: 5 }));
+  });
+});
+
+const EAN = '3017620422003';
+function produktData(extra = {}) {
+  return {
+    ean: EAN,
+    name: 'Nutella',
+    marke: 'Ferrero',
+    menge: '400 g',
+    bildUrl: 'https://images.openfoodfacts.org/images/products/301/762/042/2003/front_de.jpg',
+    quelle: 'off',
+    aktualisiertAm: now,
+    ...extra,
+  };
+}
+
+describe('produkte (Strichcode-Zwischenspeicher)', () => {
+  test('Angemeldete lesen und legen Open-Facts-Daten an, Fremde ohne Anmeldung nicht', async () => {
+    await assertSucceeds(setDoc(doc(db(member), `produkte/${EAN}`), produktData()));
+    await assertSucceeds(getDoc(doc(db(stranger), `produkte/${EAN}`)));
+    await assertFails(getDoc(doc(anon(), `produkte/${EAN}`)));
+    await assertFails(setDoc(doc(anon(), 'produkte/4008400202020'), produktData({ ean: '4008400202020' })));
+  });
+  test('Nutzer-Eintrag braucht Urheber; nur gültige Felder und Längen', async () => {
+    await assertSucceeds(
+      setDoc(doc(db(member), 'produkte/40084002'), {
+        ean: '40084002', name: 'Hausmarke Müsli', marke: null, menge: null, bildUrl: null,
+        quelle: 'nutzer', aktualisiertAm: now, erstelltVon: member,
+      }),
+    );
+    // Urheber fehlt oder ist jemand anderes
+    await assertFails(setDoc(doc(db(member), 'produkte/40084003'), produktData({ ean: '40084003', quelle: 'nutzer' })));
+    await assertFails(setDoc(doc(db(member), 'produkte/40084004'), produktData({ ean: '40084004', quelle: 'nutzer', erstelltVon: owner })));
+    // Dokument-ID muss zum Code passen und ein Strichcode sein
+    await assertFails(setDoc(doc(db(member), 'produkte/abc'), produktData({ ean: 'abc' })));
+    await assertFails(setDoc(doc(db(member), 'produkte/4008400202020'), produktData()));
+    // Name leer / zu lang, unbekannte Quelle, Bild nicht https, Fremdfeld
+    await assertFails(setDoc(doc(db(member), `produkte/${EAN}`), produktData({ name: '' })));
+    await assertFails(setDoc(doc(db(member), `produkte/${EAN}`), produktData({ name: 'x'.repeat(121) })));
+    await assertFails(setDoc(doc(db(member), `produkte/${EAN}`), produktData({ quelle: 'wiki' })));
+    await assertFails(setDoc(doc(db(member), `produkte/${EAN}`), produktData({ bildUrl: 'http://x.test/a.jpg' })));
+    await assertFails(setDoc(doc(db(member), `produkte/${EAN}`), produktData({ preis: 3.49 })));
+  });
+  test('Open-Facts-Daten werden nicht überschrieben, Nutzer-Einträge schon; Löschen nie', async () => {
+    await assertSucceeds(setDoc(doc(db(member), `produkte/${EAN}`), produktData()));
+    await assertFails(setDoc(doc(db(owner), `produkte/${EAN}`), produktData({ name: 'Quatsch' })));
+    await assertFails(updateDoc(doc(db(owner), `produkte/${EAN}`), { name: 'Quatsch' }));
+    await assertFails(deleteDoc(doc(db(owner), `produkte/${EAN}`)));
+
+    await assertSucceeds(
+      setDoc(doc(db(member), 'produkte/40084002'), {
+        ean: '40084002', name: 'Müsli', marke: null, menge: null, bildUrl: null,
+        quelle: 'nutzer', aktualisiertAm: now, erstelltVon: member,
+      }),
+    );
+    // Korrektur durch anderen Nutzer (als eigener Nutzer-Eintrag) …
+    await assertSucceeds(
+      setDoc(doc(db(owner), 'produkte/40084002'), {
+        ean: '40084002', name: 'Hausmarke Müsli', marke: null, menge: null, bildUrl: null,
+        quelle: 'nutzer', aktualisiertAm: now, erstelltVon: owner,
+      }),
+    );
+    // … oder Ersatz durch echte Open-Facts-Daten.
+    await assertSucceeds(setDoc(doc(db(owner), 'produkte/40084002'), produktData({ ean: '40084002' })));
+    await assertFails(deleteDoc(doc(db(member), 'produkte/40084002')));
+  });
+});
+
 describe('gesperrte Sammlungen', () => {
   test('shares und rateLimits sind für Clients zu', async () => {
     await assertFails(getDoc(doc(db(owner), 'shares/X')));

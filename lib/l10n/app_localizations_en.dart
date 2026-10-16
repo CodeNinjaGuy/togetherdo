@@ -1172,6 +1172,210 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get suggestedTurnYou => 'Suggestion: it\'s your turn';
+
+  @override
+  String get scanBarcode => 'Scan barcode';
+
+  @override
+  String get scanHint => 'Point the camera at the barcode';
+
+  @override
+  String scanCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items added',
+      one: '1 item added',
+      zero: 'Nothing added yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scanDone => 'Done';
+
+  @override
+  String get torchOn => 'Light on';
+
+  @override
+  String get torchOff => 'Light off';
+
+  @override
+  String get scanCameraDenied => 'Camera not allowed';
+
+  @override
+  String get scanCameraDeniedMessage => 'ToGetherDo isn\'t allowed to use the camera yet. Allow access in Settings to scan barcodes.';
+
+  @override
+  String get scanCameraUnavailable => 'No camera found';
+
+  @override
+  String get scanCameraUnavailableMessage => 'There is no camera available on this device.';
+
+  @override
+  String get scanLookingUp => 'Looking up product …';
+
+  @override
+  String get scanContinue => 'Keep scanning';
+
+  @override
+  String get scanUnknownTitle => 'Name this item';
+
+  @override
+  String get scanUnknownMessage => 'This code isn\'t known yet. Enter a name – we\'ll remember it for everyone.';
+
+  @override
+  String scanCodeLabel(String code) {
+    return 'Code $code';
+  }
+
+  @override
+  String get scanOfflineTitle => 'No connection';
+
+  @override
+  String get scanOfflineMessage => 'The product couldn\'t be looked up. You can still name the item.';
+
+  @override
+  String get scanDataAttribution => 'Data: Open Food Facts (ODbL)';
+
+  @override
+  String scanAdded(String name) {
+    return '$name added';
+  }
+
+  @override
+  String scanIncremented(String name) {
+    return '$name: quantity increased';
+  }
+
+  @override
+  String get scanDemoHit => 'Demo hit';
+
+  @override
+  String get scanBrandOptional => 'Brand (optional)';
+
+  @override
+  String get scanPackageSizeOptional => 'Package size (optional)';
+
+  @override
+  String get scanPackageSizeExample => 'e.g. 500 g';
+
+  @override
+  String get scanAddAndRemember => 'Add and remember';
+
+  @override
+  String get editItem => 'Edit item';
+
+  @override
+  String get itemNameRequired => 'Please enter a name';
+
+  @override
+  String get quantityInvalid => 'Please enter a valid quantity';
+
+  @override
+  String get rescanProduct => 'Rescan';
+
+  @override
+  String get removeProduct => 'Remove product';
+
+  @override
+  String get productLinked => 'Linked product';
+
+  @override
+  String get noProductLinked => 'No product linked';
+
+  @override
+  String get itemSaved => 'Saved';
+
+  @override
+  String get decreaseQuantity => 'Less';
+
+  @override
+  String get increaseQuantity => 'More';
+
+  @override
+  String get addManually => 'Enter manually';
+
+  @override
+  String get useProduct => 'Use';
+
+  @override
+  String get voiceInput => 'Voice input';
+
+  @override
+  String get unit_cup => 'Cup';
+
+  @override
+  String get unit_jar => 'Jar';
+
+  @override
+  String get voiceListening => 'Listening …';
+
+  @override
+  String get voiceTapToSpeak => 'Tap and speak, e.g. “2 kg tomatoes and 1 liter of milk”';
+
+  @override
+  String get voiceNothingUnderstood => 'I didn\'t catch that. Please try again.';
+
+  @override
+  String voiceUseResult(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Use $count entries',
+      one: 'Use 1 entry',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String voiceAddAll(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count items',
+      one: 'Add 1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get voiceRetry => 'Speak again';
+
+  @override
+  String get voiceStop => 'Done';
+
+  @override
+  String get voiceMicDenied => 'Microphone not allowed';
+
+  @override
+  String get voiceMicDeniedMessage => 'ToGetherDo isn\'t allowed to use the microphone or speech recognition yet. Allow access in Settings to dictate items.';
+
+  @override
+  String get voiceUnavailable => 'Voice input unavailable';
+
+  @override
+  String get voiceUnavailableMessage => 'Speech recognition isn\'t available on this device.';
+
+  @override
+  String get voiceRecognized => 'Got it';
+
+  @override
+  String get voiceDemoSpeak => 'Demo sentence';
+
+  @override
+  String voiceItemsAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items added',
+      one: '1 item added',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get voiceRemoveEntry => 'Remove entry';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).

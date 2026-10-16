@@ -431,5 +431,109 @@
   "fairnessPointsTotal": "Punkte gesamt",
   "fairnessTopCarrierYou": "Du hast am meisten getragen.",
   "fairnessNextTurnYou": "Als Nächstes bist du dran.",
-  "suggestedTurnYou": "Vorschlag: du bist dran"
+  "suggestedTurnYou": "Vorschlag: du bist dran",
+  "scanBarcode": "Strichcode scannen",
+  "scanHint": "Richte die Kamera auf den Strichcode",
+  "scanCount": "{count, plural, =0{Noch nichts hinzugefügt} =1{1 Artikel hinzugefügt} other{{count} Artikel hinzugefügt}}",
+  "@scanCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scanDone": "Fertig",
+  "torchOn": "Licht an",
+  "torchOff": "Licht aus",
+  "scanCameraDenied": "Kamera nicht erlaubt",
+  "scanCameraDeniedMessage": "ToGetherDo darf die Kamera noch nicht verwenden. Erlaube den Zugriff in den Einstellungen, um Strichcodes zu scannen.",
+  "scanCameraUnavailable": "Keine Kamera gefunden",
+  "scanCameraUnavailableMessage": "Auf diesem Gerät steht keine Kamera zur Verfügung.",
+  "scanLookingUp": "Produkt wird gesucht …",
+  "scanContinue": "Weiter scannen",
+  "scanUnknownTitle": "Artikel benennen",
+  "scanUnknownMessage": "Dieser Code ist noch unbekannt. Gib einen Namen ein – wir merken ihn uns für alle.",
+  "scanCodeLabel": "Code {code}",
+  "@scanCodeLabel": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "scanOfflineTitle": "Kein Netz",
+  "scanOfflineMessage": "Das Produkt konnte nicht nachgeschlagen werden. Du kannst den Artikel trotzdem benennen.",
+  "scanDataAttribution": "Daten: Open Food Facts (ODbL)",
+  "scanAdded": "{name} hinzugefügt",
+  "@scanAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "scanIncremented": "{name}: Menge erhöht",
+  "@scanIncremented": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "scanDemoHit": "Demo-Treffer",
+  "scanBrandOptional": "Marke (optional)",
+  "scanPackageSizeOptional": "Füllmenge (optional)",
+  "scanPackageSizeExample": "z.B. 500 g",
+  "scanAddAndRemember": "Hinzufügen und merken",
+  "editItem": "Artikel bearbeiten",
+  "itemNameRequired": "Bitte einen Namen eingeben",
+  "quantityInvalid": "Bitte eine gültige Menge eingeben",
+  "rescanProduct": "Neu scannen",
+  "removeProduct": "Produkt entfernen",
+  "productLinked": "Verknüpftes Produkt",
+  "noProductLinked": "Kein Produkt verknüpft",
+  "itemSaved": "Gespeichert",
+  "decreaseQuantity": "Weniger",
+  "increaseQuantity": "Mehr",
+  "addManually": "Von Hand eingeben",
+  "useProduct": "Übernehmen",
+  "voiceInput": "Spracheingabe",
+  "unit_cup": "Becher",
+  "unit_jar": "Glas",
+  "voiceListening": "Ich höre zu …",
+  "voiceTapToSpeak": "Tippe und sprich, z.B. „2 kg Tomaten und 1 Liter Milch“",
+  "voiceNothingUnderstood": "Ich habe nichts verstanden. Versuch es noch einmal.",
+  "voiceUseResult": "{count, plural, =1{1 Eintrag übernehmen} other{{count} Einträge übernehmen}}",
+  "@voiceUseResult": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceAddAll": "{count, plural, =1{1 Artikel hinzufügen} other{{count} Artikel hinzufügen}}",
+  "@voiceAddAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceRetry": "Noch einmal sprechen",
+  "voiceStop": "Fertig",
+  "voiceMicDenied": "Mikrofon nicht erlaubt",
+  "voiceMicDeniedMessage": "ToGetherDo darf Mikrofon oder Spracherkennung noch nicht verwenden. Erlaube den Zugriff in den Einstellungen, um Artikel zu diktieren.",
+  "voiceUnavailable": "Spracheingabe nicht verfügbar",
+  "voiceUnavailableMessage": "Auf diesem Gerät steht keine Spracherkennung zur Verfügung.",
+  "voiceRecognized": "Verstanden",
+  "voiceDemoSpeak": "Demo-Satz",
+  "voiceItemsAdded": "{count, plural, =1{1 Artikel hinzugefügt} other{{count} Artikel hinzugefügt}}",
+  "@voiceItemsAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceRemoveEntry": "Eintrag entfernen"
 }

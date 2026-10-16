@@ -31,12 +31,14 @@ import 'repositories/todo_repository.dart';
 import 'repositories/shopping_repository.dart';
 import 'repositories/list_repository.dart';
 import 'repositories/chat_repository.dart';
+import 'repositories/product_repository.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/todo/todo_screen.dart';
 import 'screens/shopping/shopping_screen.dart';
+import 'screens/shopping/shopping_demo_screen.dart';
 import 'screens/lists/lists_screen.dart';
 import 'screens/chat/chat_screen.dart';
 import 'design/showcase/design_gallery_screen.dart';
@@ -47,6 +49,8 @@ import 'firebase_options.dart';
 import 'services/messaging_service.dart';
 import 'services/firebase_emulator.dart';
 import 'services/review_service.dart';
+import 'services/product_lookup_service.dart';
+import 'config/app_info.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -92,6 +96,13 @@ void main() async {
         RepositoryProvider<ChatRepository>(
           create: (context) => FirestoreChatRepository(),
         ),
+        // Produktsuche per Strichcode: Gerät → Firestore → Open Food Facts.
+        RepositoryProvider<ProductRepository>(
+          create: (context) => ProductRepository(
+            store: FirestoreProductStore(),
+            lookupService: ProductLookupService(appVersion: appVersion),
+          ),
+        ),
       ],
       child: const TogetherDoApp(),
     ),
@@ -99,7 +110,10 @@ void main() async {
 
   // Push erst nach dem ersten Bild einrichten: Berechtigungsdialog und
   // APNs-Token dürfen den Start nicht blockieren (weißer Bildschirm).
-  unawaited(MessagingService().initialize());
+  // Beim Debug-Start auf einer Design-Route (Screenshots) kein Push.
+  if (!(kDebugMode && _debugStart.startsWith('/design/'))) {
+    unawaited(MessagingService().initialize());
+  }
 
   // Erste Nutzung merken (Bewertungsanfrage frühestens nach 3 Tagen).
   unawaited(ReviewService.instance.recordAppStart());
@@ -145,6 +159,8 @@ class TogetherDoApp extends StatelessWidget {
     );
   }
 }
+
+const String _debugStart = String.fromEnvironment('TD_START');
 
 class TogetherDoAppView extends StatelessWidget {
   TogetherDoAppView({super.key});
@@ -242,7 +258,11 @@ class TogetherDoAppView extends StatelessWidget {
   }
 
   final GoRouter _router = GoRouter(
-    initialLocation: '/login',
+    // Debug-Builds können mit `--dart-define=TD_START=/design/einkauf`
+    // direkt auf einer Design-Route starten (Screenshots im Simulator).
+    initialLocation: kDebugMode && _debugStart.startsWith('/design/')
+        ? _debugStart
+        : '/login',
     redirect: (context, state) {
       // Prüfe Auth-Status
       final authBloc = context.read<AuthBloc>();
@@ -285,6 +305,11 @@ class TogetherDoAppView extends StatelessWidget {
         GoRoute(
           path: '/design/galerie',
           builder: (context, state) => const TdDesignGalleryScreen(),
+        ),
+        // Einkaufsliste mit Scanner im Demo-Modus (Simulator ohne Kamera).
+        GoRoute(
+          path: '/design/einkauf',
+          builder: (context, state) => const ShoppingDemoScreen(),
         ),
       ],
 
