@@ -3,6 +3,7 @@
  * Written by Martin Bundschuh.
  */
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -60,7 +61,10 @@ class _ListsScreenState extends State<ListsScreen> {
     final l10n = AppLocalizations.of(context);
     if (l10n == null) return const SizedBox.shrink();
     final auth = context.watch<AuthBloc>().state;
-    final uid = auth is AuthAuthenticated ? auth.user.id : '';
+    // Rückfall auf Firebase Auth: während Profiländerungen ist der Zustand kurz kein AuthAuthenticated.
+    final uid = auth is AuthAuthenticated
+        ? auth.user.id
+        : (FirebaseAuth.instance.currentUser?.uid ?? '');
 
     return BlocConsumer<ListBloc, ListState>(
       listener: (context, state) {

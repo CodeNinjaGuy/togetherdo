@@ -3,6 +3,7 @@
  * Written by Martin Bundschuh.
  */
 
+import '../../models/user_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../repositories/auth_repository.dart';
 import 'auth_event.dart';
@@ -107,6 +108,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthUpdateProfileRequested event,
     Emitter<AuthState> emit,
   ) async {
+    final vorher = _angemeldeterNutzer;
     emit(const AuthProfileUpdateLoading());
     try {
       final user = await _authRepository.updateProfile(
@@ -117,6 +119,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthAuthenticated(user: user));
     } catch (e) {
       emit(AuthProfileUpdateFailure(message: e.toString()));
+      _zurueckZu(vorher, emit);
     }
   }
 
@@ -161,6 +164,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthUpdateLanguageRequested event,
     Emitter<AuthState> emit,
   ) async {
+    final vorher = _angemeldeterNutzer;
     emit(const AuthProfileUpdateLoading());
     try {
       final user = await _authRepository.updateLanguage(
@@ -179,6 +183,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthAuthenticated(user: user));
     } catch (e) {
       emit(AuthProfileUpdateFailure(message: e.toString()));
+      _zurueckZu(vorher, emit);
     }
   }
 
@@ -186,12 +191,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthDeleteAccountRequested event,
     Emitter<AuthState> emit,
   ) async {
+    final vorher = _angemeldeterNutzer;
     emit(const AuthLoading());
     try {
       await _authRepository.deleteAccount();
       emit(const AuthUnauthenticated());
     } catch (e) {
       emit(AuthFailure(message: e.toString()));
+      _zurueckZu(vorher, emit);
     }
   }
 
@@ -199,6 +206,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthReauthenticateRequested event,
     Emitter<AuthState> emit,
   ) async {
+    final vorher = _angemeldeterNutzer;
     emit(const AuthLoading());
     try {
       await _authRepository.reauthenticate(password: event.password);
@@ -206,6 +214,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       add(const AuthCheckRequested());
     } catch (e) {
       emit(AuthFailure(message: e.toString()));
+      _zurueckZu(vorher, emit);
     }
+  }
+
+  /// Angemeldeter Nutzer aus dem aktuellen Zustand (auch während Profiländerungen).
+  UserModel? get _angemeldeterNutzer {
+    final s = state;
+    if (s is AuthAuthenticated) return s.user;
+    if (s is AuthProfileUpdateSuccess) return s.user;
+    return null;
+  }
+
+  /// Nach einem Fehler bleibt die Person angemeldet; sonst fehlen überall die
+  /// Rechte (z. B. „Liste löschen“), weil die App die eigene ID nicht mehr kennt.
+  void _zurueckZu(UserModel? nutzer, Emitter<AuthState> emit) {
+    if (nutzer != null) emit(AuthAuthenticated(user: nutzer));
   }
 }
