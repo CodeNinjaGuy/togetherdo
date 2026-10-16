@@ -47,7 +47,6 @@ platform :ios do
       configuration: "Release",
       export_method: "app-store",
       xcargs: auth,
-      export_xcargs: auth,
       output_directory: "build/fastlane",
       output_name: "ToGetherDo.ipa"
     )
