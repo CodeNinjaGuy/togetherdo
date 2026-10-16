@@ -540,9 +540,6 @@
   "navLists": "Lists",
   "navCalendar": "Calendar",
   "navProfile": "Profile",
-  "calendarComingSoon": "The family calendar arrives with the next update.",
-  "comingSoon": "Coming soon",
-  "mailReminders": "Email reminders",
   "greetingMorning": "Good morning, {name}",
   "@greetingMorning": {
     "placeholders": {

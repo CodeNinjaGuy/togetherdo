@@ -1390,15 +1390,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get navProfile => 'Profil';
 
   @override
-  String get calendarComingSoon => 'Der Familienkalender kommt mit dem nächsten Update.';
-
-  @override
-  String get comingSoon => 'Bald verfügbar';
-
-  @override
-  String get mailReminders => 'E-Mail-Erinnerungen';
-
-  @override
   String greetingMorning(String name) {
     return 'Guten Morgen, $name';
   }

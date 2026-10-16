@@ -23,12 +23,12 @@ import 'blocs/theme/theme_bloc.dart';
 import 'blocs/theme/theme_event.dart';
 import 'blocs/theme/theme_state.dart';
 import 'blocs/notification/notification_bloc.dart';
+import 'calendar/screens/calendar_screen.dart';
 import 'blocs/language/language_bloc.dart';
 import 'blocs/language/language_event.dart';
 import 'blocs/language/language_state.dart';
 import 'design/td_design.dart';
 import 'navigation/app_shell.dart';
-import 'navigation/kalender_platzhalter.dart';
 import 'repositories/anhang_repository.dart';
 import 'repositories/auth_repository.dart';
 import 'repositories/todo_repository.dart';
@@ -347,8 +347,11 @@ class TogetherDoAppView extends StatelessWidget {
           ),
           GoRoute(
             path: '/kalender',
-            builder: (context, state) => KalenderPlatzhalter(
+            builder: (context, state) => CalendarScreen(
+              // Neuer Schlüssel je Vorauswahl, damit `?liste=` greift.
+              key: ValueKey(state.uri.queryParameters['liste']),
               listId: state.uri.queryParameters['liste'],
+              eingebettet: true,
             ),
           ),
           GoRoute(

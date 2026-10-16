@@ -2690,24 +2690,6 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get navProfile;
 
-  /// No description provided for @calendarComingSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'The family calendar arrives with the next update.'**
-  String get calendarComingSoon;
-
-  /// No description provided for @comingSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Coming soon'**
-  String get comingSoon;
-
-  /// No description provided for @mailReminders.
-  ///
-  /// In en, this message translates to:
-  /// **'Email reminders'**
-  String get mailReminders;
-
   /// No description provided for @greetingMorning.
   ///
   /// In en, this message translates to:

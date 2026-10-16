@@ -7,15 +7,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:togetherdo/l10n/app_localizations.dart';
 
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_state.dart';
 import '../../blocs/notification/notification_bloc.dart';
 import '../../blocs/notification/notification_event.dart';
 import '../../blocs/notification/notification_state.dart';
 import '../../design/td_design.dart';
+import '../../calendar/widgets/mail_einstellungen.dart';
 import '../../models/notification_settings_model.dart';
-import 'mail_einstellungen_slot.dart';
 
-/// Push-Einstellungen in Gruppen; oben der Platz für E-Mail-Erinnerungen
-/// (Kalender-Helfer).
+/// Push-Einstellungen in Gruppen; oben die E-Mail-Erinnerungen des
+/// Kalenders (Erinnerungen, Wochen- und Monatsüberblick).
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
 
@@ -30,6 +32,11 @@ class _NotificationSettingsScreenState
   void initState() {
     super.initState();
     context.read<NotificationBloc>().add(const NotificationLoadRequested());
+  }
+
+  String? get _uid {
+    final a = context.read<AuthBloc>().state;
+    return a is AuthAuthenticated ? a.user.id : null;
   }
 
   void _update(NotificationSettings s) =>
@@ -83,7 +90,10 @@ class _NotificationSettingsScreenState
                     ),
                   ),
                   const SizedBox(height: TdSpace.lg),
-                  const MailEinstellungenSlot(),
+                  if (_uid case final uid?) ...[
+                    MailEinstellungen(userId: uid),
+                    const SizedBox(height: TdSpace.lg),
+                  ],
                   _Group(
                     title: l10n.todoNotifications,
                     icon: Icons.task_alt_rounded,

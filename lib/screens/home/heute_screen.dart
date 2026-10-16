@@ -11,6 +11,7 @@ import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
+import '../../calendar/widgets/heute_kalender_karte.dart';
 import '../../blocs/list/list_bloc.dart';
 import '../../blocs/list/list_state.dart';
 import '../../design/td_design.dart';
@@ -19,7 +20,6 @@ import '../../models/list_model.dart';
 import '../../models/shopping_item_model.dart';
 import '../../models/todo_model.dart';
 import '../../models/user_model.dart';
-import '../../navigation/kalender_platzhalter.dart';
 import '../../repositories/shopping_repository.dart';
 import '../../repositories/todo_repository.dart';
 import '../../services/review_service.dart';
@@ -441,9 +441,9 @@ class _HeuteScreenState extends State<HeuteScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TdSectionHeader(title: l10n.navCalendar),
-        HeuteKalenderSlot(
+        HeuteKalenderKarte(
           listIds: [for (final l in lists) l.id],
-          onOpen: () => context.go('/kalender'),
+          onOeffnen: () => context.go('/kalender'),
         ),
       ],
     );
