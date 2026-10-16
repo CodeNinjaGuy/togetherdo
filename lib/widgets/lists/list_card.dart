@@ -61,7 +61,8 @@ class ListCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                ListIconBadge(list: list, size: dense ? 40 : 48),
+                // In der Seitenspalte kein Hero: der Kopf daneben trägt ihn.
+                ListIconBadge(list: list, size: dense ? 40 : 48, hero: !dense),
                 const SizedBox(width: TdSpace.md),
                 Expanded(
                   child: Column(
