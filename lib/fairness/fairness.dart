@@ -39,10 +39,13 @@ DateTime fairnessQueryStart(DateTime now) {
 
 /// Ein Mitglied einer Liste.
 class FairnessMember {
-  const FairnessMember({required this.id, required this.name});
+  const FairnessMember({required this.id, required this.name, this.index = 0});
 
   final String id;
   final String name;
+
+  /// Position in der Liste (Besitzer 0) – für eine feste, eindeutige Farbe.
+  final int index;
 
   @override
   bool operator ==(Object other) =>
@@ -58,10 +61,11 @@ List<FairnessMember> fairnessMembersOf(
   String Function(int index)? fallbackName,
 }) {
   return [
-    FairnessMember(id: list.ownerId, name: list.ownerName),
+    FairnessMember(id: list.ownerId, name: list.ownerName, index: 0),
     for (var i = 0; i < list.memberIds.length; i++)
       FairnessMember(
         id: list.memberIds[i],
+        index: i + 1,
         name: i < list.memberNames.length
             ? list.memberNames[i]
             : (fallbackName?.call(i) ?? '?'),

@@ -33,8 +33,14 @@ String memberDisplayName(
   String currentUserId,
 ) => member.id == currentUserId ? l10n.fairnessYou : member.name;
 
-TdAvatarData avatarDataOf(FairnessMember m, {String? imageUrl}) =>
-    TdAvatarData(id: m.id, name: m.name, imageUrl: imageUrl);
+/// Darstellung eines Mitglieds; die Farbe hängt an der Position in der
+/// Liste, damit sich Mitglieder nie dieselbe Farbe teilen.
+TdAvatarData avatarDataOf(FairnessMember m, {String? imageUrl}) => TdAvatarData(
+  id: m.id,
+  name: m.name,
+  imageUrl: imageUrl,
+  color: TdAvatarData.palette[m.index % TdAvatarData.palette.length],
+);
 
 /// Avatar eines Mitglieds; das Profilbild kommt aus dem gemeinsamen
 /// Zwischenspeicher, sonst Initialen auf fester Farbe.
@@ -103,8 +109,6 @@ class _FairnessCardState extends State<FairnessCard> {
       todos: widget.doneTodos,
       now: widget.now ?? DateTime.now(),
     );
-    String name(FairnessMember m) =>
-        memberDisplayName(l10n, m, widget.currentUserId);
 
     final String hint;
     if (stats.isEmpty) {
@@ -167,9 +171,8 @@ class _FairnessCardState extends State<FairnessCard> {
             shares: [
               for (final s in stats.shares)
                 TdFairnessShare(
-                  person: TdAvatarData(
-                    id: s.member.id,
-                    name: name(s.member),
+                  person: avatarDataOf(
+                    s.member,
                     imageUrl: UserAvatarCache.instance.peek(s.member.id),
                   ),
                   value: s.points.toDouble(),
@@ -196,8 +199,8 @@ class FairnessHint extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(TdSpace.md),
       decoration: BoxDecoration(
-        color: context.colors.secondaryContainer.withValues(
-          alpha: td.isDark ? 0.5 : 1,
+        color: context.colors.primary.withValues(
+          alpha: td.isDark ? 0.18 : 0.08,
         ),
         borderRadius: TdRadius.control,
       ),
@@ -205,7 +208,7 @@ class FairnessHint extends StatelessWidget {
         children: [
           Icon(
             Icons.auto_awesome_rounded,
-            color: context.colors.secondary,
+            color: context.colors.primary,
             size: 20,
           ),
           const SizedBox(width: TdSpace.md),
@@ -213,7 +216,7 @@ class FairnessHint extends StatelessWidget {
             child: Text(
               text,
               style: context.text.bodyMedium?.copyWith(
-                color: context.colors.onSecondaryContainer,
+                color: context.colors.onSurface,
               ),
             ),
           ),

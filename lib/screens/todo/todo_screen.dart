@@ -276,6 +276,7 @@ class _TodoScreenState extends State<TodoScreen> {
               Expanded(
                 child: DropdownButtonFormField<String>(
                   initialValue: _groupBy,
+                  isExpanded: true,
                   decoration: InputDecoration(
                     labelText: l10n.grouping,
                     border: const OutlineInputBorder(),
@@ -303,6 +304,7 @@ class _TodoScreenState extends State<TodoScreen> {
               Expanded(
                 child: DropdownButtonFormField<String>(
                   initialValue: _sortBy,
+                  isExpanded: true,
                   decoration: InputDecoration(
                     labelText: l10n.sorting,
                     border: const OutlineInputBorder(),

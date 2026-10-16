@@ -29,6 +29,10 @@ Future<T?> showTdSheet<T>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      // Über der unteren Navigation (Shell) und mit nur einem Griff –
+      // den zeichnet _SheetBody selbst.
+      useRootNavigator: true,
+      showDragHandle: false,
       isDismissible: isDismissible,
       backgroundColor: scheme.surfaceContainerHigh,
       barrierColor: Colors.black.withValues(alpha: td.isDark ? 0.6 : 0.35),
@@ -41,6 +45,7 @@ Future<T?> showTdSheet<T>(
 
   return showGeneralDialog<T>(
     context: context,
+    useRootNavigator: true,
     barrierDismissible: isDismissible,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     barrierColor: Colors.black.withValues(alpha: td.isDark ? 0.6 : 0.35),

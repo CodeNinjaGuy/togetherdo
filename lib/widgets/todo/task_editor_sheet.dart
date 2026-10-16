@@ -292,7 +292,7 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
                   Icon(
                     Icons.auto_awesome_rounded,
                     size: 16,
-                    color: context.colors.secondary,
+                    color: context.colors.primary,
                   ),
                   const SizedBox(width: TdSpace.xs),
                   Expanded(
@@ -301,7 +301,7 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
                           ? l10n.suggestedTurnYou
                           : l10n.suggestedTurn(suggested.name),
                       style: context.text.labelMedium?.copyWith(
-                        color: context.colors.secondary,
+                        color: context.colors.primary,
                       ),
                     ),
                   ),
