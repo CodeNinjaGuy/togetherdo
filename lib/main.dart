@@ -4,6 +4,8 @@
 //License: MIT
 
 import 'dart:async';
+
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -37,6 +39,8 @@ import 'screens/todo/todo_screen.dart';
 import 'screens/shopping/shopping_screen.dart';
 import 'screens/lists/lists_screen.dart';
 import 'screens/chat/chat_screen.dart';
+import 'design/showcase/design_gallery_screen.dart';
+import 'design/showcase/today_screen.dart';
 import 'utils/app_theme.dart';
 import 'utils/global_navigator.dart';
 import 'firebase_options.dart';
@@ -243,7 +247,8 @@ class TogetherDoAppView extends StatelessWidget {
       // Wenn nicht authentifiziert und nicht auf Login/Register-Seite
       if (authState is! AuthAuthenticated &&
           !state.matchedLocation.startsWith('/login') &&
-          !state.matchedLocation.startsWith('/register')) {
+          !state.matchedLocation.startsWith('/register') &&
+          !state.matchedLocation.startsWith('/design/')) {
         return '/login';
       }
 
@@ -263,6 +268,21 @@ class TogetherDoAppView extends StatelessWidget {
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
       ),
+
+      // Design-Entwurf (Stufe 2), nur im Debug-Build: Startbildschirm
+      // „Heute“ mit Beispieldaten und Galerie aller Bausteine.
+      if (kDebugMode) ...[
+        GoRoute(
+          path: '/design/heute',
+          builder: (context, state) => TdTodayScreen(
+            onOpenGallery: () => context.push('/design/galerie'),
+          ),
+        ),
+        GoRoute(
+          path: '/design/galerie',
+          builder: (context, state) => const TdDesignGalleryScreen(),
+        ),
+      ],
 
       // App Routes (nur für authentifizierte Benutzer)
       ShellRoute(
