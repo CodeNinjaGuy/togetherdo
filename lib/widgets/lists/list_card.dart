@@ -156,7 +156,9 @@ class _ListMenu extends StatelessWidget {
     return PopupMenuButton<String>(
       tooltip: l10n.more,
       padding: EdgeInsets.zero,
-      constraints: const BoxConstraints.tightFor(width: 36, height: 36),
+      // constraints gilt für das MENÜ, nicht den Knopf – vorher 36×36, nur ein Symbol sichtbar.
+      constraints: const BoxConstraints(minWidth: 220),
+      iconSize: 22,
       icon: Icon(Icons.more_horiz_rounded, color: context.td.muted),
       onSelected: (value) {
         switch (value) {

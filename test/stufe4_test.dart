@@ -26,6 +26,7 @@ import 'package:togetherdo/utils/app_theme.dart';
 import 'package:togetherdo/utils/stream_utils.dart';
 import 'package:togetherdo/widgets/attachments/anhang_abschnitt.dart';
 import 'package:togetherdo/widgets/common/user_avatar.dart';
+import 'package:togetherdo/widgets/lists/list_card.dart';
 import 'package:togetherdo/widgets/lists/list_visuals.dart';
 import 'package:togetherdo/widgets/todo/task_editor_sheet.dart';
 
@@ -60,6 +61,22 @@ ListModel _list({String id = 'L1', bool allowEdit = true}) => ListModel(
 void main() {
   setUpAll(() {
     UserAvatarCache.instance.loaderOverride = (_) async => null;
+  });
+
+  group('Listen-Menü', () {
+    testWidgets('Besitzer sieht „Liste löschen“ vollständig im ⋯-Menü', (tester) async {
+      final liste = ListModel(
+        id: 'L9', name: 'Haushalt', ownerId: 'anna', ownerName: 'Anna',
+        type: ListType.todo, createdAt: DateTime(2026, 10, 1), updatedAt: DateTime(2026, 10, 1),
+        memberIds: const ['ben'], memberNames: const ['Ben'], shareCode: 'ABC123',
+      );
+      await tester.pumpWidget(_app(ListCard(list: liste, currentUserId: 'anna', onTap: () {})));
+      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.pumpAndSettle();
+      expect(find.text('Liste löschen'), findsOneWidget);
+      // Menü muss breit genug sein, damit der Text sichtbar ist (früher 36 px).
+      expect(tester.getSize(find.text('Liste löschen')).width, greaterThan(40));
+    });
   });
 
   group('Navigation (AppShell)', () {
