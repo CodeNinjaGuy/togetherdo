@@ -1,7 +1,16 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'dart:math';
 
-import '../models/list_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+
+import '../models/list_model.dart';
+import '../models/list_preview.dart';
+import '../services/functions_client.dart';
 
 abstract class ListRepository {
   Future<List<ListModel>> getUserLists(String userId);
@@ -15,7 +24,15 @@ abstract class ListRepository {
   Future<ListModel> updateList(ListModel list);
   Future<void> deleteList(String listId, String ownerId);
   Future<void> leaveList(String listId, String userId);
-  Future<ListModel?> getListByCode(String code);
+
+  /// Vorschau zu einem 6-stelligen Code. Wirft [ListCodeException].
+  Future<ListPreview> previewListByCode(String code);
+
+  /// Tritt der Liste zum Code bei. Wirft [ListCodeException].
+  Future<ListModel> joinListByCode({
+    required String code,
+    required String userName,
+  });
   Future<ListModel?> getListById(String listId);
   Stream<ListModel?> getListByIdStream(String listId);
 }
@@ -125,15 +142,37 @@ class MockListRepository implements ListRepository {
     }
   }
 
-  @override
-  Future<ListModel?> getListByCode(String code) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-
-    try {
-      return _lists.firstWhere((list) => list.shareCode == code);
-    } catch (e) {
-      return null;
+  ListModel _byCode(String code) {
+    for (final list in _lists) {
+      if (list.shareCode == code) return list;
     }
+    throw const ListCodeException(ListCodeError.notFound);
+  }
+
+  @override
+  Future<ListPreview> previewListByCode(String code) async {
+    final list = _byCode(code);
+    return ListPreview(
+      name: list.name,
+      type: list.type,
+      ownerName: list.ownerName,
+      memberCount: list.memberCount,
+      shareCode: code,
+    );
+  }
+
+  @override
+  Future<ListModel> joinListByCode({
+    required String code,
+    required String userName,
+  }) async {
+    final list = _byCode(code);
+    final joined = list.copyWith(
+      memberIds: [...list.memberIds, 'mock-user'],
+      memberNames: [...list.memberNames, userName],
+    );
+    await updateList(joined);
+    return joined;
   }
 
   @override
@@ -156,17 +195,6 @@ class MockListRepository implements ListRepository {
 
 class FirebaseListRepository implements ListRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final Random _random = Random();
-
-  String _generateCode() {
-    const chars = '0123456789';
-    return String.fromCharCodes(
-      Iterable.generate(
-        6,
-        (_) => chars.codeUnitAt(_random.nextInt(chars.length)),
-      ),
-    );
-  }
 
   @override
   Future<List<ListModel>> getUserLists(String userId) async {
@@ -177,6 +205,8 @@ class FirebaseListRepository implements ListRepository {
     return query.docs.map((doc) => ListModel.fromJson(doc.data())).toList();
   }
 
+  /// Anlegen über die Function `createList`: Sie vergibt einen eindeutigen
+  /// Code (die Regeln verbieten Clients das Suchen nach Codes).
   @override
   Future<ListModel> createList({
     required String name,
@@ -185,39 +215,13 @@ class FirebaseListRepository implements ListRepository {
     required ListType type,
     bool allowEdit = true,
   }) async {
-    String code;
-    bool exists = true;
-    // Eindeutigen Code generieren
-    do {
-      code = _generateCode();
-      final query = await _firestore
-          .collection('lists')
-          .where('shareCode', isEqualTo: code)
-          .get();
-      exists = query.docs.isNotEmpty;
-    } while (exists);
-
-    final now = DateTime.now();
-    final docRef = _firestore.collection('lists').doc();
-    final list = ListModel(
-      id: docRef.id,
-      name: name,
-      ownerId: ownerId,
-      ownerName: ownerName,
-      type: type,
-      createdAt: now,
-      updatedAt: now,
-      isShared: true,
-      shareCode: code,
-      memberIds: [],
-      memberNames: [],
-      allowEdit: allowEdit,
-    );
-    await docRef.set({
-      ...list.toJson(),
-      'allUserIds': [ownerId],
+    final data = await callFunction('createList', {
+      'name': name,
+      'type': type.name,
+      'allowEdit': allowEdit,
+      'ownerName': ownerName,
     });
-    return list;
+    return ListModel.fromJson(data);
   }
 
   @override
@@ -283,14 +287,44 @@ class FirebaseListRepository implements ListRepository {
   }
 
   @override
-  Future<ListModel?> getListByCode(String code) async {
-    final query = await _firestore
-        .collection('lists')
-        .where('shareCode', isEqualTo: code)
-        .limit(1)
-        .get();
-    if (query.docs.isEmpty) return null;
-    return ListModel.fromJson(query.docs.first.data());
+  Future<ListPreview> previewListByCode(String code) async {
+    try {
+      final data = await callFunction('previewListByCode', {'code': code});
+      return ListPreview.fromJson(data);
+    } on FirebaseFunctionsException catch (e) {
+      throw _codeError(e);
+    }
+  }
+
+  @override
+  Future<ListModel> joinListByCode({
+    required String code,
+    required String userName,
+  }) async {
+    try {
+      final data = await callFunction('joinListByCode', {
+        'code': code,
+        'userName': userName,
+      });
+      return ListModel.fromJson(data);
+    } on FirebaseFunctionsException catch (e) {
+      throw _codeError(e);
+    }
+  }
+
+  Exception _codeError(FirebaseFunctionsException e) {
+    switch (e.code) {
+      case 'not-found':
+        return const ListCodeException(ListCodeError.notFound);
+      case 'already-exists':
+        return const ListCodeException(ListCodeError.alreadyMember);
+      case 'resource-exhausted':
+        return const ListCodeException(ListCodeError.tooManyAttempts);
+      case 'invalid-argument':
+        return const ListCodeException(ListCodeError.invalid);
+      default:
+        return e;
+    }
   }
 
   @override

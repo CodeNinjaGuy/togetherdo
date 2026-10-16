@@ -43,7 +43,7 @@ class ListItemWidget extends StatelessWidget {
         if (state is ListLeaveSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Liste "${list.name}" verlassen'),
+              content: Text(l10n.listLeftSuccess(list.name)),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -53,7 +53,7 @@ class ListItemWidget extends StatelessWidget {
         } else if (state is ListLeaveFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Fehler: ${state.message}'),
+              content: Text('${l10n.error}: ${state.message}'),
               behavior: SnackBarBehavior.floating,
               backgroundColor: Theme.of(context).colorScheme.error,
               shape: RoundedRectangleBorder(
@@ -119,7 +119,7 @@ class ListItemWidget extends StatelessWidget {
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        'Eigene Liste',
+                                        l10n.ownList,
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall
@@ -184,8 +184,8 @@ class ListItemWidget extends StatelessWidget {
                                 ),
                                 child: Text(
                                   list.type == ListType.todo
-                                      ? 'Todo'
-                                      : 'Einkauf',
+                                      ? l10n.todo
+                                      : l10n.shopping,
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: Theme.of(
@@ -220,7 +220,7 @@ class ListItemWidget extends StatelessWidget {
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        'Nur Lesen',
+                                        l10n.readOnly,
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall
@@ -255,35 +255,35 @@ class ListItemWidget extends StatelessWidget {
                       },
                       itemBuilder: (context) => [
                         if (canEdit)
-                          const PopupMenuItem(
+                          PopupMenuItem(
                             value: 'share',
                             child: Row(
                               children: [
-                                Icon(Icons.share),
-                                SizedBox(width: 8),
-                                Text('Code teilen'),
+                                const Icon(Icons.share),
+                                const SizedBox(width: 8),
+                                Text(l10n.shareCodeTitle),
                               ],
                             ),
                           ),
                         if (canDelete)
-                          const PopupMenuItem(
+                          PopupMenuItem(
                             value: 'delete',
                             child: Row(
                               children: [
-                                Icon(Icons.delete_outline),
-                                SizedBox(width: 8),
-                                Text('Liste löschen'),
+                                const Icon(Icons.delete_outline),
+                                const SizedBox(width: 8),
+                                Text(l10n.listDeleteTitle),
                               ],
                             ),
                           ),
                         if (canLeave)
-                          const PopupMenuItem(
+                          PopupMenuItem(
                             value: 'leave',
                             child: Row(
                               children: [
-                                Icon(Icons.exit_to_app_outlined),
-                                SizedBox(width: 8),
-                                Text('Liste verlassen'),
+                                const Icon(Icons.exit_to_app_outlined),
+                                const SizedBox(width: 8),
+                                Text(l10n.listLeaveTitle),
                               ],
                             ),
                           ),
@@ -324,7 +324,7 @@ class ListItemWidget extends StatelessWidget {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          'Code: ${list.shareCode}',
+                          '${l10n.codeLabel}: ${list.shareCode}',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: Theme.of(
@@ -437,7 +437,7 @@ class ListItemWidget extends StatelessWidget {
     if (list.id.isEmpty || currentUserId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Fehler: Listen-ID oder User-ID ist nicht gesetzt!'),
+          content: Text(l10n.error),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -479,13 +479,13 @@ class ListItemWidget extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Code teilen'),
+        title: Text(l10n.shareCodeTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Teile diesen Code mit anderen, damit sie der Liste beitreten können:',
+              l10n.shareCodeDescription,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
@@ -519,13 +519,13 @@ class ListItemWidget extends StatelessWidget {
                       Clipboard.setData(ClipboardData(text: list.shareCode!));
                       Navigator.of(context).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Code kopiert'),
+                        SnackBar(
+                          content: Text(l10n.codeCopied),
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
                     },
-                    tooltip: 'Code kopieren',
+                    tooltip: l10n.copy,
                   ),
                 ],
               ),
@@ -535,7 +535,7 @@ class ListItemWidget extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Schließen'),
+            child: Text(l10n.close),
           ),
         ],
       ),

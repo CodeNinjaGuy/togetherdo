@@ -71,7 +71,7 @@ class _ChatScreenState extends State<ChatScreen> {
       return const SizedBox.shrink();
     }
     return Scaffold(
-      appBar: AppBar(title: Text('Chat: ${widget.todoTitle}')),
+      appBar: AppBar(title: Text(l10n.chatWith(widget.todoTitle))),
       body: Column(
         children: [
           Expanded(

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +14,7 @@ import '../../blocs/list/list_bloc.dart';
 import '../../blocs/list/list_event.dart';
 import '../../blocs/list/list_state.dart';
 import '../../models/list_model.dart';
+import '../../models/list_preview.dart';
 
 class JoinListDialog extends StatefulWidget {
   const JoinListDialog({super.key});
@@ -21,7 +27,7 @@ class _JoinListDialogState extends State<JoinListDialog> {
   final _formKey = GlobalKey<FormState>();
   final _codeController = TextEditingController();
   bool _isLoading = false;
-  ListModel? _foundList;
+  ListPreview? _foundList;
 
   @override
   void dispose() {
@@ -47,7 +53,7 @@ class _JoinListDialogState extends State<JoinListDialog> {
     if (authState is AuthAuthenticated) {
       setState(() => _isLoading = true);
 
-      final shareCode = _foundList!.shareCode!;
+      final shareCode = _foundList!.shareCode;
       context.read<ListBloc>().add(
         ListJoinRequested(
           code: shareCode,
@@ -70,7 +76,7 @@ class _JoinListDialogState extends State<JoinListDialog> {
         if (state is ListCodeCheckSuccess) {
           setState(() {
             _isLoading = false;
-            _foundList = state.list;
+            _foundList = state.preview;
           });
         } else if (state is ListCodeCheckFailure) {
           setState(() {
@@ -135,10 +141,10 @@ class _JoinListDialogState extends State<JoinListDialog> {
                 ],
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Bitte gib den Code ein';
+                    return l10n.enterCode;
                   }
                   if (value.trim().length != 6) {
-                    return 'Der Code muss 6 Ziffern haben';
+                    return l10n.codeMustHaveSixDigits;
                   }
                   return null;
                 },

@@ -8,8 +8,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 
+import 'functions_client.dart';
+
 /// `true`, wenn die App mit `--dart-define=USE_FIREBASE_EMULATOR=true`
-/// gebaut wurde. In Release-Builds ohne diesen Schalter immer `false`.
+/// gebaut wurde. Verbindet Auth, Firestore, Storage und Functions
+/// (Ports wie in `firebase.json`). In Release-Builds ohne diesen Schalter immer `false`.
 const bool useFirebaseEmulator = bool.fromEnvironment('USE_FIREBASE_EMULATOR');
 
 /// Host der Emulator Suite (Android-Emulator erreicht den Mac über 10.0.2.2).
@@ -27,4 +30,5 @@ Future<void> connectToFirebaseEmulator() async {
   await FirebaseAuth.instance.useAuthEmulator(host, 9099);
   FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
   await FirebaseStorage.instance.useStorageEmulator(host, 9199);
+  appFunctions.useFunctionsEmulator(host, 5001);
 }

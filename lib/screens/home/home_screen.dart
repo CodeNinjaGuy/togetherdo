@@ -83,16 +83,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     break;
                 }
               },
-              destinations: const [
+              destinations: [
                 NavigationDestination(
-                  icon: Icon(Icons.list_outlined),
-                  selectedIcon: Icon(Icons.list),
-                  label: 'Listen',
+                  icon: const Icon(Icons.list_outlined),
+                  selectedIcon: const Icon(Icons.list),
+                  label: l10n.lists,
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.person_outline),
-                  selectedIcon: Icon(Icons.person),
-                  label: 'Profil',
+                  icon: const Icon(Icons.person_outline),
+                  selectedIcon: const Icon(Icons.person),
+                  label: l10n.profile,
                 ),
               ],
             ),

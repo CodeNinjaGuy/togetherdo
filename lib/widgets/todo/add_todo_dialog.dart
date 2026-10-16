@@ -64,6 +64,8 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
     final list =
         await (context.read<ListRepository>() as FirebaseListRepository)
             .getListById(widget.listId);
+    if (!mounted) return;
+    final memberLabel = AppLocalizations.of(context)?.member ?? 'Mitglied';
     if (list != null) {
       setState(() {
         _availableUsers = [
@@ -71,7 +73,7 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
           ...list.memberIds.asMap().entries.map((entry) {
             final memberName = entry.key < list.memberNames.length
                 ? list.memberNames[entry.key]
-                : 'Mitglied ${entry.key + 1}';
+                : '$memberLabel ${entry.key + 1}';
             return {'id': entry.value, 'name': memberName};
           }),
         ];
@@ -187,7 +189,7 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Titel ist erforderlich';
+                      return l10n.titleRequired;
                     }
                     return null;
                   },

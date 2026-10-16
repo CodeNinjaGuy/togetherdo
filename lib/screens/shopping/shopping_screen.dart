@@ -140,7 +140,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                     }
                     if (snapshot.hasError) {
                       return Center(
-                        child: Text('${l10n.loadError}: \\${snapshot.error}'),
+                        child: Text('${l10n.loadError}: ${snapshot.error}'),
                       );
                     }
                     final items = snapshot.data ?? <ShoppingItemModel>[];
@@ -188,7 +188,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                       children: [
                         if (pendingItems.isNotEmpty) ...[
                           _buildSectionHeader(
-                            'Noch zu kaufen',
+                            l10n.stillToBuy,
                             pendingItems.length,
                           ),
                           const SizedBox(height: 8),
@@ -202,7 +202,10 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                           const SizedBox(height: 24),
                         ],
                         if (purchasedItems.isNotEmpty) ...[
-                          _buildSectionHeader('Gekauft', purchasedItems.length),
+                          _buildSectionHeader(
+                            l10n.bought,
+                            purchasedItems.length,
+                          ),
                           const SizedBox(height: 8),
                           ...purchasedItems.map(
                             (item) => ShoppingItemWidget(

@@ -71,9 +71,10 @@ class _TodoScreenState extends State<TodoScreen> {
       for (final todo in todos) {
         String groupKey;
         if (todo.assignedToUserId != null) {
-          groupKey = todo.assignedToUserName ?? 'Unbekannt';
+          groupKey =
+              todo.assignedToUserName ?? AppLocalizations.of(context)!.unknown;
         } else {
-          groupKey = 'Allgemein';
+          groupKey = AppLocalizations.of(context)!.general;
         }
 
         grouped.putIfAbsent(groupKey, () => []).add(todo);
@@ -93,8 +94,8 @@ class _TodoScreenState extends State<TodoScreen> {
       final completedTodos = todos.where((todo) => todo.isCompleted).toList();
 
       return {
-        'Ausstehend': _sortTodos(pendingTodos),
-        'Erledigt': _sortTodos(completedTodos),
+        AppLocalizations.of(context)!.pending: _sortTodos(pendingTodos),
+        AppLocalizations.of(context)!.completed: _sortTodos(completedTodos),
       };
     }
   }
@@ -132,7 +133,7 @@ class _TodoScreenState extends State<TodoScreen> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Meine Todos'),
+        title: Text(l10n.myTodos),
         actions: [
           BlocBuilder<AuthBloc, AuthState>(
             builder: (context, authState) {
@@ -142,7 +143,7 @@ class _TodoScreenState extends State<TodoScreen> {
                   onPressed: () {
                     context.read<AuthBloc>().add(const AuthLogoutRequested());
                   },
-                  tooltip: 'Abmelden',
+                  tooltip: l10n.logout,
                 );
               }
               return const SizedBox.shrink();
@@ -159,7 +160,7 @@ class _TodoScreenState extends State<TodoScreen> {
 
           final list = listSnapshot.data;
           if (list == null) {
-            return const Center(child: Text('Liste nicht gefunden'));
+            return Center(child: Text(l10n.listNotFound));
           }
 
           final authState = context.read<AuthBloc>().state;
@@ -180,22 +181,22 @@ class _TodoScreenState extends State<TodoScreen> {
                     Expanded(
                       child: DropdownButtonFormField<String>(
                         value: _groupBy,
-                        decoration: const InputDecoration(
-                          labelText: 'Gruppierung',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
+                        decoration: InputDecoration(
+                          labelText: l10n.grouping,
+                          border: const OutlineInputBorder(),
+                          contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 8,
                           ),
                         ),
-                        items: const [
+                        items: [
                           DropdownMenuItem(
                             value: 'status',
-                            child: Text('Nach Status'),
+                            child: Text(l10n.groupByStatus),
                           ),
                           DropdownMenuItem(
                             value: 'user',
-                            child: Text('Nach Benutzer'),
+                            child: Text(l10n.groupByUser),
                           ),
                         ],
                         onChanged: (value) {
@@ -211,26 +212,26 @@ class _TodoScreenState extends State<TodoScreen> {
                     Expanded(
                       child: DropdownButtonFormField<String>(
                         value: _sortBy,
-                        decoration: const InputDecoration(
-                          labelText: 'Sortierung',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
+                        decoration: InputDecoration(
+                          labelText: l10n.sorting,
+                          border: const OutlineInputBorder(),
+                          contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 8,
                           ),
                         ),
-                        items: const [
+                        items: [
                           DropdownMenuItem(
                             value: 'dueDate',
-                            child: Text('Nach Fälligkeit'),
+                            child: Text(l10n.sortByDueDate),
                           ),
                           DropdownMenuItem(
                             value: 'priority',
-                            child: Text('Nach Priorität'),
+                            child: Text(l10n.sortByPriority),
                           ),
                           DropdownMenuItem(
                             value: 'createdAt',
-                            child: Text('Nach Erstellung'),
+                            child: Text(l10n.sortByCreated),
                           ),
                         ],
                         onChanged: (value) {
@@ -294,7 +295,7 @@ class _TodoScreenState extends State<TodoScreen> {
                     }
                     if (snapshot.hasError) {
                       return Center(
-                        child: Text('Fehler beim Laden: \\${snapshot.error}'),
+                        child: Text('${l10n.loadError}: ${snapshot.error}'),
                       );
                     }
                     final todos = snapshot.data ?? <TodoModel>[];
@@ -313,7 +314,7 @@ class _TodoScreenState extends State<TodoScreen> {
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  'Keine Todos vorhanden',
+                                  l10n.noTodos,
                                   style: Theme.of(
                                     context,
                                   ).textTheme.headlineSmall,
@@ -321,8 +322,8 @@ class _TodoScreenState extends State<TodoScreen> {
                                 const SizedBox(height: 8),
                                 Text(
                                   canEdit
-                                      ? 'Erstelle dein erstes Todo'
-                                      : 'Die Liste ist noch leer',
+                                      ? l10n.createFirstTodo
+                                      : l10n.listIsEmpty,
                                   style: Theme.of(context).textTheme.bodyLarge
                                       ?.copyWith(
                                         color: Theme.of(
@@ -423,7 +424,9 @@ class _TodoScreenState extends State<TodoScreen> {
         child: Row(
           children: [
             Icon(
-              title == 'Allgemein' ? Icons.group : Icons.person,
+              title == AppLocalizations.of(context)!.general
+                  ? Icons.group
+                  : Icons.person,
               size: 20,
               color: Theme.of(context).colorScheme.primary,
             ),

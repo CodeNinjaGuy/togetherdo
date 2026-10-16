@@ -18,6 +18,7 @@ import '../../widgets/profile/fiberoptics25_logo.dart';
 import '../../widgets/profile/language_selector.dart';
 import 'notification_settings_screen.dart';
 import 'profile_screen_desktop.dart';
+import '../../widgets/common/legal_links_row.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -756,13 +757,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: 8),
+              const Center(child: LegalLinksRow()),
             ],
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.cancel),
+            child: Text(l10n.close),
           ),
         ],
       ),

@@ -852,10 +852,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteAccountStep1 => 'Leave all joined lists';
 
   @override
-  String get deleteAccountStep2 => 'Delete all created lists';
+  String get deleteAccountStep2 => 'Hand over your own lists to members or delete them';
 
   @override
-  String get deleteAccountStep3 => 'Permanently delete account and all data';
+  String get deleteAccountStep3 => 'Delete todos, items, messages, profile picture and account';
 
   @override
   String get deleteAccountIrreversible => 'This action is irreversible. All your data will be permanently deleted.';
@@ -894,22 +894,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privacySecurity => 'Privacy & Security';
 
   @override
-  String get privacySecurityDescription => 'TogetherDo respects your privacy and protects your data. Here\'s how we handle your information:';
+  String get privacySecurityDescription => 'How ToGetherDo handles your data:';
 
   @override
-  String get privacySecuritySteps => 'Our privacy policy:';
+  String get privacySecuritySteps => 'In short:';
 
   @override
-  String get privacySecurityStep1 => 'No chat storage: Messages are not permanently stored';
+  String get privacySecurityStep1 => 'We store your account (email, name, profile picture) and everything you create in the app: lists, todos, shopping items and chat messages. Data is stored with Google Firebase in data centres in the EU.';
 
   @override
-  String get privacySecurityStep2 => 'No data sharing: We don\'t share your data with third parties';
+  String get privacySecurityStep2 => 'Members of a list can see its contents and chats. We do not share your data with third parties; there are no ads and no tracking.';
 
   @override
-  String get privacySecurityStep3 => 'No liability: We don\'t assume liability for data loss';
+  String get privacySecurityStep3 => 'Push notifications are delivered via Firebase Cloud Messaging. When you delete your account, your data is removed completely.';
 
   @override
-  String get privacySecurityIrreversible => 'Note: Deleting lists removes all associated data irreversibly.';
+  String get privacySecurityIrreversible => 'See the privacy policy for details.';
 
   @override
   String get avatarChange => 'Change profile picture';
@@ -955,6 +955,89 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get avatarNotNow => 'Not now';
+
+  @override
+  String get privacyPolicy => 'Privacy policy';
+
+  @override
+  String get imprint => 'Legal notice';
+
+  @override
+  String get linkOpenError => 'Could not open the link';
+
+  @override
+  String get forgotPassword => 'Forgot password?';
+
+  @override
+  String get resetPasswordTitle => 'Reset password';
+
+  @override
+  String get resetPasswordDescription => 'Enter your email address. We will send you a link to set a new password.';
+
+  @override
+  String get resetPasswordSend => 'Send link';
+
+  @override
+  String get resetPasswordSent => 'If an account exists for this email address, the link is on its way. Please also check your spam folder.';
+
+  @override
+  String get resetPasswordError => 'The link could not be sent. Please try again later.';
+
+  @override
+  String get unknown => 'Unknown';
+
+  @override
+  String get noTodos => 'No todos yet';
+
+  @override
+  String get createFirstTodo => 'Create your first todo';
+
+  @override
+  String listLeftSuccess(String listName) {
+    return 'Left list \"$listName\"';
+  }
+
+  @override
+  String get ownList => 'Your list';
+
+  @override
+  String get readOnly => 'Read only';
+
+  @override
+  String get shareCodeTitle => 'Share code';
+
+  @override
+  String get codeLabel => 'Code';
+
+  @override
+  String get shareCodeDescription => 'Share this code with others so they can join the list:';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get todoLists => 'Todo lists';
+
+  @override
+  String get stillToBuy => 'Still to buy';
+
+  @override
+  String get enterCode => 'Please enter the code';
+
+  @override
+  String get codeMustHaveSixDigits => 'The code must have 6 digits';
+
+  @override
+  String get tooManyCodeAttempts => 'Too many attempts. Please try again later.';
+
+  @override
+  String get assignedToYou => 'Assigned to you';
+
+  @override
+  String get titleRequired => 'Title is required';
+
+  @override
+  String get byYou => 'you';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +12,7 @@ import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
 import '../../blocs/auth/auth_state.dart';
 import '../../widgets/auth/auth_form_field.dart';
+import '../../widgets/common/legal_links_row.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -126,7 +132,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               if (!RegExp(
                                 r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                               ).hasMatch(value)) {
-                                return 'Ungültige E-Mail-Adresse';
+                                return l10n.invalidEmail;
                               }
                               return null;
                             },
@@ -238,6 +244,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 8),
+                    const LegalLinksRow(),
                   ],
                 ),
               ),

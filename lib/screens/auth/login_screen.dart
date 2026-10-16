@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +11,8 @@ import 'package:togetherdo/l10n/app_localizations.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
 import '../../blocs/auth/auth_state.dart';
+import '../../widgets/auth/forgot_password_dialog.dart';
+import '../../widgets/common/legal_links_row.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -234,7 +241,20 @@ class _LoginScreenState extends State<LoginScreen> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 32),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: _isLoading
+                                  ? null
+                                  : () => ForgotPasswordDialog.show(
+                                      context,
+                                      initialEmail: _emailController.text
+                                          .trim(),
+                                    ),
+                              child: Text(l10n.forgotPassword),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
 
                           // Login Button
                           SizedBox(
@@ -302,7 +322,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 8),
+                    const LegalLinksRow(),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),

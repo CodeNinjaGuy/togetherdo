@@ -68,12 +68,12 @@ class _ListsScreenState extends State<ListsScreen> {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: _showCreateListDialog,
-            tooltip: 'Liste erstellen',
+            tooltip: l10n.createList,
           ),
           IconButton(
             icon: const Icon(Icons.join_full),
             onPressed: _showJoinListDialog,
-            tooltip: 'Liste beitreten',
+            tooltip: l10n.joinList,
           ),
         ],
       ),
@@ -153,7 +153,7 @@ class _ListsScreenState extends State<ListsScreen> {
                     padding: const EdgeInsets.all(16),
                     children: [
                       if (todoLists.isNotEmpty) ...[
-                        _buildSectionHeader('Todo-Listen', todoLists.length),
+                        _buildSectionHeader(l10n.todoLists, todoLists.length),
                         const SizedBox(height: 8),
                         ...todoLists.map(
                           (list) => ListItemWidget(
@@ -166,7 +166,7 @@ class _ListsScreenState extends State<ListsScreen> {
                       ],
                       if (shoppingLists.isNotEmpty) ...[
                         _buildSectionHeader(
-                          'Einkaufslisten',
+                          l10n.shoppingLists,
                           shoppingLists.length,
                         ),
                         const SizedBox(height: 8),

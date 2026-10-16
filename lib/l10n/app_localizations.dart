@@ -1751,13 +1751,13 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountStep2.
   ///
   /// In en, this message translates to:
-  /// **'Delete all created lists'**
+  /// **'Hand over your own lists to members or delete them'**
   String get deleteAccountStep2;
 
   /// No description provided for @deleteAccountStep3.
   ///
   /// In en, this message translates to:
-  /// **'Permanently delete account and all data'**
+  /// **'Delete todos, items, messages, profile picture and account'**
   String get deleteAccountStep3;
 
   /// No description provided for @deleteAccountIrreversible.
@@ -1835,37 +1835,37 @@ abstract class AppLocalizations {
   /// No description provided for @privacySecurityDescription.
   ///
   /// In en, this message translates to:
-  /// **'TogetherDo respects your privacy and protects your data. Here\'s how we handle your information:'**
+  /// **'How ToGetherDo handles your data:'**
   String get privacySecurityDescription;
 
   /// No description provided for @privacySecuritySteps.
   ///
   /// In en, this message translates to:
-  /// **'Our privacy policy:'**
+  /// **'In short:'**
   String get privacySecuritySteps;
 
   /// No description provided for @privacySecurityStep1.
   ///
   /// In en, this message translates to:
-  /// **'No chat storage: Messages are not permanently stored'**
+  /// **'We store your account (email, name, profile picture) and everything you create in the app: lists, todos, shopping items and chat messages. Data is stored with Google Firebase in data centres in the EU.'**
   String get privacySecurityStep1;
 
   /// No description provided for @privacySecurityStep2.
   ///
   /// In en, this message translates to:
-  /// **'No data sharing: We don\'t share your data with third parties'**
+  /// **'Members of a list can see its contents and chats. We do not share your data with third parties; there are no ads and no tracking.'**
   String get privacySecurityStep2;
 
   /// No description provided for @privacySecurityStep3.
   ///
   /// In en, this message translates to:
-  /// **'No liability: We don\'t assume liability for data loss'**
+  /// **'Push notifications are delivered via Firebase Cloud Messaging. When you delete your account, your data is removed completely.'**
   String get privacySecurityStep3;
 
   /// No description provided for @privacySecurityIrreversible.
   ///
   /// In en, this message translates to:
-  /// **'Note: Deleting lists removes all associated data irreversibly.'**
+  /// **'See the privacy policy for details.'**
   String get privacySecurityIrreversible;
 
   /// No description provided for @avatarChange.
@@ -1957,6 +1957,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not now'**
   String get avatarNotNow;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @imprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal notice'**
+  String get imprint;
+
+  /// No description provided for @linkOpenError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the link'**
+  String get linkOpenError;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPassword;
+
+  /// No description provided for @resetPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get resetPasswordTitle;
+
+  /// No description provided for @resetPasswordDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address. We will send you a link to set a new password.'**
+  String get resetPasswordDescription;
+
+  /// No description provided for @resetPasswordSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send link'**
+  String get resetPasswordSend;
+
+  /// No description provided for @resetPasswordSent.
+  ///
+  /// In en, this message translates to:
+  /// **'If an account exists for this email address, the link is on its way. Please also check your spam folder.'**
+  String get resetPasswordSent;
+
+  /// No description provided for @resetPasswordError.
+  ///
+  /// In en, this message translates to:
+  /// **'The link could not be sent. Please try again later.'**
+  String get resetPasswordError;
+
+  /// No description provided for @unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknown;
+
+  /// No description provided for @noTodos.
+  ///
+  /// In en, this message translates to:
+  /// **'No todos yet'**
+  String get noTodos;
+
+  /// No description provided for @createFirstTodo.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first todo'**
+  String get createFirstTodo;
+
+  /// No description provided for @listLeftSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Left list \"{listName}\"'**
+  String listLeftSuccess(String listName);
+
+  /// No description provided for @ownList.
+  ///
+  /// In en, this message translates to:
+  /// **'Your list'**
+  String get ownList;
+
+  /// No description provided for @readOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Read only'**
+  String get readOnly;
+
+  /// No description provided for @shareCodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share code'**
+  String get shareCodeTitle;
+
+  /// No description provided for @codeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get codeLabel;
+
+  /// No description provided for @shareCodeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Share this code with others so they can join the list:'**
+  String get shareCodeDescription;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @todoLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Todo lists'**
+  String get todoLists;
+
+  /// No description provided for @stillToBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'Still to buy'**
+  String get stillToBuy;
+
+  /// No description provided for @enterCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the code'**
+  String get enterCode;
+
+  /// No description provided for @codeMustHaveSixDigits.
+  ///
+  /// In en, this message translates to:
+  /// **'The code must have 6 digits'**
+  String get codeMustHaveSixDigits;
+
+  /// No description provided for @tooManyCodeAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please try again later.'**
+  String get tooManyCodeAttempts;
+
+  /// No description provided for @assignedToYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned to you'**
+  String get assignedToYou;
+
+  /// No description provided for @titleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Title is required'**
+  String get titleRequired;
+
+  /// No description provided for @byYou.
+  ///
+  /// In en, this message translates to:
+  /// **'you'**
+  String get byYou;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

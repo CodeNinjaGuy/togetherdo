@@ -1,5 +1,11 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:togetherdo/l10n/app_localizations.dart';
+import '../../models/list_preview.dart';
 import '../../repositories/list_repository.dart';
 import 'list_event.dart';
 import 'list_state.dart';
@@ -88,28 +94,50 @@ class ListBloc extends Bloc<ListEvent, ListState> {
     }
   }
 
+  /// Fehlermeldung beim Verlassen in der aktuellen Sprache.
+  String _leaveErrorMessage(Object e) {
+    final context = GlobalNavigator.navigatorKey.currentContext;
+    final l10n = context != null ? AppLocalizations.of(context) : null;
+    final text = e.toString();
+    if (text.contains('owner_cannot_leave')) {
+      return l10n?.ownerCannotLeave ??
+          'Der Besitzer kann die Liste nicht verlassen';
+    }
+    if (text.contains('owner_cannot_delete')) {
+      return l10n?.onlyOwnerCanDelete ?? 'Nur der Besitzer kann löschen';
+    }
+    return text;
+  }
+
+  /// Fehlermeldung zu einem Code-Fehler in der aktuellen Sprache.
+  String _codeErrorMessage(Object e) {
+    final context = GlobalNavigator.navigatorKey.currentContext;
+    final l10n = context != null ? AppLocalizations.of(context) : null;
+    if (e is ListCodeException) {
+      switch (e.error) {
+        case ListCodeError.notFound:
+          return l10n?.codeNotFound ?? 'Code nicht gefunden';
+        case ListCodeError.alreadyMember:
+          return l10n?.alreadyMember ?? 'Du bist bereits Mitglied';
+        case ListCodeError.tooManyAttempts:
+          return l10n?.tooManyCodeAttempts ??
+              'Zu viele Versuche. Bitte später erneut probieren.';
+        case ListCodeError.invalid:
+          return l10n?.codeMustHaveSixDigits ?? 'Der Code muss 6 Ziffern haben';
+      }
+    }
+    return e.toString();
+  }
+
   Future<void> _onListCodeCheckRequested(
     ListCodeCheckRequested event,
     Emitter<ListState> emit,
   ) async {
     try {
-      final list = await _listRepository.getListByCode(event.code);
-
-      if (list != null) {
-        emit(ListCodeCheckSuccess(list: list));
-      } else {
-        emit(
-          ListCodeCheckFailure(
-            message:
-                AppLocalizations.of(
-                  GlobalNavigator.navigatorKey.currentContext!,
-                )?.codeNotFound ??
-                'Code nicht gefunden',
-          ),
-        );
-      }
+      final preview = await _listRepository.previewListByCode(event.code);
+      emit(ListCodeCheckSuccess(preview: preview));
     } catch (e) {
-      emit(ListCodeCheckFailure(message: e.toString()));
+      emit(ListCodeCheckFailure(message: _codeErrorMessage(e)));
     }
   }
 
@@ -117,42 +145,18 @@ class ListBloc extends Bloc<ListEvent, ListState> {
     ListJoinRequested event,
     Emitter<ListState> emit,
   ) async {
-    final context = GlobalNavigator.navigatorKey.currentContext;
-    final l10n = context != null ? AppLocalizations.of(context) : null;
     try {
-      final list = await _listRepository.getListByCode(event.code);
+      // Beitritt läuft serverseitig (Function joinListByCode, gedrosselt).
+      final list = await _listRepository.joinListByCode(
+        code: event.code,
+        userName: event.userName,
+      );
+      emit(ListJoinSuccess(list: list));
 
-      if (list != null) {
-        // Prüfe ob Benutzer bereits Mitglied ist oder der Owner
-        if (list.ownerId == event.userId ||
-            list.memberIds.contains(event.userId)) {
-          emit(
-            ListJoinFailure(
-              message: l10n?.alreadyMember ?? 'Du bist bereits Mitglied',
-            ),
-          );
-          return;
-        }
-
-        // Füge Benutzer zur Liste hinzu
-        final updatedList = list.copyWith(
-          memberIds: [...list.memberIds, event.userId],
-          memberNames: [...list.memberNames, event.userName],
-        );
-
-        await _listRepository.updateList(updatedList);
-        emit(ListJoinSuccess(list: updatedList));
-
-        // Lade die aktualisierte Liste
-        final lists = await _listRepository.getUserLists(event.userId);
-        emit(ListLoadSuccess(lists: lists));
-      } else {
-        emit(
-          ListJoinFailure(message: l10n?.codeNotFound ?? 'Code nicht gefunden'),
-        );
-      }
+      final lists = await _listRepository.getUserLists(event.userId);
+      emit(ListLoadSuccess(lists: lists));
     } catch (e) {
-      emit(ListJoinFailure(message: e.toString()));
+      emit(ListJoinFailure(message: _codeErrorMessage(e)));
     }
   }
 
@@ -185,14 +189,7 @@ class ListBloc extends Bloc<ListEvent, ListState> {
         level: 1000,
         stackTrace: stack,
       );
-      String message = e.toString();
-      // KEIN Zugriff mehr auf BuildContext nach await!
-      if (e.toString().contains('owner_cannot_leave')) {
-        message = 'Der Besitzer kann die Liste nicht verlassen';
-      } else if (e.toString().contains('owner_cannot_delete')) {
-        message = 'Nur der Besitzer kann löschen';
-      }
-      emit(ListLeaveFailure(message: message));
+      emit(ListLeaveFailure(message: _leaveErrorMessage(e)));
     }
   }
 }

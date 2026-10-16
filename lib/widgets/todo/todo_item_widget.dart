@@ -1,3 +1,4 @@
+import 'package:togetherdo/l10n/app_localizations.dart';
 /*
  * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
  * Written by Martin Bundschuh.
@@ -154,8 +155,8 @@ class TodoItemWidget extends StatelessWidget {
                         Flexible(
                           child: Text(
                             isAssignedToMe
-                                ? 'Dir zugewiesen'
-                                : 'Zugewiesen an ${todo.assignedToUserName ?? 'Unbekannt'}',
+                                ? AppLocalizations.of(context)!.assignedToYou
+                                : '${AppLocalizations.of(context)!.assignedTo} ${todo.assignedToUserName ?? AppLocalizations.of(context)!.unknown}',
                             style: TextStyle(
                               fontSize: 12,
                               color: isAssignedToMe
@@ -182,7 +183,7 @@ class TodoItemWidget extends StatelessWidget {
                       const SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'Erledigt von ${todo.completedByUserName}',
+                          '${AppLocalizations.of(context)!.completedBy} ${todo.completedByUserName}',
                           style: TextStyle(
                             fontSize: 12,
                             color: Theme.of(context).colorScheme.primary,
@@ -262,7 +263,7 @@ class TodoItemWidget extends StatelessWidget {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.chat_bubble_outline),
-                            tooltip: 'Chat zum Todo',
+                            tooltip: AppLocalizations.of(context)!.chat,
                             onPressed: () async {
                               // Markiere Nachrichten als gelesen beim Öffnen
                               await (context.read<ChatRepository>()
@@ -378,12 +379,14 @@ class TodoItemWidget extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Todo löschen'),
-        content: Text('Möchtest du "${todo.title}" wirklich löschen?'),
+        title: Text(AppLocalizations.of(context)!.deleteTodoTitle),
+        content: Text(
+          AppLocalizations.of(context)!.deleteTodoContent(todo.title),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Abbrechen'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -401,7 +404,7 @@ class TodoItemWidget extends StatelessWidget {
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('Löschen'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),

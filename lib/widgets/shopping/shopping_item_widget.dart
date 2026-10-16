@@ -1,3 +1,4 @@
+import 'package:togetherdo/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -190,7 +191,7 @@ class _ShoppingItemWidgetState extends State<ShoppingItemWidget>
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    'Gekauft von ${(context.read<AuthBloc>().state is AuthAuthenticated && (context.read<AuthBloc>().state as AuthAuthenticated).user.displayName == widget.item.purchasedBy) ? 'dir' : widget.item.purchasedBy!}',
+                    '${AppLocalizations.of(context)!.boughtBy} ${(context.read<AuthBloc>().state is AuthAuthenticated && (context.read<AuthBloc>().state as AuthAuthenticated).user.displayName == widget.item.purchasedBy) ? AppLocalizations.of(context)!.byYou : widget.item.purchasedBy!}',
                     style: TextStyle(
                       fontSize: 12,
                       color: Theme.of(context).colorScheme.primary,
@@ -240,12 +241,14 @@ class _ShoppingItemWidgetState extends State<ShoppingItemWidget>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Item löschen'),
-        content: Text('Möchtest du "${widget.item.name}" wirklich löschen?'),
+        title: Text(AppLocalizations.of(context)!.deleteItemTitle),
+        content: Text(
+          AppLocalizations.of(context)!.deleteItemContent(widget.item.name),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Abbrechen'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -258,7 +261,7 @@ class _ShoppingItemWidgetState extends State<ShoppingItemWidget>
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('Löschen'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),

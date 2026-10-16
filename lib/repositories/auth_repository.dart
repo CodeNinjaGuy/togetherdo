@@ -8,8 +8,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 import '../models/user_model.dart';
+import '../services/functions_client.dart';
 
 abstract class AuthRepository {
   Future<UserModel?> getCurrentUser();
@@ -38,10 +40,29 @@ abstract class AuthRepository {
   Future<Map<String, String>?> getUserLanguage();
   Future<void> deleteAccount();
   Future<void> reauthenticate({required String password}); // NEU
+
+  /// Schickt den Link zum Zurücksetzen des Passworts. Wirft
+  /// [InvalidEmailException] bei ungültiger Adresse; unbekannte Adressen
+  /// werden bewusst nicht gemeldet.
+  Future<void> sendPasswordResetEmail(String email);
 }
+
+/// Ungültige E-Mail-Adresse beim Zurücksetzen des Passworts.
+class InvalidEmailException implements Exception {
+  const InvalidEmailException();
+}
+
+/// Text, an dem die Profil-Bildschirme „neu anmelden“ erkennen.
+const String kReauthRequiredMessage =
+    'Re-Authentifizierung erforderlich. Bitte melde dich erneut an, um deinen Account zu löschen.';
 
 class MockAuthRepository implements AuthRepository {
   UserModel? _currentUser;
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) async {
+    if (!email.contains('@')) throw const InvalidEmailException();
+  }
 
   @override
   Future<UserModel?> getCurrentUser() async {
@@ -406,98 +427,44 @@ class FirebaseAuthRepository implements AuthRepository {
     return null;
   }
 
+  /// Kontolöschung läuft serverseitig (Function `deleteAccount`): Listen
+  /// übergeben/löschen, eigene Inhalte, Profilbild, Profil mit FCM-Token und
+  /// zuletzt das Auth-Konto. Verlangt eine frische Anmeldung; scheitert etwas,
+  /// bleibt das Konto bestehen und der Vorgang kann wiederholt werden.
   @override
   Future<void> deleteAccount() async {
     final user = _firebaseAuth.currentUser;
     if (user == null) throw Exception('Nicht angemeldet');
 
     try {
-      // Schritt 1: Aus allen beigetretenen Listen austreten
-      await _leaveAllJoinedLists(user.uid);
-
-      // Schritt 2: Alle erstellten Listen löschen
-      await _deleteAllCreatedLists(user.uid);
-
-      // Schritt 3: Profilbild aus Firebase Storage löschen
-      try {
-        await _deleteAvatarFile(user.uid);
-      } catch (e) {
-        debugPrint('Profilbild konnte nicht gelöscht werden: $e');
+      await callFunction('deleteAccount');
+    } on FirebaseFunctionsException catch (e) {
+      if (e.code == 'failed-precondition' &&
+          (e.message ?? '').contains('requires-recent-login')) {
+        throw Exception(kReauthRequiredMessage);
       }
-
-      // Schritt 4: Alle Benutzerdaten aus Firestore löschen
-      await _firestore.collection('users').doc(user.uid).delete();
-
-      // Schritt 5: Firebase Auth Account löschen (mit Re-Authentifizierung)
-      await _deleteUserWithReAuth(user);
-    } catch (e) {
-      debugPrint('Fehler beim Löschen des Accounts: $e');
-      throw Exception('Fehler beim Löschen des Accounts: $e');
+      debugPrint('Fehler beim Löschen des Accounts: ${e.code} ${e.message}');
+      throw Exception('Fehler beim Löschen des Accounts: ${e.message}');
     }
+
+    // Gerät abmelden: Push-Token verwerfen und lokal abmelden.
+    try {
+      await FirebaseMessaging.instance.deleteToken();
+    } catch (e) {
+      debugPrint('FCM-Token konnte nicht verworfen werden: $e');
+    }
+    await _firebaseAuth.signOut();
   }
 
-  Future<void> _leaveAllJoinedLists(String userId) async {
+  @override
+  Future<void> sendPasswordResetEmail(String email) async {
     try {
-      // Alle Listen abrufen, in denen der Benutzer Mitglied ist
-      final listsQuery = await _firestore
-          .collection('lists')
-          .where('memberIds', arrayContains: userId)
-          .get();
-
-      // Aus allen Listen austreten
-      for (final doc in listsQuery.docs) {
-        final data = doc.data();
-        final memberIds = List<String>.from(data['memberIds'] ?? []);
-        final memberNames = List<String>.from(data['memberNames'] ?? []);
-
-        // Benutzer aus der Liste entfernen
-        memberIds.remove(userId);
-        memberNames.removeWhere(
-          (name) => name.contains(userId),
-        ); // Vereinfachte Logik
-
-        await doc.reference.update({
-          'memberIds': memberIds,
-          'memberNames': memberNames,
-        });
-      }
-    } catch (e) {
-      debugPrint('Fehler beim Verlassen der Listen: $e');
-      // Nicht abbrechen, weiter mit nächstem Schritt
-    }
-  }
-
-  Future<void> _deleteAllCreatedLists(String userId) async {
-    try {
-      // Alle Listen abrufen, die der Benutzer erstellt hat
-      final listsQuery = await _firestore
-          .collection('lists')
-          .where('ownerId', isEqualTo: userId)
-          .get();
-
-      // Alle erstellten Listen löschen
-      for (final doc in listsQuery.docs) {
-        await doc.reference.delete();
-      }
-    } catch (e) {
-      debugPrint('Fehler beim Löschen der erstellten Listen: $e');
-      // Nicht abbrechen, weiter mit nächstem Schritt
-    }
-  }
-
-  Future<void> _deleteUserWithReAuth(fb_auth.User user) async {
-    try {
-      // Versuche direkt zu löschen
-      await user.delete();
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
     } on fb_auth.FirebaseAuthException catch (e) {
-      if (e.code == 'requires-recent-login') {
-        // Re-Authentifizierung erforderlich
-        throw Exception(
-          'Re-Authentifizierung erforderlich. Bitte melde dich erneut an, um deinen Account zu löschen.',
-        );
-      } else {
-        rethrow;
-      }
+      if (e.code == 'invalid-email') throw const InvalidEmailException();
+      // Unbekannte Adresse nicht verraten.
+      if (e.code == 'user-not-found') return;
+      rethrow;
     }
   }
 

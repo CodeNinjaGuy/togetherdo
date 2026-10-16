@@ -852,10 +852,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get deleteAccountStep1 => 'Aus allen beigetretenen Listen austreten';
 
   @override
-  String get deleteAccountStep2 => 'Alle erstellten Listen löschen';
+  String get deleteAccountStep2 => 'Eigene Listen an Mitglieder übergeben oder löschen';
 
   @override
-  String get deleteAccountStep3 => 'Account und alle Daten permanent löschen';
+  String get deleteAccountStep3 => 'Todos, Artikel, Nachrichten, Profilbild und Konto löschen';
 
   @override
   String get deleteAccountIrreversible => 'Diese Aktion ist irreversibel. Alle deine Daten werden unwiderruflich gelöscht.';
@@ -894,22 +894,22 @@ class AppLocalizationsDe extends AppLocalizations {
   String get privacySecurity => 'Datenschutz & Sicherheit';
 
   @override
-  String get privacySecurityDescription => 'TogetherDo respektiert deine Privatsphäre und schützt deine Daten. Hier erfährst du, wie wir mit deinen Informationen umgehen:';
+  String get privacySecurityDescription => 'So geht ToGetherDo mit deinen Daten um:';
 
   @override
-  String get privacySecuritySteps => 'Unsere Datenschutzrichtlinien:';
+  String get privacySecuritySteps => 'Kurz zusammengefasst:';
 
   @override
-  String get privacySecurityStep1 => 'Keine Chat-Speicherung: Nachrichten werden nicht dauerhaft gespeichert';
+  String get privacySecurityStep1 => 'Gespeichert werden dein Konto (E-Mail, Name, Profilbild) und alles, was du in der App anlegst: Listen, Todos, Einkaufsartikel und Chat-Nachrichten. Die Speicherung erfolgt bei Google Firebase in Rechenzentren in der EU.';
 
   @override
-  String get privacySecurityStep2 => 'Keine Datenweitergabe: Wir geben deine Daten nicht an Dritte weiter';
+  String get privacySecurityStep2 => 'Mitglieder einer Liste sehen deren Inhalte und Chats. Wir geben deine Daten nicht an Dritte weiter, es gibt keine Werbung und kein Tracking.';
 
   @override
-  String get privacySecurityStep3 => 'Keine Haftung: Wir übernehmen keine Haftung für Datenverluste';
+  String get privacySecurityStep3 => 'Push-Benachrichtigungen laufen über Firebase Cloud Messaging. Beim Löschen deines Kontos werden deine Daten vollständig entfernt.';
 
   @override
-  String get privacySecurityIrreversible => 'Hinweis: Das Löschen von Listen entfernt alle zugehörigen Daten unwiderruflich.';
+  String get privacySecurityIrreversible => 'Details stehen in der Datenschutzerklärung.';
 
   @override
   String get avatarChange => 'Profilbild ändern';
@@ -955,6 +955,89 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get avatarNotNow => 'Nicht jetzt';
+
+  @override
+  String get privacyPolicy => 'Datenschutzerklärung';
+
+  @override
+  String get imprint => 'Impressum';
+
+  @override
+  String get linkOpenError => 'Link konnte nicht geöffnet werden';
+
+  @override
+  String get forgotPassword => 'Passwort vergessen?';
+
+  @override
+  String get resetPasswordTitle => 'Passwort zurücksetzen';
+
+  @override
+  String get resetPasswordDescription => 'Gib deine E-Mail-Adresse ein. Wir schicken dir einen Link, mit dem du ein neues Passwort festlegen kannst.';
+
+  @override
+  String get resetPasswordSend => 'Link senden';
+
+  @override
+  String get resetPasswordSent => 'Falls ein Konto zu dieser E-Mail-Adresse existiert, ist der Link unterwegs. Schau auch im Spam-Ordner nach.';
+
+  @override
+  String get resetPasswordError => 'Der Link konnte nicht gesendet werden. Bitte später erneut versuchen.';
+
+  @override
+  String get unknown => 'Unbekannt';
+
+  @override
+  String get noTodos => 'Keine Todos vorhanden';
+
+  @override
+  String get createFirstTodo => 'Erstelle dein erstes Todo';
+
+  @override
+  String listLeftSuccess(String listName) {
+    return 'Liste \"$listName\" verlassen';
+  }
+
+  @override
+  String get ownList => 'Eigene Liste';
+
+  @override
+  String get readOnly => 'Nur Lesen';
+
+  @override
+  String get shareCodeTitle => 'Code teilen';
+
+  @override
+  String get codeLabel => 'Code';
+
+  @override
+  String get shareCodeDescription => 'Teile diesen Code mit anderen, damit sie der Liste beitreten können:';
+
+  @override
+  String get close => 'Schließen';
+
+  @override
+  String get todoLists => 'Todo-Listen';
+
+  @override
+  String get stillToBuy => 'Noch zu kaufen';
+
+  @override
+  String get enterCode => 'Bitte gib den Code ein';
+
+  @override
+  String get codeMustHaveSixDigits => 'Der Code muss 6 Ziffern haben';
+
+  @override
+  String get tooManyCodeAttempts => 'Zu viele Versuche. Bitte später erneut probieren.';
+
+  @override
+  String get assignedToYou => 'Dir zugewiesen';
+
+  @override
+  String get titleRequired => 'Titel ist erforderlich';
+
+  @override
+  String get byYou => 'dir';
 }
 
 /// The translations for German, as used in Austria (`de_AT`).

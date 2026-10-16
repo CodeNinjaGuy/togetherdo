@@ -1,5 +1,11 @@
+/*
+ * Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+ * Written by Martin Bundschuh.
+ */
+
 import 'package:equatable/equatable.dart';
 import '../../models/list_model.dart';
+import '../../models/list_preview.dart';
 
 abstract class ListState extends Equatable {
   const ListState();
@@ -89,12 +95,12 @@ class ListDeleteFailure extends ListState {
 }
 
 class ListCodeCheckSuccess extends ListState {
-  final ListModel list;
+  final ListPreview preview;
 
-  const ListCodeCheckSuccess({required this.list});
+  const ListCodeCheckSuccess({required this.preview});
 
   @override
-  List<Object?> get props => [list];
+  List<Object?> get props => [preview];
 }
 
 class ListCodeCheckFailure extends ListState {

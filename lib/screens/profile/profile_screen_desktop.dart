@@ -17,6 +17,7 @@ import '../../blocs/theme/theme_state.dart';
 import '../../widgets/profile/editable_profile_avatar.dart';
 import '../../widgets/profile/language_selector.dart';
 import 'notification_settings_screen.dart';
+import '../../widgets/common/legal_links_row.dart';
 
 class ProfileScreenDesktop extends StatefulWidget {
   const ProfileScreenDesktop({super.key});
@@ -293,6 +294,8 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
           l10n.privacySecurityIrreversible,
           style: Theme.of(context).textTheme.bodySmall,
         ),
+        const SizedBox(height: 8),
+        const LegalLinksRow(),
       ],
     );
   }
