@@ -114,9 +114,15 @@ async function cleanupOwnContent(uid: string): Promise<void> {
   if (!assigned.empty || !completed.empty) await batch.commit();
 }
 
+/** Bucket der App (`<projekt>.firebasestorage.app`, wie in firebase_options). */
+function avatarBucket() {
+  const projectId = process.env.GCLOUD_PROJECT ?? JSON.parse(process.env.FIREBASE_CONFIG ?? '{}').projectId;
+  return admin.storage().bucket(`${projectId}.firebasestorage.app`);
+}
+
 async function deleteAvatar(uid: string): Promise<void> {
   try {
-    await admin.storage().bucket().file(avatarPath(uid)).delete({ ignoreNotFound: true });
+    await avatarBucket().file(avatarPath(uid)).delete({ ignoreNotFound: true });
   } catch (e) {
     // Fehlender Bucket (z. B. Emulator ohne Storage) darf die Löschung nicht blockieren.
     console.warn('Profilbild nicht gelöscht:', (e as Error).message);

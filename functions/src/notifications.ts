@@ -97,6 +97,11 @@ async function sendNotification(
 ): Promise<void> {
   const tokens = await getFilteredMemberTokens(members, exclude, notificationType);
   if (!tokens.length) return;
+  // Im lokalen Emulator nie echte Push-Nachrichten über Produktion senden.
+  if (process.env.FUNCTIONS_EMULATOR === 'true') {
+    log.info(`(Emulator) Push an ${tokens.length} Gerät(e) übersprungen`);
+    return;
+  }
 
   const batches: string[][] = [];
   for (let i = 0; i < tokens.length; i += 500) batches.push(tokens.slice(i, i + 500));
@@ -361,6 +366,7 @@ export const sendTestNotification = onCall({ region: 'europe-west3' }, async (re
       payload: { aps: { alert: { title, body }, sound: 'notification_sound.aiff', badge: 1, 'interruption-level': 'time-sensitive' } },
     },
   };
+  if (process.env.FUNCTIONS_EMULATOR === 'true') return { success: true, messageId: 'emulator' };
   const res = await messaging.send(message);
   log.info('✅ Test-Benachrichtigung gesendet:', res);
   return { success: true, messageId: res };

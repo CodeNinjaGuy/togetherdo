@@ -184,6 +184,8 @@ describe('Kontolöschung', () => {
     await db.doc('shopping_items/A-item2').set({ id: 'A-item2', listId: bens.id, userId: anna.uid, name: 'Käse' });
     await db.doc('todos/S-todo').set({ id: 'S-todo', listId: solo.id, userId: anna.uid, title: 'privat' });
     await db.doc(`rateLimits/${anna.uid}`).set({ joinFailures: [Date.now()] });
+    const avatar = admin.storage().bucket(`${PROJECT_ID}.firebasestorage.app`).file(`avatars/${anna.uid}.jpg`);
+    await avatar.save(Buffer.from([0xff, 0xd8, 0xff, 0xd9]), { contentType: 'image/jpeg' });
 
     // Frisch anmelden (wie die App vor dem Löschen) und löschen.
     await signInWithEmailAndPassword(anna.auth, anna.email, 'geheim123');
@@ -192,6 +194,8 @@ describe('Kontolöschung', () => {
 
     // Auth-Konto weg.
     await assert.rejects(admin.auth().getUser(anna.uid), (e) => e.code === 'auth/user-not-found');
+    // Profilbild weg.
+    assert.equal((await avatar.exists())[0], false);
     // Profil (inkl. FCM-Token) und Drosselung weg.
     assert.equal(await exists(`users/${anna.uid}`), false);
     assert.equal(await exists(`rateLimits/${anna.uid}`), false);
