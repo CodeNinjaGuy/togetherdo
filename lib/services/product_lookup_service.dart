@@ -46,7 +46,7 @@ class ProductLookupService {
     this.timeout = const Duration(seconds: 8),
     List<Uri Function(String ean)>? endpoints,
   }) : _client = client ?? http.Client(),
-       userAgent = 'ToGetherDo/$appVersion (kontakt über seebubble.me)',
+       userAgent = 'ToGetherDo/$appVersion (https://seebubble.me)',
        _endpoints = endpoints ?? _defaultEndpoints;
 
   final http.Client _client;
@@ -107,6 +107,9 @@ class ProductLookupService {
       throw ProductLookupException(ProductLookupFailure.offline, e);
     } on http.ClientException catch (e) {
       throw ProductLookupException(ProductLookupFailure.offline, e);
+    } on FormatException catch (e) {
+      // z. B. ungültiger Header-Wert: nicht als „unbekanntes Produkt“ tarnen.
+      throw ProductLookupException(ProductLookupFailure.serverError, e);
     }
 
     // 404 = Produkt unbekannt, das ist eine gültige Antwort.

@@ -131,6 +131,11 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
+  test('User-Agent ist ein gültiger HTTP-Header (nur ASCII)', () {
+    final ua = ProductLookupService(appVersion: '1.3.0').userAgent;
+    expect(ua.codeUnits.every((c) => c >= 0x20 && c < 0x7f), isTrue, reason: ua);
+  });
+
   group('Open-Facts-Antwort lesen', () {
     test('deutscher Name, erste Marke, Menge und Bild', () {
       final p = ProductLookupService.parseProduct(
@@ -214,7 +219,7 @@ void main() {
       });
       final p = await _service(client).lookup(nutellaEan);
       expect(p?.name, 'Nutella Nuss-Nougat-Creme');
-      expect(agent, 'ToGetherDo/9.9.9 (kontakt über seebubble.me)');
+      expect(agent, 'ToGetherDo/9.9.9 (https://seebubble.me)');
     });
 
     test(
