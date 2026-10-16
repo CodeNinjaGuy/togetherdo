@@ -1376,6 +1376,682 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get voiceRemoveEntry => 'Eintrag entfernen';
+
+  @override
+  String get anhangTitel => 'Anhänge';
+
+  @override
+  String get anhangHinzufuegen => 'Anhang hinzufügen';
+
+  @override
+  String get anhangQuelleTitel => 'Was möchtest du anhängen?';
+
+  @override
+  String get anhangFotoAufnehmen => 'Foto aufnehmen';
+
+  @override
+  String get anhangFotoAufnehmenHinweis => 'Mit der Kamera';
+
+  @override
+  String get anhangAusGalerie => 'Aus Galerie';
+
+  @override
+  String get anhangAusGalerieHinweis => 'Ein oder mehrere Fotos';
+
+  @override
+  String get anhangDokument => 'Dokument';
+
+  @override
+  String get anhangDokumentHinweis => 'PDF, Word, Excel und mehr';
+
+  @override
+  String get anhangKeine => 'Noch keine Anhänge';
+
+  @override
+  String get anhangKeineHinweis => 'Fotos, PDFs und Dokumente, die hierher gehören.';
+
+  @override
+  String get anhangOeffnen => 'Öffnen';
+
+  @override
+  String get anhangTeilen => 'Teilen';
+
+  @override
+  String get anhangLoeschen => 'Löschen';
+
+  @override
+  String anhangLoeschenFrage(String name) {
+    return '„$name“ wirklich löschen?';
+  }
+
+  @override
+  String get anhangLoeschenHinweis => 'Die Datei wird für alle in dieser Liste entfernt.';
+
+  @override
+  String get anhangAbbrechen => 'Abbrechen';
+
+  @override
+  String get anhangSchliessen => 'Schließen';
+
+  @override
+  String get anhangWeitereAktionen => 'Weitere Aktionen';
+
+  @override
+  String get anhangWirdHochgeladen => 'Wird hochgeladen …';
+
+  @override
+  String get anhangHochgeladen => 'Anhang hochgeladen';
+
+  @override
+  String get anhangGeloescht => 'Anhang gelöscht';
+
+  @override
+  String get anhangLadeFehler => 'Anhang konnte nicht geladen werden';
+
+  @override
+  String get anhangErneut => 'Erneut versuchen';
+
+  @override
+  String get anhangTypBild => 'Bild';
+
+  @override
+  String get anhangTypPdf => 'PDF';
+
+  @override
+  String get anhangTypDokument => 'Dokument';
+
+  @override
+  String anhangGroesseKb(String kb) {
+    return '$kb kB';
+  }
+
+  @override
+  String anhangGroesseMb(String mb) {
+    return '$mb MB';
+  }
+
+  @override
+  String anhangZuGross(String name, String max) {
+    return '„$name“ ist zu groß (höchstens $max)';
+  }
+
+  @override
+  String anhangTypUnzulaessig(String name) {
+    return '„$name“ hat einen Dateityp, der nicht unterstützt wird';
+  }
+
+  @override
+  String anhangLimitErreicht(int max) {
+    return 'Höchstens $max Anhänge je Eintrag';
+  }
+
+  @override
+  String get anhangFehlerAllgemein => 'Anhang konnte nicht verarbeitet werden';
+
+  @override
+  String anhangVonAnzahl(int index, int gesamt) {
+    return '$index von $gesamt';
+  }
+
+  @override
+  String get anhangVorschauNichtMoeglich => 'Für diese Datei gibt es keine Vorschau.';
+
+  @override
+  String get kalTitel => 'Kalender';
+
+  @override
+  String get kalAnsichtSpuren => 'Spuren';
+
+  @override
+  String get kalAnsichtAgenda => 'Agenda';
+
+  @override
+  String get kalAnsichtMonat => 'Monat';
+
+  @override
+  String get kalHeute => 'Heute';
+
+  @override
+  String get kalMorgen => 'Morgen';
+
+  @override
+  String get kalDieseWoche => 'Diese Woche';
+
+  @override
+  String get kalSpaeter => 'Später';
+
+  @override
+  String get kalAlle => 'Alle';
+
+  @override
+  String get kalNeuerTermin => 'Neuer Termin';
+
+  @override
+  String get kalTerminBearbeiten => 'Termin bearbeiten';
+
+  @override
+  String get kalWannHabenAlleZeit => 'Wann haben alle Zeit?';
+
+  @override
+  String get kalFilter => 'Filter';
+
+  @override
+  String get kalListen => 'Listen';
+
+  @override
+  String get kalPersonen => 'Personen';
+
+  @override
+  String get kalArten => 'Arten';
+
+  @override
+  String get kalArtTermin => 'Termin';
+
+  @override
+  String get kalArtArzt => 'Arzt';
+
+  @override
+  String get kalArtArbeit => 'Arbeit';
+
+  @override
+  String get kalArtUrlaub => 'Urlaub';
+
+  @override
+  String get kalArtSchule => 'Schule/Kita';
+
+  @override
+  String get kalArtGeburtstag => 'Geburtstag';
+
+  @override
+  String get kalArtSonstiges => 'Sonstiges';
+
+  @override
+  String get kalGanztaegig => 'Ganztägig';
+
+  @override
+  String get kalStart => 'Beginn';
+
+  @override
+  String get kalEnde => 'Ende';
+
+  @override
+  String get kalOrt => 'Ort';
+
+  @override
+  String get kalNotiz => 'Notiz';
+
+  @override
+  String get kalTitelFeld => 'Titel';
+
+  @override
+  String get kalTitelHinweis => 'Was steht an?';
+
+  @override
+  String get kalSchnelleingabeHinweis => 'Einfach tippen oder sprechen: „Zahnarzt Anna Dienstag 15 Uhr“';
+
+  @override
+  String get kalSchnelleingabeUebernehmen => 'Übernehmen';
+
+  @override
+  String get kalSchnelleingabeErkannt => 'Erkannt';
+
+  @override
+  String get kalWiederholung => 'Wiederholung';
+
+  @override
+  String get kalWdhKeine => 'Nie';
+
+  @override
+  String get kalWdhTaeglich => 'Täglich';
+
+  @override
+  String get kalWdhWoechentlich => 'Wöchentlich';
+
+  @override
+  String get kalWdhMonatlich => 'Monatlich';
+
+  @override
+  String get kalWdhJaehrlich => 'Jährlich';
+
+  @override
+  String get kalWdhAnTagen => 'An diesen Tagen';
+
+  @override
+  String get kalWdhEnde => 'Endet';
+
+  @override
+  String get kalWdhEndeNie => 'Nie';
+
+  @override
+  String get kalWdhEndeAm => 'Am Datum';
+
+  @override
+  String kalWdhEndeNach(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Nach $count Malen',
+      one: 'Nach 1 Mal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String kalWdhIntervall(int count) {
+    return 'Alle $count';
+  }
+
+  @override
+  String kalWdhTaeglichN(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Alle $count Tage',
+      one: 'Täglich',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String kalWdhWoechentlichN(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Alle $count Wochen',
+      one: 'Wöchentlich',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String kalWdhMonatlichN(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Alle $count Monate',
+      one: 'Monatlich',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String kalWdhJaehrlichN(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Alle $count Jahre',
+      one: 'Jährlich',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get kalErinnerung => 'Erinnerung';
+
+  @override
+  String get kalErinnerungKeine => 'Keine';
+
+  @override
+  String kalErinnerungMinuten(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Minuten vorher',
+      one: '1 Minute vorher',
+      zero: 'Zum Start',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String kalErinnerungStunden(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Stunden vorher',
+      one: '1 Stunde vorher',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String kalErinnerungTage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Tage vorher',
+      one: '1 Tag vorher',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get kalLoeschenFrage => 'Termin löschen?';
+
+  @override
+  String get kalLoeschenSerieFrage => 'Nur dieses Mal oder die ganze Serie?';
+
+  @override
+  String get kalNurDiesesMal => 'Nur dieses Mal';
+
+  @override
+  String get kalGanzeSerie => 'Ganze Serie';
+
+  @override
+  String get kalTeilenIcs => 'Kalenderdatei teilen';
+
+  @override
+  String get kalKonfliktTitel => 'Hinweis';
+
+  @override
+  String kalKonfliktBelegt(String name, String titel) {
+    return '$name hat da schon „$titel“';
+  }
+
+  @override
+  String kalKonfliktUrlaub(String name) {
+    return '$name ist da im Urlaub';
+  }
+
+  @override
+  String get kalTrotzdemSpeichern => 'Trotzdem speichern';
+
+  @override
+  String get kalKeineTermine => 'Keine Termine';
+
+  @override
+  String get kalKeineTermineHinweis => 'Lege den ersten Termin an – alle in der Liste sehen ihn.';
+
+  @override
+  String get kalFreieZeitDauer => 'Dauer';
+
+  @override
+  String get kalFreieZeitZeitraum => 'Zeitraum';
+
+  @override
+  String kalFreieZeitNaechsteTage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Nächste $count Tage',
+      one: 'Nächster Tag',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get kalFreieZeitKeine => 'Keine gemeinsame freie Zeit gefunden.';
+
+  @override
+  String get kalFreieZeitHinweis => 'Antippe ein Fenster, um dort einen Termin anzulegen.';
+
+  @override
+  String kalMinuten(int count) {
+    return '$count Min.';
+  }
+
+  @override
+  String kalStunden(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Std.',
+      one: '1 Std.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get kalAufgabeFaellig => 'Aufgabe fällig';
+
+  @override
+  String get kalJetzt => 'Jetzt';
+
+  @override
+  String get kalGespeichert => 'Termin gespeichert';
+
+  @override
+  String get kalGeloescht => 'Termin gelöscht';
+
+  @override
+  String get kalUebersprungen => 'Dieses Mal übersprungen';
+
+  @override
+  String kalFehler(String fehler) {
+    return 'Das hat nicht geklappt: $fehler';
+  }
+
+  @override
+  String get kalNaechsteTermine => 'Nächste Termine';
+
+  @override
+  String get kalZumKalender => 'Zum Kalender';
+
+  @override
+  String get kalKeineNaechsten => 'Nichts geplant.';
+
+  @override
+  String kalUnbekannteNamen(String namen) {
+    return 'Nicht in der Liste: $namen';
+  }
+
+  @override
+  String get kalListeWaehlen => 'Liste';
+
+  @override
+  String get kalMailEinstellungen => 'E-Mail-Benachrichtigungen';
+
+  @override
+  String get kalMailErinnerungen => 'Termin-Erinnerungen';
+
+  @override
+  String get kalMailPush => 'Push';
+
+  @override
+  String get kalMailMail => 'E-Mail';
+
+  @override
+  String get kalMailBeide => 'Beides';
+
+  @override
+  String get kalMailKeine => 'Keine';
+
+  @override
+  String get kalMailWochenueberblick => 'Wochenüberblick der Familie (Sonntagabend)';
+
+  @override
+  String get kalMailEinladungen => 'Einladungen per E-Mail erhalten';
+
+  @override
+  String get kalMailHinweis => 'Mails kommen von noreply@seebubble.me. Jede Mail hat einen Abmelde-Link.';
+
+  @override
+  String get kalTag => 'Tag';
+
+  @override
+  String get kalPersonenAlle => 'Für alle';
+
+  @override
+  String get kalAnhaenge => 'Anhänge';
+
+  @override
+  String kalMehr(int count) {
+    return '+$count weitere';
+  }
+
+  @override
+  String kalErstelltVon(String name) {
+    return 'Eingetragen von $name';
+  }
+
+  @override
+  String kalBisZeit(String zeit) {
+    return 'bis $zeit';
+  }
+
+  @override
+  String kalTageAnzahl(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Tage',
+      one: '1 Tag',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get kalDiktatHinweis => 'Ich höre zu …';
+
+  @override
+  String get kalEinladenPerMail => 'Per E-Mail einladen';
+
+  @override
+  String get kalEinladenAdresse => 'E-Mail-Adresse';
+
+  @override
+  String get kalEinladenGesendet => 'Einladung verschickt';
+
+  @override
+  String get kalZuTag => 'Tagesansicht';
+
+  @override
+  String get jahrTitel => 'Jahresüberblick';
+
+  @override
+  String get jahrZurueck => 'Vorheriges Jahr';
+
+  @override
+  String get jahrVor => 'Nächstes Jahr';
+
+  @override
+  String get jahrBandTitel => 'Jahresband';
+
+  @override
+  String get jahrBandHinweis => 'Lange drücken und ziehen, um Urlaub zu planen – oder Anfang und Ende antippen.';
+
+  @override
+  String jahrAuswahlStart(String datum) {
+    return 'Anfang gewählt: $datum – jetzt das Ende antippen';
+  }
+
+  @override
+  String get jahrAuswahlAbbrechen => 'Auswahl aufheben';
+
+  @override
+  String get jahrDichte => 'Wie voll die Wochen sind';
+
+  @override
+  String get jahrAlleFrei => 'Alle frei';
+
+  @override
+  String get jahrAlleFreiKeine => 'Noch kein gemeinsamer Urlaub geplant. Zieh im Jahresband einen Zeitraum, um Urlaub einzutragen.';
+
+  @override
+  String jahrAlleFreiChip(String zeitraum) {
+    return 'alle frei $zeitraum';
+  }
+
+  @override
+  String get jahrFeiertag => 'Feiertag';
+
+  @override
+  String get jahrFeiertage => 'Feiertage';
+
+  @override
+  String get jahrMonate => 'Monate';
+
+  @override
+  String jahrMonatOeffnen(String monat) {
+    return '$monat öffnen';
+  }
+
+  @override
+  String jahrUrlaubAuswahl(String zeitraum) {
+    return 'Urlaub: $zeitraum';
+  }
+
+  @override
+  String vorschauTitel(String monat) {
+    return 'Was kommt im $monat';
+  }
+
+  @override
+  String get vorschauHighlights => 'Highlights';
+
+  @override
+  String get vorschauFreieWochenenden => 'Freie Wochenenden';
+
+  @override
+  String get vorschauKeineFreienWochenenden => 'Kein freies Wochenende';
+
+  @override
+  String get vorschauUnterwegs => 'Wer ist wie viel unterwegs';
+
+  @override
+  String vorschauUrlaubstage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Tage Urlaub',
+      one: '1 Tag Urlaub',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String vorschauArbeitsstunden(int count) {
+    return '$count Std. Arbeit';
+  }
+
+  @override
+  String vorschauTermine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Termine',
+      one: '1 Termin',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get vorschauRuhig => 'Ein ruhiger Monat – nichts Besonderes geplant.';
+
+  @override
+  String get vorschauAlleFrei => 'Alle frei';
+
+  @override
+  String get feiertagRegion => 'Feiertage';
+
+  @override
+  String get feiertagKeine => 'Keine';
+
+  @override
+  String get feiertagOesterreich => 'Österreich';
+
+  @override
+  String get feiertagDeutschland => 'Deutschland';
+
+  @override
+  String get feiertagBundesland => 'Bundesland';
+
+  @override
+  String get kalJahr => 'Jahr';
+
+  @override
+  String get kalMailMonatsueberblick => 'Monatsüberblick der Familie (am Monatsanfang)';
+
+  @override
+  String kalTermineAnzahl(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Termine',
+      one: '1 Termin',
+    );
+    return '$_temp0';
+  }
 }
 
 /// The translations for German, as used in Austria (`de_AT`).

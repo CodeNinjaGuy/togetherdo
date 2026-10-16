@@ -83,6 +83,11 @@ dependencies:
   # Spracheingabe (Erkennung auf dem Gerät/System)
   speech_to_text: ^7.5.0
 
+  # Anhänge (Dokumente wählen, Dateien teilen, Zwischenablage für Downloads)
+  file_picker: ^10.3.3
+  share_plus: ^12.0.0
+  path_provider: ^2.1.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

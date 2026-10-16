@@ -17,9 +17,12 @@
 // - `produkte/{ean}` ist der gemeinsame Zwischenspeicher des Strichcode-
 //   Scanners: Angemeldete lesen und legen an; Open-Facts-Daten (Quelle
 //   off/obf/opf) werden nie überschrieben, Löschen ist verboten.
+// - `termine` (Familienkalender): lesen/anlegen = Mitglied, ändern/löschen =
+//   Ersteller oder Besitzer/Mitglied mit allowEdit, Felder werden geprüft.
 // - Alles, was hier nicht erlaubt ist (z. B. `shares`, `rateLimits`), ist verboten.
 //
-// Tests: functions/test/rules.test.mjs (Firestore-Emulator).
+// Tests: functions/test/rules.test.mjs und functions/test/termine.rules.test.mjs
+// (Firestore-Emulator).
 rules_version = '2';
 
 service cloud.firestore {
@@ -256,6 +259,122 @@ service cloud.firestore {
         && validProduct(request.resource.data);
 
       allow delete: if false;
+    }
+
+    // ------------------------------------------------------------- termine
+    // Familienkalender: flache Sammlung mit `listId` (wie todos). Lesen und
+    // anlegen dürfen alle Mitglieder der Liste; ändern/löschen der Ersteller
+    // oder Besitzer/Mitglied mit allowEdit. Anhänge darf jedes Mitglied
+    // hinzufügen und eigene wieder entfernen. `letzteErinnerungSchluessel`
+    // schreibt nur die Erinnerungs-Function.
+    function validTerminArt(a) {
+      return a in ['termin', 'arzt', 'arbeit', 'urlaub', 'schule', 'geburtstag', 'sonstiges'];
+    }
+
+    function validWiederholung(w) {
+      return w == null
+        || (w is map
+            && w.keys().hasOnly(['typ', 'intervall', 'wochentage', 'bisDatum', 'anzahl', 'ausnahmen'])
+            && w.typ in ['taeglich', 'woechentlich', 'monatlich', 'jaehrlich']
+            && w.get('intervall', 1) is int && w.intervall >= 1 && w.intervall <= 365
+            && w.get('wochentage', []) is list && w.wochentage.size() <= 7
+            && (w.get('bisDatum', null) == null || w.bisDatum is timestamp)
+            && (w.get('anzahl', null) == null
+                || (w.anzahl is int && w.anzahl >= 1 && w.anzahl <= 1000))
+            && w.get('ausnahmen', []) is list && w.ausnahmen.size() <= 500);
+    }
+
+    function validAnhang(a) {
+      return a is map
+        && a.keys().hasOnly(['id', 'name', 'typ', 'groesse', 'pfad', 'vorschauPfad',
+                             'hochgeladenVon', 'hochgeladenAm'])
+        && a.id is string && a.id.size() >= 1 && a.id.size() <= 80
+        && a.name is string && a.name.size() >= 1 && a.name.size() <= 200
+        && a.typ is string && a.typ.size() <= 100
+        && a.groesse is int && a.groesse >= 0 && a.groesse <= 20 * 1024 * 1024
+        && a.pfad is string && a.pfad.size() <= 400
+        && a.hochgeladenVon is string;
+    }
+
+    function validAnhaenge(l) {
+      // Einzelne Einträge prüft die App vollständig; hier Umfang und Form
+      // der ersten Einträge (Regeln kennen keine Schleifen).
+      return l is list && l.size() <= 20
+        && (l.size() < 1 || validAnhang(l[0]))
+        && (l.size() < 2 || validAnhang(l[l.size() - 1]));
+    }
+
+    function validTermin(d, terminId) {
+      return d.keys().hasOnly(['id', 'listId', 'titel', 'art', 'personen', 'start', 'ende',
+                               'ganztaegig', 'ort', 'notiz', 'zeitzone', 'wiederholung',
+                               'erinnerungen', 'anhaenge', 'erstelltVon', 'erstelltAm',
+                               'aktualisiertAm', 'sichtbarBis', 'naechsteErinnerungAm',
+                               'letzteErinnerungSchluessel'])
+        && d.id == terminId
+        && d.listId is string
+        && d.titel is string && d.titel.size() >= 1 && d.titel.size() <= 200
+        && validTerminArt(d.art)
+        && d.personen is list && d.personen.size() <= 50
+        && listDoc(d.listId).data.allUserIds.hasAll(d.personen)
+        && d.start is timestamp && d.ende is timestamp && d.ende > d.start
+        && d.ganztaegig is bool
+        && (d.get('ort', null) == null || (d.ort is string && d.ort.size() <= 200))
+        && (d.get('notiz', null) == null || (d.notiz is string && d.notiz.size() <= 2000))
+        && d.zeitzone is string && d.zeitzone.size() <= 64
+        && validWiederholung(d.get('wiederholung', null))
+        && d.erinnerungen is list && d.erinnerungen.size() <= 5
+        && validAnhaenge(d.get('anhaenge', []))
+        && d.erstelltVon is string
+        && d.sichtbarBis is timestamp && d.sichtbarBis >= d.ende
+        && (d.get('naechsteErinnerungAm', null) == null || d.naechsteErinnerungAm is timestamp);
+    }
+
+    function canEditTermin() {
+      return resource.data.erstelltVon == request.auth.uid
+        || canEditList(resource.data.listId);
+    }
+
+    match /termine/{terminId} {
+      allow read: if signedIn() && isListMember(resource.data.listId);
+
+      allow create: if signedIn()
+        && isListMember(request.resource.data.listId)
+        && request.resource.data.erstelltVon == request.auth.uid
+        && request.resource.data.erstelltAm == request.time
+        && request.resource.data.get('letzteErinnerungSchluessel', null) == null
+        && validTermin(request.resource.data, terminId);
+
+      // Bearbeiten: Ersteller oder Besitzer/Mitglied mit allowEdit.
+      allow update: if signedIn()
+        && unchanged('id') && unchanged('listId') && unchanged('erstelltVon')
+        && unchanged('erstelltAm') && unchanged('letzteErinnerungSchluessel')
+        && isListMember(resource.data.listId)
+        && canEditTermin()
+        && validTermin(request.resource.data, terminId);
+
+      // Anhänge: jedes Mitglied darf eigene hinzufügen …
+      allow update: if signedIn()
+        && changedKeys().hasOnly(['anhaenge', 'aktualisiertAm'])
+        && isListMember(resource.data.listId)
+        && validAnhaenge(request.resource.data.anhaenge)
+        && request.resource.data.anhaenge.hasAll(resource.data.anhaenge)
+        && request.resource.data.anhaenge.size() == resource.data.anhaenge.size() + 1
+        && request.resource.data.anhaenge[request.resource.data.anhaenge.size() - 1]
+             .hochgeladenVon == request.auth.uid;
+
+      // … und genau ein eigenes wieder entfernen.
+      allow update: if signedIn()
+        && changedKeys().hasOnly(['anhaenge', 'aktualisiertAm'])
+        && isListMember(resource.data.listId)
+        && resource.data.anhaenge.hasAll(request.resource.data.anhaenge)
+        && resource.data.anhaenge.size() == request.resource.data.anhaenge.size() + 1
+        && resource.data.anhaenge.removeAll(request.resource.data.anhaenge).size() == 1
+        && resource.data.anhaenge.removeAll(request.resource.data.anhaenge)[0]
+             .hochgeladenVon == request.auth.uid;
+
+      allow delete: if signedIn()
+        && isListMember(resource.data.listId)
+        && canEditTermin();
     }
 
     // Alles andere (u. a. alte `shares`, `rateLimits`) ist für Clients gesperrt.
