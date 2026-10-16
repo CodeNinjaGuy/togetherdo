@@ -2274,6 +2274,21 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get memberAway => 'abwesend';
+
+  @override
+  String get kalFehlerVorbereitung => 'Der Kalender wird gerade vorbereitet. Bitte in einer Minute nochmal versuchen.';
+
+  @override
+  String get kalFehlerOffline => 'Keine Verbindung. Bitte Internet prüfen und nochmal versuchen.';
+
+  @override
+  String get kalFehlerRechte => 'Dafür fehlt dir die Berechtigung in dieser Liste.';
+
+  @override
+  String get kalFehlerAllgemein => 'Das hat nicht geklappt. Bitte nochmal versuchen.';
+
+  @override
+  String get kalNeuLaden => 'Neu laden';
 }
 
 /// The translations for German, as used in Austria (`de_AT`).

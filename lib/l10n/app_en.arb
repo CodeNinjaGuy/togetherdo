@@ -1099,5 +1099,10 @@
     }
   },
   "anhangZugriffVerweigert": "Please allow access to the camera or photos in Settings.",
-  "memberAway": "away"
+  "memberAway": "away",
+  "kalFehlerVorbereitung": "The calendar is being prepared. Please try again in a minute.",
+  "kalFehlerOffline": "No connection. Please check your internet and try again.",
+  "kalFehlerRechte": "You don't have permission for this in this list.",
+  "kalFehlerAllgemein": "That didn't work. Please try again.",
+  "kalNeuLaden": "Reload"
 }

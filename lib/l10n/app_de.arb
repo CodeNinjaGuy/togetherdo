@@ -1102,5 +1102,10 @@
   "memberAway": "abwesend",
   "@memberAway": {
     "description": "Kennzeichen hinter einem Mitglied, das am Tag der Aufgabe laut Kalender abwesend ist (Urlaub)"
-  }
+  },
+  "kalFehlerVorbereitung": "Der Kalender wird gerade vorbereitet. Bitte in einer Minute nochmal versuchen.",
+  "kalFehlerOffline": "Keine Verbindung. Bitte Internet prüfen und nochmal versuchen.",
+  "kalFehlerRechte": "Dafür fehlt dir die Berechtigung in dieser Liste.",
+  "kalFehlerAllgemein": "Das hat nicht geklappt. Bitte nochmal versuchen.",
+  "kalNeuLaden": "Neu laden"
 }

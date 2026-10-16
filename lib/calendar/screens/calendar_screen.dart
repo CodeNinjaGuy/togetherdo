@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../services/fehler_text.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
 import '../../design/attachments/td_attachments.dart';
@@ -261,8 +262,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ),
                   if (z.fehler != null)
                     Padding(
-                      padding: const EdgeInsets.all(TdSpace.lg),
-                      child: Text(s.kalFehler(z.fehler!), style: ctx.text.bodySmall?.copyWith(color: ctx.td.danger)),
+                      padding: const EdgeInsets.fromLTRB(TdSpace.lg, TdSpace.md, TdSpace.lg, 0),
+                      child: TdCard(
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline_rounded, color: ctx.td.warning),
+                            const SizedBox(width: TdSpace.md),
+                            Expanded(child: Text(kalFehlerText(s, z.fehler!), style: ctx.text.bodyMedium)),
+                            TdButton.ghost(label: s.kalNeuLaden, onPressed: _cubit.starten),
+                          ],
+                        ),
+                      ),
                     ),
                   Expanded(
                     child: z.laedt && z.termine.isEmpty && z.listen.isEmpty

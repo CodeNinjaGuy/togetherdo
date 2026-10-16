@@ -13,6 +13,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../services/fehler_text.dart';
 import '../../design/calendar/td_calendar.dart';
 import '../../design/td_design.dart';
 import '../../l10n/app_localizations.dart';
@@ -347,7 +348,7 @@ class _TerminFormularState extends State<TerminFormular> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _speichert = false);
-      TdToast.show(context, s.kalFehler('$e'), variant: TdToastVariant.error);
+      TdToast.show(context, kalFehlerText(s, e), variant: TdToastVariant.error);
     }
   }
 

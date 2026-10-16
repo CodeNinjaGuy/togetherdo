@@ -2274,6 +2274,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get memberAway => 'away';
+
+  @override
+  String get kalFehlerVorbereitung => 'The calendar is being prepared. Please try again in a minute.';
+
+  @override
+  String get kalFehlerOffline => 'No connection. Please check your internet and try again.';
+
+  @override
+  String get kalFehlerRechte => 'You don\'t have permission for this in this list.';
+
+  @override
+  String get kalFehlerAllgemein => 'That didn\'t work. Please try again.';
+
+  @override
+  String get kalNeuLaden => 'Reload';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).

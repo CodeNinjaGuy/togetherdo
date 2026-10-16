@@ -13,6 +13,7 @@ library;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import '../services/fehler_text.dart';
 import '../../design/td_design.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -124,7 +125,7 @@ class _MailEinstellungenState extends State<MailEinstellungen> {
     } catch (e) {
       if (!mounted) return;
       final s = AppLocalizations.of(context)!;
-      TdToast.show(context, s.kalFehler('$e'), variant: TdToastVariant.error);
+      TdToast.show(context, kalFehlerText(s, e), variant: TdToastVariant.error);
     }
   }
 

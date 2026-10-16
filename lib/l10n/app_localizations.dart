@@ -4045,6 +4045,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'away'**
   String get memberAway;
+
+  /// No description provided for @kalFehlerVorbereitung.
+  ///
+  /// In en, this message translates to:
+  /// **'The calendar is being prepared. Please try again in a minute.'**
+  String get kalFehlerVorbereitung;
+
+  /// No description provided for @kalFehlerOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Please check your internet and try again.'**
+  String get kalFehlerOffline;
+
+  /// No description provided for @kalFehlerRechte.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have permission for this in this list.'**
+  String get kalFehlerRechte;
+
+  /// No description provided for @kalFehlerAllgemein.
+  ///
+  /// In en, this message translates to:
+  /// **'That didn\'t work. Please try again.'**
+  String get kalFehlerAllgemein;
+
+  /// No description provided for @kalNeuLaden.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get kalNeuLaden;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

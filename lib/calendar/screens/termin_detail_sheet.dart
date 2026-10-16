@@ -16,6 +16,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../services/fehler_text.dart';
 import '../../design/attachments/td_attachments.dart';
 import '../../design/calendar/td_calendar.dart';
 import '../../design/td_design.dart';
@@ -136,7 +137,7 @@ class _TerminDetailState extends State<TerminDetail> {
       );
     } catch (e) {
       if (!mounted) return;
-      TdToast.show(context, s.kalFehler('$e'), variant: TdToastVariant.error);
+      TdToast.show(context, kalFehlerText(s, e), variant: TdToastVariant.error);
     }
   }
 
@@ -156,7 +157,7 @@ class _TerminDetailState extends State<TerminDetail> {
       );
     } catch (e) {
       if (!mounted) return;
-      TdToast.show(context, s.kalFehler('$e'), variant: TdToastVariant.error);
+      TdToast.show(context, kalFehlerText(s, e), variant: TdToastVariant.error);
     }
   }
 
