@@ -3,6 +3,7 @@
 //Email: martin.bundschuh@gmail.com
 //License: MIT
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -52,9 +53,6 @@ void main() async {
     await connectToFirebaseEmulator();
   }
 
-  // Messaging Service initialisieren
-  await MessagingService().initialize();
-
   // Navigation Callbacks für Push-Benachrichtigungen setzen
   MessagingService().setNavigationCallbacks(
     navigateToChat: (todoId, listId, todoTitle) {
@@ -93,6 +91,10 @@ void main() async {
       child: const TogetherDoApp(),
     ),
   );
+
+  // Push erst nach dem ersten Bild einrichten: Berechtigungsdialog und
+  // APNs-Token dürfen den Start nicht blockieren (weißer Bildschirm).
+  unawaited(MessagingService().initialize());
 }
 
 class TogetherDoApp extends StatelessWidget {
