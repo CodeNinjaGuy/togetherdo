@@ -7,19 +7,23 @@ import Flutter
 import UIKit
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    GeneratedPluginRegistrant.register(with: self)
-    registerDeviceChannel()
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
+  /// UIScene-Lebenszyklus (ab iOS 27 Pflicht): Plugins hängen an der Engine der Szene.
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    registerDeviceChannel(engineBridge.pluginRegistry)
+  }
+
   /// Kleine Brücke für das Profilbild: Kamera vorhanden? Einstellungen öffnen.
-  private func registerDeviceChannel() {
-    guard let registrar = self.registrar(forPlugin: "TogetherDoDevice") else { return }
+  private func registerDeviceChannel(_ registry: FlutterPluginRegistry) {
+    guard let registrar = registry.registrar(forPlugin: "TogetherDoDevice") else { return }
     let channel = FlutterMethodChannel(
       name: "togetherdo/device",
       binaryMessenger: registrar.messenger()
@@ -42,3 +46,6 @@ import UIKit
     }
   }
 }
+
+/// Szene der App; in dieser Datei, damit das Xcode-Projekt unverändert bleibt.
+class SceneDelegate: FlutterSceneDelegate {}
