@@ -564,5 +564,32 @@ void main() {
       await tester.pumpAndSettle();
       expect(ergebnis, AnhangQuelle.dokument);
     });
+
+    testWidgets('Chat: ohne Kamera und ohne Dokument nur die Galerie', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          Builder(
+            builder: (context) => TdButton(
+              label: 'Los',
+              onPressed: () => showTdAnhangQuelleSheet(
+                context,
+                kameraVerfuegbar: false,
+                dokumentErlaubt: false,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Los'));
+      await tester.pumpAndSettle();
+      expect(find.text('Foto aufnehmen'), findsNothing);
+      expect(find.text('Aus Galerie'), findsOneWidget);
+      expect(find.text('Dokument'), findsNothing);
+    });
+  });
+
+  test('Zugriff verweigert ergibt einen verständlichen Hinweis', () {
+    final l = lookupAppLocalizations(const Locale('de'));
+    expect(l.anhangFehler(const AnhangZugriffVerweigert()), l.anhangZugriffVerweigert);
   });
 }

@@ -656,26 +656,6 @@
   "chatEmptyMessage": "Schreib die erste Nachricht oder schick ein Foto.",
   "yesterday": "Gestern",
   "attachmentSendImage": "Bild senden",
-  "attachments": "Anhänge",
-  "attachmentAdd": "Anhang hinzufügen",
-  "attachmentTakePhoto": "Foto aufnehmen",
-  "attachmentChooseFromPhotos": "Aus Fotos wählen",
-  "attachmentChooseFile": "Datei wählen (PDF)",
-  "attachmentDelete": "Anhang löschen",
-  "attachmentDeleteConfirm": "„{name}“ wirklich löschen?",
-  "@attachmentDeleteConfirm": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "attachmentOpen": "Öffnen",
-  "attachmentTooLarge": "Die Datei ist zu groß (Bilder bis 10 MB, PDF bis 20 MB).",
-  "attachmentUnsupported": "Nur Fotos und PDF-Dateien lassen sich anhängen.",
-  "attachmentUploadFailed": "Der Anhang konnte nicht hochgeladen werden.",
-  "attachmentDeleteFailed": "Der Anhang konnte nicht gelöscht werden.",
-  "attachmentPermissionMessage": "Bitte erlaube den Zugriff auf Kamera bzw. Fotos in den Einstellungen.",
   "showPassword": "Passwort anzeigen",
   "hidePassword": "Passwort verbergen",
   "promiseLists": "Aufgaben und Einkauf für alle zu Hause",
@@ -1120,5 +1100,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "anhangZugriffVerweigert": "Bitte erlaube den Zugriff auf Kamera bzw. Fotos in den Einstellungen."
 }

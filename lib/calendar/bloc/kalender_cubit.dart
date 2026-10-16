@@ -128,6 +128,18 @@ class KalenderZustand extends Equatable {
     return const [];
   }
 
+  /// Besitzer der Liste oder Mitglied mit Bearbeitungsrecht (z. B. für
+  /// das Löschen fremder Anhänge, wie in den Regeln).
+  bool darfListeBearbeiten(String listId) {
+    for (final l in listen) {
+      if (l.id == listId) {
+        return l.ownerId == userId ||
+            (l.memberIds.contains(userId) && l.allowEdit);
+      }
+    }
+    return false;
+  }
+
   bool darfBearbeiten(Termin t) {
     if (t.erstelltVon == userId) return true;
     for (final l in listen) {
@@ -363,9 +375,6 @@ class KalenderCubit extends Cubit<KalenderZustand> {
       ),
     );
   }
-
-  Future<void> anhaengeSetzen(Termin t, List<Anhang> anhaenge) =>
-      _termine.anhaengeSetzen(t.id, anhaenge);
 
   @override
   Future<void> close() async {

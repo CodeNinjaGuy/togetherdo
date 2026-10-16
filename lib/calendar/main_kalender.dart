@@ -15,6 +15,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../design/attachments/td_attachments.dart';
 import '../l10n/app_localizations.dart';
+import '../repositories/anhang_repository.dart';
 import '../utils/app_theme.dart';
 import 'demo/beispiel_familie.dart';
 import 'bloc/kalender_cubit.dart';
@@ -63,6 +64,7 @@ class KalenderDemoApp extends StatelessWidget {
         termine: Beispiel.repository(heuteTag),
         listen: BeispielListRepository(),
         anhaenge: FakeAttachmentService(),
+        anhangRepository: MockAnhangRepository(),
         heute: heuteTag,
         eingebettet: true,
         startAnsicht: KalenderAnsicht.values.firstWhere(

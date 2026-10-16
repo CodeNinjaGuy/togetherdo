@@ -63,9 +63,18 @@ export async function deleteStoragePrefix(prefix: string): Promise<void> {
   }
 }
 
+/** Storage-Bereiche je Liste: Anhänge an Aufgaben, Bilder im Chat,
+ *  Anhänge an Terminen. */
+export const STORAGE_BEREICHE = ['todos', 'chats', 'termine'] as const;
+
 /** Storage-Pfade einer Aufgabe: Anhänge und Chat-Bilder. */
 export function todoStoragePrefixes(listId: string, todoId: string): string[] {
   return [`todos/${listId}/${todoId}/`, `chats/${listId}/${todoId}/`];
+}
+
+/** Storage-Pfad eines Termins (Anhänge). */
+export function terminStoragePrefix(listId: string, terminId: string): string {
+  return `termine/${listId}/${terminId}/`;
 }
 
 /** Löscht Chat und Anhang-Beschreibungen einer Aufgabe (Unter-Sammlungen). */
@@ -73,7 +82,14 @@ export async function deleteTodoSubcollections(
   todoRef: admin.firestore.DocumentReference,
 ): Promise<void> {
   await deleteQueryInBatches(todoRef.collection('chatMessages'));
-  await deleteQueryInBatches(todoRef.collection('attachments'));
+  await deleteQueryInBatches(todoRef.collection('anhaenge'));
+}
+
+/** Löscht die Anhang-Beschreibungen eines Termins (Unter-Sammlung). */
+export async function deleteTerminSubcollections(
+  terminRef: admin.firestore.DocumentReference,
+): Promise<void> {
+  await deleteQueryInBatches(terminRef.collection('anhaenge'));
 }
 
 /** Löscht ein Todo samt Chat, Anhängen und Dateien. */
@@ -89,14 +105,25 @@ export async function deleteTodoWithChat(
   }
 }
 
-/** Löscht alle Todos (mit Chats und Anhängen), Einkaufsartikel und
- *  Dateien einer Liste. */
+/** Alle Termine einer Liste löschen (mit Anhang-Beschreibungen). Sie
+ *  werden vorher still markiert: `onTerminDeleted` räumt dann nichts mehr
+ *  einzeln auf, weil die Liste ihre Storage-Bereiche als Ganzes löscht. */
+export async function deleteTermineOfList(listId: string): Promise<number> {
+  return deleteQueryInBatches(db.collection('termine').where('listId', '==', listId), async (doc) => {
+    await deleteTerminSubcollections(doc.ref);
+    await doc.ref.update({ [SILENT_DELETE_FIELD]: true });
+  });
+}
+
+/** Löscht alle Inhalte einer Liste: Todos (mit Chats und Anhängen),
+ *  Einkaufsartikel, Termine (mit Anhängen) und alle Dateien der Liste
+ *  (todos/, chats/, termine/). Einziger Aufräumer beim Löschen einer Liste. */
 export async function deleteListContent(listId: string): Promise<void> {
   await deleteQueryInBatches(
     db.collection('todos').where('listId', '==', listId),
     (doc) => deleteTodoSubcollections(doc.ref),
   );
   await deleteQueryInBatches(db.collection('shopping_items').where('listId', '==', listId));
-  await deleteStoragePrefix(`todos/${listId}/`);
-  await deleteStoragePrefix(`chats/${listId}/`);
+  await deleteTermineOfList(listId);
+  for (const bereich of STORAGE_BEREICHE) await deleteStoragePrefix(`${bereich}/${listId}/`);
 }

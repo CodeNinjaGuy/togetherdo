@@ -405,69 +405,88 @@ describe('chatMessages', () => {
   });
 });
 
-describe('todo attachments (Anhänge)', () => {
-  const att = (id, userId, extra = {}) => ({
-    id,
-    todoId: 'T1',
-    listId: 'L1',
-    name: 'rechnung.pdf',
-    path: `todos/L1/T1/${id}-rechnung.pdf`,
-    url: 'https://firebasestorage.googleapis.com/x',
-    contentType: 'application/pdf',
-    size: 1234,
-    uploadedBy: userId,
-    uploadedByName: 'Max',
-    createdAt: now,
-    ...extra,
-  });
-  test('Mitglied hängt an und liest', async () => {
-    await assertSucceeds(setDoc(doc(db(member), 'todos/T1/attachments/A1'), att('A1', member)));
-    await assertSucceeds(getDocs(collection(db(member), 'todos/T1/attachments')));
-    await assertSucceeds(getDocs(collection(db(owner), 'todos/T1/attachments')));
-  });
-  test('Mitglied ohne allowEdit hängt an (Liste RO)', async () => {
-    await assertSucceeds(
-      setDoc(doc(db(viewer), 'todos/TRO/attachments/A2'), {
-        ...att('A2', viewer),
-        todoId: 'TRO',
-        listId: 'RO',
-        path: 'todos/RO/TRO/A2-rechnung.pdf',
-      }),
-    );
-  });
-  test('Fremder weder lesen noch anhängen; falscher Pfad, Typ, Größe, Urheber', async () => {
-    await assertFails(getDocs(collection(db(stranger), 'todos/T1/attachments')));
-    await assertFails(setDoc(doc(db(stranger), 'todos/T1/attachments/A3'), att('A3', stranger)));
-    await assertFails(setDoc(doc(db(member), 'todos/T1/attachments/A4'), att('A4', owner)));
-    await assertFails(setDoc(doc(db(member), 'todos/T1/attachments/A5'), att('A5', member, { path: 'todos/RO/T1/x.pdf' })));
-    await assertFails(setDoc(doc(db(member), 'todos/T1/attachments/A6'), att('A6', member, { contentType: 'application/zip' })));
-    await assertFails(setDoc(doc(db(member), 'todos/T1/attachments/A7'), att('A7', member, { size: 25 * 1024 * 1024 })));
-    await assertFails(setDoc(doc(db(member), 'todos/T1/attachments/A8'), att('A8', member, { listId: 'RO' })));
-  });
-  test('löschen: Urheber ja, Besitzer ja, anderes Mitglied ohne allowEdit nein', async () => {
-    await env.withSecurityRulesDisabled(async (ctx) => {
-      const f = ctx.firestore();
-      await setDoc(doc(f, 'todos/T1/attachments/B1'), att('B1', member));
-      await setDoc(doc(f, 'todos/T1/attachments/B2'), att('B2', member));
-      await setDoc(doc(f, 'todos/TRO/attachments/B3'), {
-        ...att('B3', owner),
-        todoId: 'TRO',
-        listId: 'RO',
-        path: 'todos/RO/TRO/B3-rechnung.pdf',
+// Aufgaben und Termine speichern Anhänge gleich (Untersammlung `anhaenge`)
+// und folgen denselben Regeln – darum dieselben Fälle für beide.
+for (const [sammlung, eintrag, eintragRO] of [['todos', 'T1', 'TRO'], ['termine', 'E1', 'ERO']]) {
+  describe(`${sammlung}/{id}/anhaenge`, () => {
+    const anhang = (id, von, { liste = 'L1', id2 = eintrag, ...extra } = {}) => ({
+      id,
+      name: 'rechnung.pdf',
+      typ: 'application/pdf',
+      groesse: 1234,
+      pfad: `${sammlung}/${liste}/${id2}/${id}`,
+      vorschauPfad: null,
+      hochgeladenVon: von,
+      hochgeladenAm: Timestamp.fromDate(new Date(now)),
+      ...extra,
+    });
+    const pfad = (e, id) => `${sammlung}/${e}/anhaenge/${id}`;
+
+    beforeEach(async () => {
+      if (sammlung !== 'termine') return;
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        const f = ctx.firestore();
+        await setDoc(doc(f, 'termine/E1'), { id: 'E1', listId: 'L1', titel: 'Arzt', erstelltVon: owner });
+        await setDoc(doc(f, 'termine/ERO'), { id: 'ERO', listId: 'RO', titel: 'Arzt', erstelltVon: owner });
       });
     });
-    await assertSucceeds(deleteDoc(doc(db(member), 'todos/T1/attachments/B1')));
-    await assertSucceeds(deleteDoc(doc(db(owner), 'todos/T1/attachments/B2')));
-    await assertFails(deleteDoc(doc(db(viewer), 'todos/TRO/attachments/B3')));
-    await assertFails(deleteDoc(doc(db(stranger), 'todos/TRO/attachments/B3')));
-  });
-  test('nicht veränderbar', async () => {
-    await env.withSecurityRulesDisabled(async (ctx) => {
-      await setDoc(doc(ctx.firestore(), 'todos/T1/attachments/C1'), att('C1', member));
+
+    test('Mitglied hängt an und liest; Bild mit Vorschau', async () => {
+      await assertSucceeds(setDoc(doc(db(member), pfad(eintrag, 'A1')), anhang('A1', member)));
+      await assertSucceeds(
+        setDoc(
+          doc(db(member), pfad(eintrag, 'A2')),
+          anhang('A2', member, {
+            typ: 'image/jpeg',
+            vorschauPfad: `${sammlung}/L1/${eintrag}/A2_vorschau.jpg`,
+          }),
+        ),
+      );
+      await assertSucceeds(getDocs(collection(db(member), `${sammlung}/${eintrag}/anhaenge`)));
+      await assertSucceeds(getDocs(collection(db(owner), `${sammlung}/${eintrag}/anhaenge`)));
     });
-    await assertFails(updateDoc(doc(db(member), 'todos/T1/attachments/C1'), { name: 'anders.pdf' }));
+    test('Mitglied ohne allowEdit hängt an (Liste RO)', async () => {
+      await assertSucceeds(
+        setDoc(doc(db(viewer), pfad(eintragRO, 'A2')), anhang('A2', viewer, { liste: 'RO', id2: eintragRO })),
+      );
+    });
+    test('Fremder weder lesen noch anhängen; falscher Pfad, Urheber, Größe, Felder', async () => {
+      await assertFails(getDocs(collection(db(stranger), `${sammlung}/${eintrag}/anhaenge`)));
+      await assertFails(setDoc(doc(db(stranger), pfad(eintrag, 'A3')), anhang('A3', stranger)));
+      await assertFails(setDoc(doc(db(member), pfad(eintrag, 'A4')), anhang('A4', owner)));
+      await assertFails(setDoc(doc(db(member), pfad(eintrag, 'A5')), anhang('A5', member, { liste: 'RO' })));
+      await assertFails(setDoc(doc(db(member), pfad(eintrag, 'A6')), anhang('A6', member, { id2: 'ANDERS' })));
+      await assertFails(setDoc(doc(db(member), pfad(eintrag, 'A7')), anhang('A7', member, { groesse: 25 * 1024 * 1024 })));
+      await assertFails(setDoc(doc(db(member), pfad(eintrag, 'A8')), anhang('A8', member, { url: 'https://x' })));
+      await assertFails(setDoc(doc(db(member), pfad(eintrag, 'A9')), { ...anhang('A9', member), id: 'X' }));
+      await assertFails(
+        setDoc(doc(db(member), pfad(eintrag, 'A10')), anhang('A10', member, { vorschauPfad: 'avatars/owner.jpg' })),
+      );
+      // Aufgabe/Termin gibt es nicht.
+      await assertFails(setDoc(doc(db(member), pfad('GIBTSNICHT', 'A11')), anhang('A11', member, { id2: 'GIBTSNICHT' })));
+    });
+    test('löschen: Urheber ja, Besitzer ja, anderes Mitglied ohne allowEdit nein', async () => {
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        const f = ctx.firestore();
+        await setDoc(doc(f, pfad(eintrag, 'B1')), anhang('B1', member));
+        await setDoc(doc(f, pfad(eintrag, 'B2')), anhang('B2', member));
+        await setDoc(doc(f, pfad(eintragRO, 'B3')), anhang('B3', owner, { liste: 'RO', id2: eintragRO }));
+        await setDoc(doc(f, pfad(eintragRO, 'B4')), anhang('B4', viewer, { liste: 'RO', id2: eintragRO }));
+      });
+      await assertSucceeds(deleteDoc(doc(db(member), pfad(eintrag, 'B1'))));
+      await assertSucceeds(deleteDoc(doc(db(owner), pfad(eintrag, 'B2'))));
+      await assertFails(deleteDoc(doc(db(viewer), pfad(eintragRO, 'B3'))));
+      await assertFails(deleteDoc(doc(db(stranger), pfad(eintragRO, 'B3'))));
+      await assertSucceeds(deleteDoc(doc(db(viewer), pfad(eintragRO, 'B4'))));
+    });
+    test('nicht veränderbar', async () => {
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await setDoc(doc(ctx.firestore(), pfad(eintrag, 'C1')), anhang('C1', member));
+      });
+      await assertFails(updateDoc(doc(db(member), pfad(eintrag, 'C1')), { name: 'anders.pdf' }));
+    });
   });
-});
+}
 
 describe('chatMessages mit Bild', () => {
   const msg = (id, extra = {}) => ({
@@ -480,17 +499,18 @@ describe('chatMessages mit Bild', () => {
     isRead: false,
     ...extra,
   });
-  test('Bild mit https-Adresse und Pfad erlaubt', async () => {
+  test('Bild mit Pfad und Vorschau unter dieser Aufgabe erlaubt', async () => {
     await assertSucceeds(
       setDoc(doc(db(member), 'todos/T1/chatMessages/P1'), msg('P1', {
-        imageUrl: 'https://firebasestorage.googleapis.com/bild.jpg',
-        imagePath: 'chats/L1/T1/bild.jpg',
+        imagePath: 'chats/L1/T1/bild',
+        imagePreviewPath: 'chats/L1/T1/bild_vorschau.jpg',
       })),
     );
   });
-  test('Bild ohne https oder mit überlangem Pfad verboten', async () => {
-    await assertFails(setDoc(doc(db(member), 'todos/T1/chatMessages/P2'), msg('P2', { imageUrl: 'javascript:alert(1)' })));
-    await assertFails(setDoc(doc(db(member), 'todos/T1/chatMessages/P3'), msg('P3', { imagePath: 'x'.repeat(600) })));
+  test('Pfad einer anderen Aufgabe, fremder Ordner oder überlang verboten', async () => {
+    await assertFails(setDoc(doc(db(member), 'todos/T1/chatMessages/P2'), msg('P2', { imagePath: 'chats/L1/ANDERE/bild' })));
+    await assertFails(setDoc(doc(db(member), 'todos/T1/chatMessages/P3'), msg('P3', { imagePath: 'avatars/owner.jpg' })));
+    await assertFails(setDoc(doc(db(member), 'todos/T1/chatMessages/P4'), msg('P4', { imagePath: `chats/L1/T1/${'x'.repeat(400)}` })));
   });
 });
 

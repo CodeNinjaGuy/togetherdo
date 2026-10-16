@@ -96,7 +96,6 @@ async function termin(listId, erstelltVon, felder, ab) {
     zeitzone: 'Europe/Vienna',
     wiederholung: null,
     erinnerungen: [15],
-    anhaenge: [],
     erstelltVon,
     erstelltAm: Timestamp.now(),
     aktualisiertAm: Timestamp.now(),
@@ -463,9 +462,12 @@ describe('Termin-Auslöser', () => {
     const t1 = await termin(listId, anna, { start: s, ende: s }, null);
     const t2 = await termin(listId, anna, { start: s, ende: s }, null);
     const t3 = await termin(andere, anna, { start: s, ende: s }, null);
+    await db.doc(`termine/${t1}/anhaenge/A1`).set({ id: 'A1', pfad: `termine/${listId}/${t1}/A1` });
     const n = await loescheTermineDerListe(listId);
     assert.equal(n, 2);
     assert.equal((await db.doc(`termine/${t1}`).get()).exists, false);
+    // Anhang-Beschreibungen (Untersammlung) gehen mit.
+    assert.equal((await db.doc(`termine/${t1}/anhaenge/A1`).get()).exists, false);
     assert.equal((await db.doc(`termine/${t2}`).get()).exists, false);
     assert.equal((await db.doc(`termine/${t3}`).get()).exists, true);
   });

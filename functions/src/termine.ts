@@ -5,30 +5,26 @@
 
 // Firestore-Auslöser für `termine/{id}`:
 // - neuer Termin → Push „Neuer Termin: …“ an betroffene Mitglieder (ohne Ersteller)
-// - gelöschter Termin → Anhänge in Storage (`termine/{listId}/{terminId}/`) entfernen
-// - gelöschte Liste → alle Termine der Liste (still) und ihr Storage-Präfix entfernen
-//   (eigener Export `onListDeletedTermine`, `lists.ts` bleibt unverändert)
+// - gelöschter Termin → Anhang-Beschreibungen (`termine/{id}/anhaenge`) und
+//   Dateien (`termine/{listId}/{terminId}/`) entfernen
+// Gelöschte Listen räumt `onListDeleted` (lists.ts → deleteListContent)
+// vollständig auf, auch Termine und ihre Dateien.
 
 import { onDocumentCreated, onDocumentDeleted } from 'firebase-functions/v2/firestore';
-import { REGION, db, appBucket, deleteQueryInBatches, SILENT_DELETE_FIELD } from './common';
+import {
+  REGION,
+  SILENT_DELETE_FIELD,
+  deleteListContent,
+  deleteStoragePrefix,
+  deleteTermineOfList,
+  deleteTerminSubcollections,
+  terminStoragePrefix,
+} from './common';
 import { terminAusDaten, betroffenePersonen } from './termine_logik';
 import { ladeListe, ladeNutzer, standardDeps, KalenderDeps } from './empfaenger';
 import { PushInhalt } from './push';
 
 export const PUSH_TYP_NEU = 'termin_created';
-
-export function storagePraefix(listId: string, terminId?: string): string {
-  return terminId ? `termine/${listId}/${terminId}/` : `termine/${listId}/`;
-}
-
-/** Löscht alle Dateien unter einem Präfix; Fehler werden nur gewarnt. */
-export async function loescheStoragePraefix(praefix: string): Promise<void> {
-  try {
-    await appBucket().deleteFiles({ prefix: praefix, force: true });
-  } catch (e) {
-    console.warn('⚠️ Storage-Präfix nicht gelöscht:', praefix, (e as Error).message);
-  }
-}
 
 /** Kern des „Neuer Termin“-Push, testbar mit Fake-Sender. */
 export async function neuerTerminPush(
@@ -68,20 +64,19 @@ export const onTerminCreated = onDocumentCreated({ region: REGION, document: 'te
 
 export const onTerminDeleted = onDocumentDeleted({ region: REGION, document: 'termine/{terminId}' }, async (event) => {
   const d = event.data?.data();
-  const listId = typeof d?.listId === 'string' ? d.listId : null;
-  if (!listId) return;
-  await loescheStoragePraefix(storagePraefix(listId, event.params.terminId));
+  // Beim Löschen einer Liste räumt deleteListContent alles gesammelt auf.
+  if (!d || d[SILENT_DELETE_FIELD] === true) return;
+  if (event.data) await deleteTerminSubcollections(event.data.ref);
+  if (typeof d.listId === 'string') {
+    await deleteStoragePrefix(terminStoragePrefix(d.listId, event.params.terminId));
+  }
 });
 
-/** Alle Termine einer Liste still löschen und ihr Storage-Präfix entfernen. */
+/** Alle Termine einer Liste still löschen (Teil von deleteListContent;
+ *  für Tests einzeln aufrufbar). */
 export async function loescheTermineDerListe(listId: string): Promise<number> {
-  const anzahl = await deleteQueryInBatches(db.collection('termine').where('listId', '==', listId), async (doc) => {
-    await doc.ref.update({ [SILENT_DELETE_FIELD]: true });
-  });
-  await loescheStoragePraefix(storagePraefix(listId));
-  return anzahl;
+  return deleteTermineOfList(listId);
 }
 
-export const onListDeletedTermine = onDocumentDeleted({ region: REGION, document: 'lists/{listId}' }, async (event) => {
-  await loescheTermineDerListe(event.params.listId);
-});
+// Für Tests: vollständiges Aufräumen einer Liste.
+export { deleteListContent };

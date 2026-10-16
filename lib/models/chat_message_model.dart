@@ -14,11 +14,13 @@ class ChatMessageModel extends Equatable {
   final DateTime timestamp;
   final bool isRead;
 
-  /// Bild im Chat (Storage `chats/{listId}/{todoId}/{datei}`).
-  final String? imageUrl;
+  /// Bild im Chat: Pfad in Storage (`chats/{listId}/{todoId}/{id}`) und
+  /// Vorschaubild (`…/{id}_vorschau.jpg`). Geladen wird über den
+  /// `AttachmentService` (Storage-Regeln), nicht über eine offene Adresse.
   final String? imagePath;
+  final String? imagePreviewPath;
 
-  bool get hasImage => imageUrl != null && imageUrl!.isNotEmpty;
+  bool get hasImage => imagePath != null && imagePath!.isNotEmpty;
 
   const ChatMessageModel({
     required this.id,
@@ -28,8 +30,8 @@ class ChatMessageModel extends Equatable {
     required this.message,
     required this.timestamp,
     this.isRead = false,
-    this.imageUrl,
     this.imagePath,
+    this.imagePreviewPath,
   });
 
   factory ChatMessageModel.fromJson(Map<String, dynamic> json) {
@@ -41,8 +43,8 @@ class ChatMessageModel extends Equatable {
       message: json['message'] as String,
       timestamp: DateTime.parse(json['timestamp'] as String),
       isRead: json['isRead'] as bool? ?? false,
-      imageUrl: json['imageUrl'] as String?,
       imagePath: json['imagePath'] as String?,
+      imagePreviewPath: json['imagePreviewPath'] as String?,
     );
   }
 
@@ -55,8 +57,8 @@ class ChatMessageModel extends Equatable {
       'message': message,
       'timestamp': timestamp.toIso8601String(),
       'isRead': isRead,
-      if (imageUrl != null) 'imageUrl': imageUrl,
       if (imagePath != null) 'imagePath': imagePath,
+      if (imagePreviewPath != null) 'imagePreviewPath': imagePreviewPath,
     };
   }
 
@@ -68,8 +70,8 @@ class ChatMessageModel extends Equatable {
     String? message,
     DateTime? timestamp,
     bool? isRead,
-    String? imageUrl,
     String? imagePath,
+    String? imagePreviewPath,
   }) {
     return ChatMessageModel(
       id: id ?? this.id,
@@ -79,8 +81,8 @@ class ChatMessageModel extends Equatable {
       message: message ?? this.message,
       timestamp: timestamp ?? this.timestamp,
       isRead: isRead ?? this.isRead,
-      imageUrl: imageUrl ?? this.imageUrl,
       imagePath: imagePath ?? this.imagePath,
+      imagePreviewPath: imagePreviewPath ?? this.imagePreviewPath,
     );
   }
 
@@ -93,7 +95,7 @@ class ChatMessageModel extends Equatable {
     message,
     timestamp,
     isRead,
-    imageUrl,
     imagePath,
+    imagePreviewPath,
   ];
 }

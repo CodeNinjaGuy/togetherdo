@@ -11,20 +11,20 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:image/image.dart' as img;
 import 'package:togetherdo/design/td_design.dart';
 import 'package:togetherdo/fairness/fairness.dart';
 import 'package:togetherdo/l10n/app_localizations.dart';
-import 'package:togetherdo/models/attachment_model.dart';
+import 'package:togetherdo/models/anhang_model.dart';
 import 'package:togetherdo/models/chat_message_model.dart';
 import 'package:togetherdo/models/list_model.dart';
 import 'package:togetherdo/models/todo_model.dart';
 import 'package:togetherdo/navigation/app_shell.dart';
-import 'package:togetherdo/repositories/attachment_repository.dart';
+import 'package:togetherdo/repositories/anhang_repository.dart';
 import 'package:togetherdo/repositories/todo_repository.dart';
-import 'package:togetherdo/services/aufgaben_anhang_service.dart';
+import 'package:togetherdo/services/attachment_service.dart';
 import 'package:togetherdo/utils/app_theme.dart';
 import 'package:togetherdo/utils/stream_utils.dart';
+import 'package:togetherdo/widgets/attachments/anhang_abschnitt.dart';
 import 'package:togetherdo/widgets/common/user_avatar.dart';
 import 'package:togetherdo/widgets/lists/list_visuals.dart';
 import 'package:togetherdo/widgets/todo/task_editor_sheet.dart';
@@ -125,113 +125,103 @@ void main() {
     });
   });
 
-  group('Anhänge', () {
-    test('Dateinamen, Typen und Grenzen', () {
-      expect(sanitizeFileName('Rechnung Küche (final).pdf'), 'Rechnung-K-che-final-.pdf');
-      expect(sanitizeFileName('   '), 'datei');
-      expect(contentTypeFor('a.PDF'), 'application/pdf');
-      expect(contentTypeFor('a.jpeg'), 'image/jpeg');
-      expect(contentTypeFor('a.bin'), 'application/octet-stream');
-      expect(checkAttachment('image/jpeg', 5 * 1024 * 1024), AttachmentPickStatus.picked);
-      expect(checkAttachment('image/jpeg', 11 * 1024 * 1024), AttachmentPickStatus.tooLarge);
-      expect(checkAttachment('application/pdf', 19 * 1024 * 1024), AttachmentPickStatus.picked);
-      expect(checkAttachment('application/pdf', 21 * 1024 * 1024), AttachmentPickStatus.tooLarge);
-      expect(checkAttachment('application/zip', 10), AttachmentPickStatus.unsupported);
-      expect(
-        attachmentStoragePath(listId: 'L', todoId: 'T', fileName: 'a.jpg'),
-        'todos/L/T/a.jpg',
-      );
-      expect(
-        attachmentStoragePath(listId: 'L', todoId: 'T', fileName: 'a.jpg', chat: true),
-        'chats/L/T/a.jpg',
-      );
-    });
-    test('Bild wird auf 1600 px verkleinert und als JPEG geliefert', () {
-      final wide = img.Image(width: 3200, height: 800);
-      img.fill(wide, color: img.ColorRgb8(10, 20, 30));
-      final out = compressAttachmentImage(Uint8List.fromList(img.encodePng(wide)));
-      final decoded = img.decodeJpg(out!)!;
-      expect(decoded.width, 1600);
-      expect(decoded.height, 400);
-      final small = img.Image(width: 300, height: 200);
-      final out2 = compressAttachmentImage(Uint8List.fromList(img.encodePng(small)));
-      expect(img.decodeJpg(out2!)!.width, 300);
-      expect(compressAttachmentImage(Uint8List.fromList([1, 2, 3])), isNull);
+  group('Anhänge (gemeinsam für Aufgaben und Termine)', () {
+    Anhang anhang(String id, {String von = 'anna', String typ = 'application/pdf'}) => Anhang(
+      id: id,
+      name: '$id.pdf',
+      typ: typ,
+      groesse: 1200,
+      pfad: 'todos/L1/T1/$id',
+      hochgeladenVon: von,
+      hochgeladenAm: DateTime.utc(2026, 10, 16, 9),
+    );
+
+    test('Ziel liefert Storage-Pfad und Sammlung', () {
+      const a = AnhangZiel.aufgabe(listId: 'L', todoId: 'T');
+      const t = AnhangZiel.termin(listId: 'L', terminId: 'X');
+      expect(a.storagePfad, 'todos/L/T');
+      expect(t.storagePfad, 'termine/L/X');
+      expect(a.sammlung.name, 'todos');
+      expect(t.sammlung.name, 'termine');
+      expect(a, const AnhangZiel.aufgabe(listId: 'L', todoId: 'T'));
+      expect(a == t, isFalse);
     });
     test('Modell hin und zurück', () {
-      final a = AttachmentModel(
-        id: 'a1',
-        todoId: 't',
-        listId: 'l',
-        name: 'foto.jpg',
-        path: 'todos/l/t/a1-foto.jpg',
-        url: 'https://x/y',
-        contentType: 'image/jpeg',
-        size: 10,
-        uploadedBy: 'anna',
-        uploadedByName: 'Anna',
-        createdAt: DateTime(2026, 10, 16, 9),
-      );
-      expect(AttachmentModel.fromJson(a.toJson()), a);
-      expect(a.isImage, isTrue);
-      expect(a.isPdf, isFalse);
+      final a = anhang('a1', typ: 'image/jpeg');
+      final back = Anhang.fromJson(a.toJson());
+      expect(back, a);
+      expect(back.hochgeladenVon, 'anna');
+      expect(back.istBild, isTrue);
+      expect(back.istPdf, isFalse);
     });
-    test('Mock-Repository streamt Änderungen', () async {
-      final repo = MockAttachmentRepository();
+    test('Mock-Repository streamt Änderungen je Ziel', () async {
+      final repo = MockAnhangRepository();
+      const z = AnhangZiel.aufgabe(listId: 'L1', todoId: 'T1');
+      const anderes = AnhangZiel.termin(listId: 'L1', terminId: 'T1');
       final seen = <int>[];
-      final sub = repo.watch('t').listen((l) => seen.add(l.length));
+      final sub = repo.beobachten(z).listen((l) => seen.add(l.length));
       await Future<void>.delayed(Duration.zero);
-      await repo.add(
-        AttachmentModel(
-          id: 'a',
-          todoId: 't',
-          listId: 'l',
-          name: 'n',
-          path: 'p',
-          url: 'u',
-          contentType: 'application/pdf',
-          size: 1,
-          uploadedBy: 'x',
-          uploadedByName: 'X',
-          createdAt: DateTime(2026),
-        ),
-      );
-      await repo.remove('t', 'a');
+      await repo.hinzufuegen(z, anhang('a'));
+      await repo.hinzufuegen(anderes, anhang('b'));
+      await repo.entfernen(z, 'a');
       await Future<void>.delayed(Duration.zero);
       expect(seen, [0, 1, 0]);
+      expect(repo.von(anderes), hasLength(1));
       await sub.cancel();
     });
-    testWidgets('Galerie: Hinzufügen-Kachel, Upload, Löschen-Knopf', (tester) async {
-      var added = 0;
-      TdAttachmentItem? deleted;
+    test('Vormerkung: neue Aufgabe sammelt und lädt nach dem Anlegen hoch', () async {
+      final service = FakeAttachmentService();
+      final repo = MockAnhangRepository();
+      final v = AnhangVormerkung();
+      v.hinzufuegen(
+        AnhangAuswahl(bytes: Uint8List(10), name: 'Rechnung.pdf', mime: 'application/pdf'),
+        userId: 'ben',
+      );
+      expect(v.anhaenge.single.pfad, startsWith('vorgemerkt/'));
+      // Galerie-Dienst liefert die vorgemerkte Datei aus dem Speicher.
+      expect(await v.dienst(service).laden(v.anhaenge.single.pfad), hasLength(10));
+      const z = AnhangZiel.aufgabe(listId: 'L1', todoId: 'NEU');
+      await v.hochladen(ziel: z, service: service, repository: repo, userId: 'ben');
+      expect(v.leer, isTrue);
+      final a = repo.von(z).single;
+      expect(a.pfad, startsWith('todos/L1/NEU/'));
+      expect(a.hochgeladenVon, 'ben');
+      expect(service.dateien.containsKey(a.pfad), isTrue);
+    });
+    testWidgets('Abschnitt: Galerie, Plus-Kachel, Hochladen trägt ein', (tester) async {
+      final service = FakeAttachmentService(bilderVerarbeiten: false);
+      const z = AnhangZiel.aufgabe(listId: 'L1', todoId: 'T1');
+      final repo = MockAnhangRepository({z: [anhang('vorhanden')]});
+      service.naechsteAuswahl = [
+        AnhangAuswahl(bytes: Uint8List(5), name: 'Plan.pdf', mime: 'application/pdf'),
+      ];
       await tester.pumpWidget(
-        _app(
-          TdAttachmentGallery(
-            onAdd: () => added++,
-            addLabel: 'Hinzufügen',
-            deleteLabel: 'Löschen',
-            uploads: const [TdUploadProgress(name: 'u.jpg', progress: 0.4)],
-            items: const [
-              TdAttachmentItem(id: '1', name: 'rechnung.pdf', isImage: false, canDelete: true),
-              TdAttachmentItem(id: '2', name: 'bild.jpg', url: '', canDelete: false),
-            ],
-            onDelete: (i) => deleted = i,
-            onOpen: (_) {},
-          ),
-        ),
+        _app(AnhangAbschnitt(service: service, repository: repo, userId: 'ben', ziel: z)),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Hinzufügen'), findsOneWidget);
-      expect(find.text('rechnung.pdf'), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.byIcon(Icons.close_rounded), findsOneWidget); // nur bei canDelete
-      await tester.tap(find.text('Hinzufügen'));
-      await tester.tap(find.byIcon(Icons.close_rounded));
-      await tester.pump();
-      expect(added, 1);
-      expect(deleted?.id, '1');
+      expect(find.text('Anhänge'), findsOneWidget);
+      expect(find.text('vorhanden.pdf'), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.add_rounded).last);
+      await tester.pumpAndSettle();
+      // Quelle wählen: Dokument.
+      await tester.tap(find.text('Dokument'));
+      await tester.pumpAndSettle();
+      expect(service.gewaehlt, [AnhangQuelle.dokument]);
+      expect(repo.von(z).map((a) => a.name), ['vorhanden.pdf', 'Plan.pdf']);
+      expect(find.text('Plan.pdf'), findsOneWidget);
     });
-    test('Chat-Nachricht trägt Bild', () {
+    testWidgets('Kennzeichen zeigt die Anzahl, nichts bei 0', (tester) async {
+      const z = AnhangZiel.aufgabe(listId: 'L1', todoId: 'T1');
+      final repo = MockAnhangRepository();
+      await tester.pumpWidget(_app(AnhangAnzahl(repository: repo, ziel: z)));
+      await tester.pump();
+      expect(find.byIcon(Icons.attach_file_rounded), findsNothing);
+      await repo.hinzufuegen(z, anhang('a'));
+      await repo.hinzufuegen(z, anhang('b'));
+      await tester.pump();
+      expect(find.text('2'), findsOneWidget);
+    });
+    test('Chat-Nachricht trägt Bildpfad und Vorschau', () {
       final m = ChatMessageModel(
         id: '1',
         todoId: 't',
@@ -239,12 +229,13 @@ void main() {
         userName: 'U',
         message: '',
         timestamp: DateTime(2026, 10, 16),
-        imageUrl: 'https://x/bild.jpg',
-        imagePath: 'chats/l/t/bild.jpg',
+        imagePath: 'chats/l/t/bild',
+        imagePreviewPath: 'chats/l/t/bild_vorschau.jpg',
       );
       final back = ChatMessageModel.fromJson(m.toJson());
       expect(back.hasImage, isTrue);
-      expect(back.imagePath, 'chats/l/t/bild.jpg');
+      expect(back.imagePath, 'chats/l/t/bild');
+      expect(back.imagePreviewPath, 'chats/l/t/bild_vorschau.jpg');
       expect(
         ChatMessageModel.fromJson({
           'id': '2',

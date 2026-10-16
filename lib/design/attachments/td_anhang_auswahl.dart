@@ -13,10 +13,12 @@ import '../tokens/td_tokens.dart';
 import 'anhang_texte.dart';
 
 /// Öffnet das Blatt „Foto aufnehmen / Aus Galerie / Dokument“ und liefert
-/// die gewählte Quelle; `null`, wenn abgebrochen.
+/// die gewählte Quelle; `null`, wenn abgebrochen. Ohne [dokumentErlaubt]
+/// (Bilder im Chat) fehlt die Dokument-Kachel.
 Future<AnhangQuelle?> showTdAnhangQuelleSheet(
   BuildContext context, {
   bool kameraVerfuegbar = true,
+  bool dokumentErlaubt = true,
 }) {
   final l = anhangL10n(context);
   return showTdSheet<AnhangQuelle>(
@@ -24,6 +26,7 @@ Future<AnhangQuelle?> showTdAnhangQuelleSheet(
     title: l.anhangQuelleTitel,
     builder: (ctx) => TdAnhangAuswahl(
       kameraVerfuegbar: kameraVerfuegbar,
+      dokumentErlaubt: dokumentErlaubt,
       onAusgewaehlt: (q) => Navigator.of(ctx).pop(q),
     ),
   );
@@ -35,10 +38,12 @@ class TdAnhangAuswahl extends StatelessWidget {
     super.key,
     required this.onAusgewaehlt,
     this.kameraVerfuegbar = true,
+    this.dokumentErlaubt = true,
   });
 
   final ValueChanged<AnhangQuelle> onAusgewaehlt;
   final bool kameraVerfuegbar;
+  final bool dokumentErlaubt;
 
   @override
   Widget build(BuildContext context) {
@@ -61,13 +66,14 @@ class TdAnhangAuswahl extends StatelessWidget {
         hinweis: l.anhangAusGalerieHinweis,
         farbe: scheme.secondary,
       ),
-      _QuelleKachel(
-        quelle: AnhangQuelle.dokument,
-        icon: Icons.description_rounded,
-        titel: l.anhangDokument,
-        hinweis: l.anhangDokumentHinweis,
-        farbe: scheme.tertiary,
-      ),
+      if (dokumentErlaubt)
+        _QuelleKachel(
+          quelle: AnhangQuelle.dokument,
+          icon: Icons.description_rounded,
+          titel: l.anhangDokument,
+          hinweis: l.anhangDokumentHinweis,
+          farbe: scheme.tertiary,
+        ),
     ];
 
     return LayoutBuilder(

@@ -323,7 +323,6 @@ class _TerminFormularState extends State<TerminFormular> {
       zeitzone: _zone,
       wiederholung: _wiederholung,
       erinnerungen: _erinnerungen,
-      anhaenge: v?.anhaenge ?? const [],
       erstelltVon: v?.erstelltVon ?? _z.userId,
       erstelltAm: v?.erstelltAm,
     );

@@ -44,7 +44,7 @@ const unendlich = new Date('2200-01-01T00:00:00Z');
 function termin(id, titel, art, start, ende, extra = {}) {
   return {
     id, listId: 'L-familie', titel, art, personen: [], start: Ts.fromDate(start), ende: Ts.fromDate(ende), ganztaegig: false,
-    ort: null, notiz: null, zeitzone: 'Europe/Vienna', wiederholung: null, erinnerungen: [30], anhaenge: [], erstelltVon: ich,
+    ort: null, notiz: null, zeitzone: 'Europe/Vienna', wiederholung: null, erinnerungen: [30], erstelltVon: ich,
     erstelltAm: Ts.fromDate(new Date()), aktualisiertAm: Ts.fromDate(new Date()),
     sichtbarBis: Ts.fromDate(extra.wiederholung ? unendlich : ende), naechsteErinnerungAm: null, letzteErinnerungSchluessel: null,
     ...extra,

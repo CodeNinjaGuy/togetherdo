@@ -17,8 +17,9 @@
 // - `produkte/{ean}` ist der gemeinsame Zwischenspeicher des Strichcode-
 //   Scanners: Angemeldete lesen und legen an; Open-Facts-Daten (Quelle
 //   off/obf/opf) werden nie überschrieben, Löschen ist verboten.
-// - Anhänge (`todos/{id}/attachments`): anhängen darf jedes Mitglied,
-//   löschen die hochladende Person oder wer die Liste bearbeiten darf.
+// - Anhänge (`todos/{id}/anhaenge`, `termine/{id}/anhaenge`, gleiche Form):
+//   anhängen darf jedes Mitglied, löschen die hochladende Person oder wer
+//   die Liste bearbeiten darf.
 // - `termine` (Familienkalender): lesen/anlegen = Mitglied, ändern/löschen =
 //   Ersteller oder Besitzer/Mitglied mit allowEdit, Felder werden geprüft.
 // - Alles, was hier nicht erlaubt ist (z. B. `shares`, `rateLimits`), ist verboten.
@@ -116,6 +117,25 @@ service cloud.firestore {
       allow delete: if signedIn() && resource.data.ownerId == request.auth.uid;
     }
 
+    // -------------------------------------------------------------- Anhänge
+    // Beschreibung eines Anhangs (Aufgabe oder Termin). Die Datei liegt in
+    // Storage unter `{sammlung}/{listId}/{eintragId}/{anhangId}`, die
+    // Vorschau unter `…/{anhangId}_vorschau.jpg`; Typ und Größe prüfen
+    // die Storage-Regeln an der Datei selbst.
+    function validAnhangDoc(d, anhangId, sammlung, listId, eintragId) {
+      let basis = sammlung + '/' + listId + '/' + eintragId + '/' + anhangId;
+      return d.keys().hasOnly(['id', 'name', 'typ', 'groesse', 'pfad', 'vorschauPfad',
+                               'hochgeladenVon', 'hochgeladenAm'])
+        && d.id == anhangId
+        && d.hochgeladenVon == request.auth.uid
+        && d.name is string && d.name.size() >= 1 && d.name.size() <= 200
+        && d.typ is string && d.typ.size() <= 100
+        && d.groesse is int && d.groesse >= 0 && d.groesse <= 20 * 1024 * 1024
+        && d.pfad == basis
+        && (d.get('vorschauPfad', null) == null || d.vorschauPfad == basis + '_vorschau.jpg')
+        && d.hochgeladenAm is timestamp;
+    }
+
     // ---------------------------------------------------------------- todos
     // Gültige Werte für „fair verteilt“. Fehlende Felder sind erlaubt
     // (alte Einträge; ohne Aufwand gilt „mittel“).
@@ -181,44 +201,28 @@ service cloud.firestore {
         return get(/databases/$(database)/documents/todos/$(todoId)).data.listId;
       }
 
-      // Bild im Chat (Storage `chats/{listId}/{todoId}/…`): optional,
-      // nur https-Adresse und Pfad in begrenzter Länge.
-      function validChatImage(d) {
-        return (d.get('imageUrl', null) == null
-                || (d.imageUrl is string && d.imageUrl.size() <= 1000
-                    && d.imageUrl.matches('^https?://.*')))
-          && (d.get('imagePath', null) == null
-              || (d.imagePath is string && d.imagePath.size() <= 500));
+      // Bild im Chat (Storage `chats/{listId}/{todoId}/{id}`, Vorschau
+      // `…/{id}_vorschau.jpg`): optional, nur Pfade unter dieser Aufgabe.
+      function validChatPath(p) {
+        return p == null
+          || (p is string && p.size() <= 300
+              && p.matches('^chats/[^/]+/' + todoId + '/[^/]+$'));
       }
 
-      // Anhänge (Fotos/PDF) einer Aufgabe. Die Datei liegt in Storage,
-      // hier nur die Beschreibung. Anhängen darf jedes Mitglied, löschen
-      // nur, wer hochgeladen hat, oder wer die Liste bearbeiten darf.
-      match /attachments/{attachmentId} {
-        function validAttachment(d) {
-          return d.keys().hasOnly(['id', 'todoId', 'listId', 'name', 'path', 'url',
-                                   'contentType', 'size', 'uploadedBy',
-                                   'uploadedByName', 'createdAt'])
-            && d.id == attachmentId
-            && d.todoId == todoId
-            && d.listId == todoListId()
-            && d.uploadedBy == request.auth.uid
-            && d.name is string && d.name.size() >= 1 && d.name.size() <= 200
-            && d.path is string && d.path.size() <= 500
-            && d.path.matches('^todos/' + d.listId + '/' + todoId + '/.*')
-            && d.url is string && d.url.size() <= 1000
-            && d.contentType.matches('^(image/(jpeg|png|webp|heic)|application/pdf)$')
-            && d.size is int && d.size > 0 && d.size <= 20 * 1024 * 1024;
-        }
+      function validChatImage(d) {
+        return validChatPath(d.get('imagePath', null))
+          && validChatPath(d.get('imagePreviewPath', null));
+      }
 
-        allow read: if signedIn() && isListMember(todoListId());
-        allow create: if signedIn()
-          && isListMember(todoListId())
-          && validAttachment(request.resource.data);
+      // Anhänge (Fotos, PDFs, Dokumente) – gleiche Regeln wie bei Terminen.
+      match /anhaenge/{anhangId} {
+        allow read: if isListMember(todoListId());
+        allow create: if isListMember(todoListId())
+          && validAnhangDoc(request.resource.data, anhangId,
+                            'todos', todoListId(), todoId);
         allow update: if false;
-        allow delete: if signedIn()
-          && isListMember(todoListId())
-          && (resource.data.uploadedBy == request.auth.uid
+        allow delete: if isListMember(todoListId())
+          && (resource.data.hochgeladenVon == request.auth.uid
               || canEditList(todoListId()));
       }
 
@@ -309,8 +313,8 @@ service cloud.firestore {
     // ------------------------------------------------------------- termine
     // Familienkalender: flache Sammlung mit `listId` (wie todos). Lesen und
     // anlegen dürfen alle Mitglieder der Liste; ändern/löschen der Ersteller
-    // oder Besitzer/Mitglied mit allowEdit. Anhänge darf jedes Mitglied
-    // hinzufügen und eigene wieder entfernen. `letzteErinnerungSchluessel`
+    // oder Besitzer/Mitglied mit allowEdit. Anhänge liegen in der
+    // Untersammlung `anhaenge` (siehe unten). `letzteErinnerungSchluessel`
     // schreibt nur die Erinnerungs-Function.
     function validTerminArt(a) {
       return a in ['termin', 'arzt', 'arbeit', 'urlaub', 'schule', 'geburtstag', 'sonstiges'];
@@ -329,30 +333,10 @@ service cloud.firestore {
             && w.get('ausnahmen', []) is list && w.ausnahmen.size() <= 500);
     }
 
-    function validAnhang(a) {
-      return a is map
-        && a.keys().hasOnly(['id', 'name', 'typ', 'groesse', 'pfad', 'vorschauPfad',
-                             'hochgeladenVon', 'hochgeladenAm'])
-        && a.id is string && a.id.size() >= 1 && a.id.size() <= 80
-        && a.name is string && a.name.size() >= 1 && a.name.size() <= 200
-        && a.typ is string && a.typ.size() <= 100
-        && a.groesse is int && a.groesse >= 0 && a.groesse <= 20 * 1024 * 1024
-        && a.pfad is string && a.pfad.size() <= 400
-        && a.hochgeladenVon is string;
-    }
-
-    function validAnhaenge(l) {
-      // Einzelne Einträge prüft die App vollständig; hier Umfang und Form
-      // der ersten Einträge (Regeln kennen keine Schleifen).
-      return l is list && l.size() <= 20
-        && (l.size() < 1 || validAnhang(l[0]))
-        && (l.size() < 2 || validAnhang(l[l.size() - 1]));
-    }
-
     function validTermin(d, terminId) {
       return d.keys().hasOnly(['id', 'listId', 'titel', 'art', 'personen', 'start', 'ende',
                                'ganztaegig', 'ort', 'notiz', 'zeitzone', 'wiederholung',
-                               'erinnerungen', 'anhaenge', 'erstelltVon', 'erstelltAm',
+                               'erinnerungen', 'erstelltVon', 'erstelltAm',
                                'aktualisiertAm', 'sichtbarBis', 'naechsteErinnerungAm',
                                'letzteErinnerungSchluessel'])
         && d.id == terminId
@@ -368,7 +352,6 @@ service cloud.firestore {
         && d.zeitzone is string && d.zeitzone.size() <= 64
         && validWiederholung(d.get('wiederholung', null))
         && d.erinnerungen is list && d.erinnerungen.size() <= 5
-        && validAnhaenge(d.get('anhaenge', []))
         && d.erstelltVon is string
         && d.sichtbarBis is timestamp && d.sichtbarBis >= d.ende
         && (d.get('naechsteErinnerungAm', null) == null || d.naechsteErinnerungAm is timestamp);
@@ -397,29 +380,25 @@ service cloud.firestore {
         && canEditTermin()
         && validTermin(request.resource.data, terminId);
 
-      // Anhänge: jedes Mitglied darf eigene hinzufügen …
-      allow update: if signedIn()
-        && changedKeys().hasOnly(['anhaenge', 'aktualisiertAm'])
-        && isListMember(resource.data.listId)
-        && validAnhaenge(request.resource.data.anhaenge)
-        && request.resource.data.anhaenge.hasAll(resource.data.anhaenge)
-        && request.resource.data.anhaenge.size() == resource.data.anhaenge.size() + 1
-        && request.resource.data.anhaenge[request.resource.data.anhaenge.size() - 1]
-             .hochgeladenVon == request.auth.uid;
-
-      // … und genau ein eigenes wieder entfernen.
-      allow update: if signedIn()
-        && changedKeys().hasOnly(['anhaenge', 'aktualisiertAm'])
-        && isListMember(resource.data.listId)
-        && resource.data.anhaenge.hasAll(request.resource.data.anhaenge)
-        && resource.data.anhaenge.size() == request.resource.data.anhaenge.size() + 1
-        && resource.data.anhaenge.removeAll(request.resource.data.anhaenge).size() == 1
-        && resource.data.anhaenge.removeAll(request.resource.data.anhaenge)[0]
-             .hochgeladenVon == request.auth.uid;
-
       allow delete: if signedIn()
         && isListMember(resource.data.listId)
         && canEditTermin();
+
+      function terminListId() {
+        return get(/databases/$(database)/documents/termine/$(terminId)).data.listId;
+      }
+
+      // Anhänge – gleiche Form und Regeln wie bei Aufgaben.
+      match /anhaenge/{anhangId} {
+        allow read: if isListMember(terminListId());
+        allow create: if isListMember(terminListId())
+          && validAnhangDoc(request.resource.data, anhangId,
+                            'termine', terminListId(), terminId);
+        allow update: if false;
+        allow delete: if isListMember(terminListId())
+          && (resource.data.hochgeladenVon == request.auth.uid
+              || canEditList(terminListId()));
+      }
     }
 
     // Alles andere (u. a. alte `shares`, `rateLimits`) ist für Clients gesperrt.

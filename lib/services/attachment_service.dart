@@ -6,9 +6,11 @@
 /// Anhänge (Fotos, PDFs, Dokumente) an Terminen und Aufgaben: auswählen,
 /// verkleinern, nach Firebase Storage laden, laden, teilen, öffnen, löschen.
 ///
-/// Der Baustein ist bewusst unabhängig vom Kalender gehalten: der Aufrufer
-/// gibt den Storage-Basispfad vor (`termine/{listId}/{terminId}` oder
-/// `todos/{listId}/{todoId}`), alles andere ist für beide gleich.
+/// Ein Dienst für Aufgaben, Termine und Bilder im Chat: der Aufrufer gibt
+/// den Storage-Basispfad vor (`todos/{listId}/{todoId}`,
+/// `termine/{listId}/{terminId}` oder `chats/{listId}/{todoId}`), alles
+/// andere ist für alle gleich. Die Beschreibungen (Firestore) verwaltet
+/// `AnhangRepository` in `lib/repositories/anhang_repository.dart`.
 library;
 
 import 'dart:async';
@@ -18,6 +20,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -26,6 +29,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/anhang_model.dart';
+import 'avatar_service.dart' show DeviceCapabilities;
 
 // ---------------------------------------------------------------------------
 // Grenzen und Dateitypen
@@ -153,6 +157,14 @@ class AnhangTypUnzulaessig implements Exception {
 
   @override
   String toString() => 'AnhangTypUnzulaessig($name: $mime)';
+}
+
+/// Das System hat den Zugriff auf Kamera bzw. Fotos verweigert.
+class AnhangZugriffVerweigert implements Exception {
+  const AnhangZugriffVerweigert();
+
+  @override
+  String toString() => 'AnhangZugriffVerweigert';
 }
 
 /// Zu viele Anhänge an einem Eintrag.
@@ -343,8 +355,12 @@ abstract class AttachmentService {
     FilePicker? filePicker,
   }) = FirebaseAttachmentService;
 
+  /// Ob das Gerät eine nutzbare Kamera hat (sonst keine Kamera-Kachel).
+  Future<bool> kameraVerfuegbar();
+
   /// Lässt den Nutzer Dateien wählen. Leere Liste = abgebrochen.
   /// Prüft Typ und Größe noch nicht; das macht [hochladen].
+  /// Fehler: [AnhangZugriffVerweigert], wenn das System den Zugriff sperrt.
   Future<List<AnhangAuswahl>> waehlen(AnhangQuelle quelle);
 
   /// Lädt eine Datei nach `basisPfad/<id>` hoch. Bilder werden vorher
@@ -429,11 +445,14 @@ class FirebaseAttachmentService implements AttachmentService {
     ImagePicker? imagePicker,
     FilePicker? filePicker,
     AnhangCache? cache,
+    DeviceCapabilities device = const DeviceCapabilities(),
   }) : _storage = storage,
        _imagePicker = imagePicker ?? ImagePicker(),
        _filePicker = filePicker,
+       _device = device,
        cache = cache ?? AnhangCache();
 
+  final DeviceCapabilities _device;
   final FirebaseStorage? _storage;
   final ImagePicker _imagePicker;
   final FilePicker? _filePicker;
@@ -444,7 +463,24 @@ class FirebaseAttachmentService implements AttachmentService {
   FilePicker get _fp => _filePicker ?? FilePicker.platform;
 
   @override
+  Future<bool> kameraVerfuegbar() => _device.hasCamera();
+
+  @override
   Future<List<AnhangAuswahl>> waehlen(AnhangQuelle quelle) async {
+    try {
+      return await _waehlen(quelle);
+    } on PlatformException catch (e) {
+      final c = e.code.toLowerCase();
+      if (c.contains('denied') ||
+          c.contains('permission') ||
+          c.contains('restricted')) {
+        throw const AnhangZugriffVerweigert();
+      }
+      rethrow;
+    }
+  }
+
+  Future<List<AnhangAuswahl>> _waehlen(AnhangQuelle quelle) async {
     switch (quelle) {
       case AnhangQuelle.kamera:
         final x = await _imagePicker.pickImage(
@@ -699,7 +735,11 @@ class FakeAttachmentService implements AttachmentService {
     this.schrittDauer = Duration.zero,
     this.schritte = 4,
     this.bilderVerarbeiten = true,
+    this.kamera = true,
   });
+
+  /// Ergebnis von [kameraVerfuegbar].
+  final bool kamera;
 
   /// Pause zwischen Fortschrittsereignissen (0 = sofort).
   final Duration schrittDauer;
@@ -726,6 +766,9 @@ class FakeAttachmentService implements AttachmentService {
   /// Pfade, die über [laden] angefragt wurden (auch fehlgeschlagene).
   final List<String> geladen = [];
   int _zaehler = 0;
+
+  @override
+  Future<bool> kameraVerfuegbar() async => kamera;
 
   @override
   Future<List<AnhangAuswahl>> waehlen(AnhangQuelle quelle) async {

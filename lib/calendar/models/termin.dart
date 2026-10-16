@@ -21,10 +21,6 @@ library;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../models/anhang_model.dart';
-
-export '../../models/anhang_model.dart';
-
 /// Letzter Zeitpunkt, bis zu dem eine endlose Wiederholung „sichtbar“ ist
 /// (Abfrage `sichtbarBis >= Fensteranfang`).
 final DateTime terminUnendlich = DateTime.utc(2200, 1, 1);
@@ -179,7 +175,6 @@ class Termin extends Equatable {
     this.zeitzone = 'Europe/Vienna',
     this.wiederholung,
     this.erinnerungen = const [],
-    this.anhaenge = const [],
     this.erstelltAm,
     this.aktualisiertAm,
     this.naechsteErinnerungAm,
@@ -205,7 +200,6 @@ class Termin extends Equatable {
 
   /// Minuten vor Start (0 = zum Start).
   final List<int> erinnerungen;
-  final List<Anhang> anhaenge;
   final String erstelltVon;
   final DateTime? erstelltAm;
   final DateTime? aktualisiertAm;
@@ -241,10 +235,6 @@ class Termin extends Equatable {
     erinnerungen: List<int>.from(
       (json['erinnerungen'] as List? ?? const []).map((e) => (e as num).toInt()),
     ),
-    anhaenge: (json['anhaenge'] as List? ?? const [])
-        .whereType<Map>()
-        .map((e) => Anhang.fromJson(Map<String, dynamic>.from(e)))
-        .toList(),
     erstelltVon: json['erstelltVon'] as String? ?? '',
     erstelltAm: parseTimestamp(json['erstelltAm']),
     aktualisiertAm: parseTimestamp(json['aktualisiertAm']),
@@ -269,7 +259,6 @@ class Termin extends Equatable {
     'zeitzone': zeitzone,
     'wiederholung': wiederholung?.toJson(),
     'erinnerungen': erinnerungen,
-    'anhaenge': anhaenge.map((a) => a.toJson()).toList(),
     'erstelltVon': erstelltVon,
   };
 
@@ -288,7 +277,6 @@ class Termin extends Equatable {
     Wiederholung? wiederholung,
     bool ohneWiederholung = false,
     List<int>? erinnerungen,
-    List<Anhang>? anhaenge,
     String? erstelltVon,
     DateTime? erstelltAm,
     DateTime? aktualisiertAm,
@@ -308,7 +296,6 @@ class Termin extends Equatable {
     zeitzone: zeitzone ?? this.zeitzone,
     wiederholung: ohneWiederholung ? null : wiederholung ?? this.wiederholung,
     erinnerungen: erinnerungen ?? this.erinnerungen,
-    anhaenge: anhaenge ?? this.anhaenge,
     erstelltVon: erstelltVon ?? this.erstelltVon,
     erstelltAm: erstelltAm ?? this.erstelltAm,
     aktualisiertAm: aktualisiertAm ?? this.aktualisiertAm,
@@ -332,7 +319,6 @@ class Termin extends Equatable {
     zeitzone,
     wiederholung,
     erinnerungen,
-    anhaenge,
     erstelltVon,
     aktualisiertAm,
     naechsteErinnerungAm,

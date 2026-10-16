@@ -61,7 +61,6 @@ function terminData(id, erstelltVon, extra = {}) {
     zeitzone: 'Europe/Vienna',
     wiederholung: null,
     erinnerungen: [30],
-    anhaenge: [],
     erstelltVon,
     erstelltAm: serverTimestamp(),
     aktualisiertAm: serverTimestamp(),
@@ -72,12 +71,7 @@ function terminData(id, erstelltVon, extra = {}) {
   };
 }
 
-function anhang(id, von) {
-  return {
-    id, name: `${id}.jpg`, typ: 'image/jpeg', groesse: 1234, pfad: `termine/L1/T1/${id}`,
-    vorschauPfad: `termine/L1/T1/${id}_vorschau.jpg`, hochgeladenVon: von, hochgeladenAm: ts(now),
-  };
-}
+
 
 const db = (uid) => env.authenticatedContext(uid).firestore();
 const anon = () => env.unauthenticatedContext().firestore();
@@ -102,11 +96,10 @@ beforeEach(async () => {
     await setDoc(doc(f, 'lists/RO'), listData('RO', {
       memberIds: [viewer], memberNames: ['Vera'], allUserIds: [owner, viewer], allowEdit: false, shareCode: '654321',
     }));
-    // Bestehender Termin von `member` mit einem Anhang des Besitzers.
+    // Bestehender Termin von `member`.
     await setDoc(doc(f, 'termine/T1'), {
       ...terminData('T1', member),
       erstelltAm: ts(now), aktualisiertAm: ts(now),
-      anhaenge: [anhang('A1', owner)],
     });
     await setDoc(doc(f, 'termine/TRO'), {
       ...terminData('TRO', owner, { listId: 'RO', personen: [] }),
@@ -181,32 +174,23 @@ describe('termine ändern und löschen', () => {
     await assertFails(updateDoc(doc(m, 'termine/T1'), { ende: ts('2026-10-20T12:00:00Z') }));
   });
 
-  test('Anhänge: Mitglied fügt eigenen hinzu, nicht fremden; entfernt eigenen, nicht fremden', async () => {
-    const vorher = [anhang('A1', owner)];
-    // viewer ist in L1 kein Mitglied – Mitglied `member` (= Ersteller) wird nicht gebraucht,
-    // darum testen wir mit `owner` (Besitzer, aber Anhang-Regel greift zuerst nicht) und einem
-    // zusätzlichen Mitglied in RO. Hier: `member` als Nicht-Ersteller eines fremden Termins TRO
-    // ist kein Mitglied von RO – also eigenes Szenario in L1 mit Termin des Besitzers:
+  test('Mitglied ohne Bearbeitungsrecht ändert fremden Termin nicht (auch kein Feld anhaenge)', async () => {
+    // Anhänge liegen in der Untersammlung `anhaenge` (Tests in rules.test.mjs);
+    // das frühere Feld im Termin ist nicht mehr erlaubt. Diese verbotenen
+    // Änderungen liefen früher in das Ausdrucks-Limit (1000) des Emulators.
     await env.withSecurityRulesDisabled(async (ctx) => {
       await setDoc(doc(ctx.firestore(), 'termine/TO'), {
-        ...terminData('TO', owner), erstelltAm: ts(now), aktualisiertAm: ts(now), anhaenge: vorher,
+        ...terminData('TO', owner), erstelltAm: ts(now), aktualisiertAm: ts(now),
       });
       await setDoc(doc(ctx.firestore(), 'lists/L1'), listData('L1', { allowEdit: false }));
     });
     const m = db(member); // Mitglied ohne allowEdit, nicht Ersteller von TO
     await assertFails(updateDoc(doc(m, 'termine/TO'), { titel: 'Nein', aktualisiertAm: serverTimestamp() }));
-    // eigenen Anhang hinzufügen: erlaubt
-    await assertSucceeds(updateDoc(doc(m, 'termine/TO'), { anhaenge: [...vorher, anhang('A2', member)], aktualisiertAm: serverTimestamp() }));
-    // fremden Anhang hinzufügen: verboten
-    await assertFails(updateDoc(doc(m, 'termine/TO'), { anhaenge: [...vorher, anhang('A2', member), anhang('A3', owner)], aktualisiertAm: serverTimestamp() }));
-    // zwei auf einmal: verboten
-    await assertFails(updateDoc(doc(m, 'termine/TO'), { anhaenge: [...vorher, anhang('A2', member), anhang('A3', member), anhang('A4', member)] }));
-    // fremden entfernen: verboten
-    await assertFails(updateDoc(doc(m, 'termine/TO'), { anhaenge: [anhang('A2', member)], aktualisiertAm: serverTimestamp() }));
-    // eigenen entfernen: erlaubt
-    await assertSucceeds(updateDoc(doc(m, 'termine/TO'), { anhaenge: vorher, aktualisiertAm: serverTimestamp() }));
-    // Besitzer entfernt beliebige (über die Bearbeiten-Regel)
-    await assertSucceeds(updateDoc(doc(db(owner), 'termine/TO'), { anhaenge: [], aktualisiertAm: serverTimestamp() }));
+    await assertFails(updateDoc(doc(m, 'termine/TO'), { anhaenge: [], aktualisiertAm: serverTimestamp() }));
+    await assertFails(setDoc(doc(db(member), 'termine/N9'), { ...terminData('N9', member), anhaenge: [] }));
+    for (let i = 0; i < 5; i++) {
+      await assertFails(updateDoc(doc(m, 'termine/TO'), { personen: [member, owner], aktualisiertAm: serverTimestamp() }));
+    }
   });
 
   test('Löschen: Ersteller und Besitzer ja, Nur-Lese-Mitglied und Fremder nein', async () => {

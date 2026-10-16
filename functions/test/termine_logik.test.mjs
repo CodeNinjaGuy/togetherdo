@@ -56,7 +56,6 @@ function termin(extra = {}) {
     zeitzone: TZ,
     wiederholung: null,
     erinnerungen: [],
-    anhaenge: [],
     erstelltVon: 'u1',
     erstelltAm: null,
     aktualisiertAm: null,

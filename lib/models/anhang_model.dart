@@ -5,7 +5,8 @@
 
 /// Anhang (Foto, PDF, Dokument) an einem Termin oder einer Aufgabe.
 /// Gemeinsames Modell für Kalender und Aufgaben; Dateien liegen in
-/// Firebase Storage, die Metadaten im jeweiligen Dokument (Feld `anhaenge`).
+/// Firebase Storage, die Beschreibung je Anhang in der Untersammlung
+/// `todos/{todoId}/anhaenge/{id}` bzw. `termine/{terminId}/anhaenge/{id}`.
 library;
 
 import 'package:cloud_firestore/cloud_firestore.dart';

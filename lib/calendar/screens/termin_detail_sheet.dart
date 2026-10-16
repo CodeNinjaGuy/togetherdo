@@ -9,7 +9,6 @@
 /// nur dieses Mal oder ganze Serie).
 library;
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -21,7 +20,9 @@ import '../../design/attachments/td_attachments.dart';
 import '../../design/calendar/td_calendar.dart';
 import '../../design/td_design.dart';
 import '../../l10n/app_localizations.dart';
+import '../../repositories/anhang_repository.dart';
 import '../../services/speech_service.dart';
+import '../../widgets/attachments/anhang_abschnitt.dart';
 import '../bloc/kalender_cubit.dart';
 import '../logic/ical.dart';
 import '../logic/zeit.dart';
@@ -34,6 +35,7 @@ Future<void> zeigeTerminDetail(
   required KalenderCubit cubit,
   required Vorkommen vorkommen,
   required AttachmentService anhaenge,
+  required AnhangRepository anhangRepository,
   SpeechService? speech,
 }) {
   return showTdSheet<void>(
@@ -41,7 +43,12 @@ Future<void> zeigeTerminDetail(
     maxWidth: 600,
     builder: (ctx) => BlocProvider.value(
       value: cubit,
-      child: TerminDetail(vorkommen: vorkommen, anhaenge: anhaenge, speech: speech),
+      child: TerminDetail(
+        vorkommen: vorkommen,
+        anhaenge: anhaenge,
+        anhangRepository: anhangRepository,
+        speech: speech,
+      ),
     ),
   );
 }
@@ -51,11 +58,13 @@ class TerminDetail extends StatefulWidget {
     super.key,
     required this.vorkommen,
     required this.anhaenge,
+    required this.anhangRepository,
     this.speech,
   });
 
   final Vorkommen vorkommen;
   final AttachmentService anhaenge;
+  final AnhangRepository anhangRepository;
   final SpeechService? speech;
 
   @override
@@ -63,17 +72,6 @@ class TerminDetail extends StatefulWidget {
 }
 
 class _TerminDetailState extends State<TerminDetail> {
-  final Map<String, UploadFortschritt> _laufend = {};
-  final List<StreamSubscription<UploadFortschritt>> _subs = [];
-
-  @override
-  void dispose() {
-    for (final s in _subs) {
-      s.cancel();
-    }
-    super.dispose();
-  }
-
   /// Aktueller Termin aus dem Zustand (nach Änderungen frisch).
   Termin _aktuell(KalenderZustand z) {
     for (final t in z.termine) {
@@ -125,9 +123,8 @@ class _TerminDetailState extends State<TerminDetail> {
       if (wahl == 'einmal') {
         await cubit.vorkommenUeberspringen(widget.vorkommen);
       } else {
-        for (final a in t.anhaenge) {
-          unawaited(widget.anhaenge.loeschen(a));
-        }
+        // Anhänge (Beschreibungen und Dateien) räumt die Function
+        // onTerminDeleted auf.
         await cubit.loeschen(t);
       }
       if (!mounted) return;
@@ -160,49 +157,6 @@ class _TerminDetailState extends State<TerminDetail> {
     } catch (e) {
       if (!mounted) return;
       TdToast.show(context, s.kalFehler('$e'), variant: TdToastVariant.error);
-    }
-  }
-
-  Future<void> _anhangHinzufuegen(KalenderCubit cubit, Termin t) async {
-    final s = AppLocalizations.of(context)!;
-    final quelle = await showTdAnhangQuelleSheet(context);
-    if (quelle == null || !mounted) return;
-    List<AnhangAuswahl> dateien;
-    try {
-      anhangAnzahlPruefen(t.anhaenge.length + _laufend.length);
-      dateien = await widget.anhaenge.waehlen(quelle);
-      for (final d in dateien) {
-        anhangPruefen(d);
-      }
-    } catch (e) {
-      if (!mounted) return;
-      TdToast.show(context, s.anhangFehler(e), variant: TdToastVariant.warning);
-      return;
-    }
-    for (final d in dateien) {
-      final strom = widget.anhaenge.hochladen(
-        basisPfad: 'termine/${t.listId}/${t.id}',
-        datei: d,
-        userId: cubit.userId,
-      );
-      late StreamSubscription<UploadFortschritt> sub;
-      sub = strom.listen(
-        (f) async {
-          if (!mounted) return;
-          setState(() => _laufend[f.anhangId] = f);
-          if (f.istFertig && f.fertig != null) {
-            final frisch = _aktuell(cubit.state);
-            await cubit.anhaengeSetzen(frisch, [...frisch.anhaenge, f.fertig!]);
-            if (mounted) setState(() => _laufend.remove(f.anhangId));
-          }
-        },
-        onError: (Object e) {
-          if (!mounted) return;
-          setState(() => _laufend.removeWhere((_, f) => f.name == d.name));
-          TdToast.show(context, s.anhangFehler(e), variant: TdToastVariant.error);
-        },
-      );
-      _subs.add(sub);
     }
   }
 
@@ -295,20 +249,15 @@ class _TerminDetailState extends State<TerminDetail> {
               gedaempft: true,
             ),
             const SizedBox(height: TdSpace.md),
-            // Anhänge
-            Text(s.kalAnhaenge, style: ctx.text.labelMedium?.copyWith(color: ctx.td.muted)),
-            const SizedBox(height: TdSpace.sm),
-            TdAnhangGalerie(
-              anhaenge: t.anhaenge,
+            // Anhänge: derselbe Abschnitt wie bei Aufgaben.
+            AnhangAbschnitt(
+              ziel: AnhangZiel.termin(listId: t.listId, terminId: t.id),
               service: widget.anhaenge,
-              laufend: _laufend,
-              padding: EdgeInsets.zero,
-              darfLoeschen: (a) => darf || a.hochgeladenVon == z.userId,
-              onLoeschen: (a) => cubit.anhaengeSetzen(
-                t,
-                t.anhaenge.where((x) => x.id != a.id).toList(),
-              ),
-              onHinzufuegen: () => _anhangHinzufuegen(cubit, t),
+              repository: widget.anhangRepository,
+              userId: z.userId,
+              darfFremdeLoeschen: z.darfListeBearbeiten(t.listId),
+              titel: s.kalAnhaenge,
+              heroPraefix: 'termin',
             ),
             const SizedBox(height: TdSpace.lg),
             // Aktionen

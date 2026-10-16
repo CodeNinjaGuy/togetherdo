@@ -2948,84 +2948,6 @@ abstract class AppLocalizations {
   /// **'Send image'**
   String get attachmentSendImage;
 
-  /// No description provided for @attachments.
-  ///
-  /// In en, this message translates to:
-  /// **'Attachments'**
-  String get attachments;
-
-  /// No description provided for @attachmentAdd.
-  ///
-  /// In en, this message translates to:
-  /// **'Add attachment'**
-  String get attachmentAdd;
-
-  /// No description provided for @attachmentTakePhoto.
-  ///
-  /// In en, this message translates to:
-  /// **'Take photo'**
-  String get attachmentTakePhoto;
-
-  /// No description provided for @attachmentChooseFromPhotos.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose from photos'**
-  String get attachmentChooseFromPhotos;
-
-  /// No description provided for @attachmentChooseFile.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose file (PDF)'**
-  String get attachmentChooseFile;
-
-  /// No description provided for @attachmentDelete.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete attachment'**
-  String get attachmentDelete;
-
-  /// No description provided for @attachmentDeleteConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Really delete “{name}”?'**
-  String attachmentDeleteConfirm(String name);
-
-  /// No description provided for @attachmentOpen.
-  ///
-  /// In en, this message translates to:
-  /// **'Open'**
-  String get attachmentOpen;
-
-  /// No description provided for @attachmentTooLarge.
-  ///
-  /// In en, this message translates to:
-  /// **'The file is too large (images up to 10 MB, PDF up to 20 MB).'**
-  String get attachmentTooLarge;
-
-  /// No description provided for @attachmentUnsupported.
-  ///
-  /// In en, this message translates to:
-  /// **'Only photos and PDF files can be attached.'**
-  String get attachmentUnsupported;
-
-  /// No description provided for @attachmentUploadFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'The attachment could not be uploaded.'**
-  String get attachmentUploadFailed;
-
-  /// No description provided for @attachmentDeleteFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'The attachment could not be deleted.'**
-  String get attachmentDeleteFailed;
-
-  /// No description provided for @attachmentPermissionMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Please allow access to the camera or photos in Settings.'**
-  String get attachmentPermissionMessage;
-
   /// No description provided for @showPassword.
   ///
   /// In en, this message translates to:
@@ -4129,6 +4051,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 event} other{{count} events}}'**
   String kalTermineAnzahl(int count);
+
+  /// No description provided for @anhangZugriffVerweigert.
+  ///
+  /// In en, this message translates to:
+  /// **'Please allow access to the camera or photos in Settings.'**
+  String get anhangZugriffVerweigert;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

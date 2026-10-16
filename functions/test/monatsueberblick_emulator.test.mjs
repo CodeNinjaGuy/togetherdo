@@ -83,7 +83,6 @@ async function termin(listId, erstelltVon, felder) {
     zeitzone: TZ,
     wiederholung: null,
     erinnerungen: [],
-    anhaenge: [],
     erstelltVon,
     erstelltAm: Timestamp.now(),
     aktualisiertAm: Timestamp.now(),

@@ -20,6 +20,7 @@ import '../../design/calendar/td_calendar.dart';
 import '../../design/td_design.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/list_model.dart';
+import '../../repositories/anhang_repository.dart';
 import '../../repositories/list_repository.dart';
 import '../../services/speech_service.dart';
 import '../bloc/kalender_cubit.dart';
@@ -45,6 +46,7 @@ class CalendarScreen extends StatefulWidget {
     this.termine,
     this.listen,
     this.anhaenge,
+    this.anhangRepository,
     this.speech,
     this.heute,
     this.jetzt,
@@ -60,6 +62,9 @@ class CalendarScreen extends StatefulWidget {
   final TerminRepository? termine;
   final ListRepository? listen;
   final AttachmentService? anhaenge;
+
+  /// Ohne Angabe aus dem Kontext (App) bzw. Firestore.
+  final AnhangRepository? anhangRepository;
   final SpeechService? speech;
 
   /// Für Tests/Demos fest setzbar.
@@ -79,6 +84,7 @@ class CalendarScreen extends StatefulWidget {
 class _CalendarScreenState extends State<CalendarScreen> {
   late final KalenderCubit _cubit;
   late final AttachmentService _anhaenge;
+  late final AnhangRepository _anhangRepository;
   late final SpeechService? _speech;
   bool _filterOffen = false;
 
@@ -99,11 +105,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
       heute: widget.heute,
       ansicht: widget.startAnsicht,
     );
-    _anhaenge = widget.anhaenge ?? AttachmentService();
+    // In der App kommen Dienst und Ablage aus dem Kontext (ein Satz für
+    // Aufgaben und Termine); allein (Demo) eigene Instanzen.
+    _anhaenge = widget.anhaenge ?? _ausKontext<AttachmentService>() ?? AttachmentService();
+    _anhangRepository =
+        widget.anhangRepository ?? _ausKontext<AnhangRepository>() ?? FirestoreAnhangRepository();
     _speech = widget.speech ?? (speechInputSupported ? DeviceSpeechService() : null);
     _cubit.starten().then((_) {
       if (mounted) profilbilderLaden(_cubit.state.mitglieder, () => setState(() {}));
     });
+  }
+
+  T? _ausKontext<T>() {
+    try {
+      return context.read<T>();
+    } on ProviderNotFoundException {
+      return null;
+    }
   }
 
   String _userIdAusAuth() {
@@ -148,6 +166,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     cubit: _cubit,
     vorkommen: v,
     anhaenge: _anhaenge,
+    anhangRepository: _anhangRepository,
     speech: _speech,
   );
 

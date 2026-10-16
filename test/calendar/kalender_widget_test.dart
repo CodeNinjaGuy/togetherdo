@@ -16,6 +16,8 @@ import 'package:togetherdo/calendar/widgets/heute_kalender_karte.dart';
 import 'package:togetherdo/calendar/widgets/mail_einstellungen.dart';
 import 'package:togetherdo/design/attachments/td_attachments.dart';
 import 'package:togetherdo/l10n/app_localizations.dart';
+import 'package:togetherdo/models/anhang_model.dart';
+import 'package:togetherdo/repositories/anhang_repository.dart';
 import 'package:togetherdo/utils/app_theme.dart';
 
 /// Ein Freitag; die Beispielfamilie legt ihre Woche darum herum an.
@@ -41,6 +43,19 @@ CalendarScreen bildschirm() => CalendarScreen(
   termine: Beispiel.repository(heute),
   listen: BeispielListRepository(),
   anhaenge: FakeAttachmentService(),
+  anhangRepository: MockAnhangRepository({
+    const AnhangZiel.termin(listId: Beispiel.familie, terminId: 'T-zahnarzt'): [
+      Anhang(
+        id: 'befund',
+        name: 'Befund.pdf',
+        typ: 'application/pdf',
+        groesse: 2048,
+        pfad: 'termine/${Beispiel.familie}/T-zahnarzt/befund',
+        hochgeladenVon: Beispiel.anna,
+        hochgeladenAm: DateTime.utc(2026, 10, 1),
+      ),
+    ],
+  }),
   heute: heute,
   jetzt: utcVon(beispielZone, 2026, 10, 16, 11, 20),
   eingebettet: true,
@@ -153,6 +168,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Dr. Huber, Hauptstraße 12'), findsOneWidget);
       expect(find.text('Anhänge'), findsOneWidget);
+      // Anhänge kommen aus der gemeinsamen Ablage (Untersammlung).
+      expect(find.text('Befund.pdf'), findsOneWidget);
       expect(find.text('Bearbeiten'), findsOneWidget);
     });
 

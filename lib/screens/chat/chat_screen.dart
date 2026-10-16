@@ -14,8 +14,9 @@ import '../../design/td_design.dart';
 import '../../models/chat_message_model.dart';
 import '../../repositories/chat_repository.dart';
 import '../../repositories/todo_repository.dart';
-import '../../services/aufgaben_anhang_service.dart';
-import '../../widgets/attachments/attachment_source_sheet.dart';
+import '../../design/attachments/td_attachments.dart';
+import '../../models/anhang_model.dart';
+import '../../widgets/attachments/anhang_abschnitt.dart';
 import '../../widgets/common/user_avatar.dart';
 
 /// Chat zu einer Aufgabe: Sprechblasen mit Tagestrennern, eigene rechts
@@ -87,9 +88,9 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Future<void> _send({String? imageUrl, String? imagePath}) async {
-    final text = _controller.text.trim();
-    if (text.isEmpty && imageUrl == null) return;
+  Future<void> _send({String? imagePath, String? imagePreviewPath}) async {
+    final text = imagePath == null ? _controller.text.trim() : '';
+    if (text.isEmpty && imagePath == null) return;
     final auth = _auth;
     if (auth == null || _sending) return;
     setState(() => _sending = true);
@@ -101,12 +102,12 @@ class _ChatScreenState extends State<ChatScreen> {
       userName: user.displayName,
       message: text,
       timestamp: DateTime.now(),
-      imageUrl: imageUrl,
       imagePath: imagePath,
+      imagePreviewPath: imagePreviewPath,
     );
     try {
       await context.read<ChatRepository>().sendMessage(message);
-      _controller.clear();
+      if (imagePath == null) _controller.clear();
     } catch (e) {
       debugPrint('Nachricht senden fehlgeschlagen: $e');
       if (mounted) {
@@ -121,37 +122,40 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  /// Bilder wählen (Kamera oder Galerie), verkleinert hochladen und je
+  /// Bild eine Nachricht senden. Gleicher Dienst wie Anhänge an Aufgaben.
   Future<void> _attachImage() async {
     final auth = _auth;
     final listId = _listId;
     if (auth == null || listId == null) return;
     final service = context.read<AttachmentService>();
-    final file = await pickAttachmentWithFeedback(
+    final dateien = await anhaengeWaehlen(
       context,
-      service,
-      allowFiles: false,
+      service: service,
+      dokumentErlaubt: false,
     );
-    if (file == null || !mounted) return;
+    if (dateien.isEmpty || !mounted) return;
     setState(() => _uploadProgress = 0);
     try {
-      final model = await service.upload(
-        file: file,
-        listId: listId,
-        todoId: widget.todoId,
-        userId: auth.user.id,
-        userName: auth.user.displayName,
-        chat: true,
-        onProgress: (p) {
-          if (mounted) setState(() => _uploadProgress = p);
-        },
-      );
-      await _send(imageUrl: model.url, imagePath: model.path);
+      for (final d in dateien) {
+        await for (final f in service.hochladen(
+          basisPfad: 'chats/$listId/${widget.todoId}',
+          datei: d,
+          userId: auth.user.id,
+        )) {
+          if (mounted) setState(() => _uploadProgress = f.fortschritt);
+          final a = f.fertig;
+          if (a != null) {
+            await _send(imagePath: a.pfad, imagePreviewPath: a.vorschauPfad);
+          }
+        }
+      }
     } catch (e) {
       debugPrint('Bild senden fehlgeschlagen: $e');
       if (mounted) {
         TdToast.show(
           context,
-          AppLocalizations.of(context)!.attachmentUploadFailed,
+          anhangL10n(context).anhangFehler(e),
           variant: TdToastVariant.error,
         );
       }
@@ -160,17 +164,25 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  /// Chat-Bild als Anhang für das gemeinsame Vollbild.
+  static Anhang _alsAnhang(ChatMessageModel m) => Anhang(
+    id: 'chat-${m.id}',
+    name: m.userName,
+    typ: 'image/jpeg',
+    groesse: 0,
+    pfad: m.imagePath!,
+    vorschauPfad: m.imagePreviewPath,
+    hochgeladenVon: m.userId,
+    hochgeladenAm: m.timestamp,
+  );
+
   void _openImage(List<ChatMessageModel> images, ChatMessageModel msg) {
-    final l10n = AppLocalizations.of(context)!;
-    final items = [
-      for (final m in images)
-        TdAttachmentItem(id: 'chat-${m.id}', name: m.userName, url: m.imageUrl),
-    ];
-    TdAttachmentViewer.open(
+    TdAnhangVollbild.oeffnen(
       context,
-      items: items,
-      initialIndex: images.indexOf(msg),
-      closeLabel: l10n.close,
+      anhaenge: images.map(_alsAnhang).toList(),
+      start: images.indexOf(msg),
+      service: context.read<AttachmentService>(),
+      heroPraefix: 'chat',
     );
   }
 
@@ -238,9 +250,12 @@ class _ChatScreenState extends State<ChatScreen> {
                         final prev = i > 0 ? messages[i - 1] : null;
                         final isMe = msg.userId == uid;
                         final newDay =
-                            prev == null || !_sameDay(prev.timestamp, msg.timestamp);
+                            prev == null ||
+                            !_sameDay(prev.timestamp, msg.timestamp);
                         final sameAuthor =
-                            prev != null && prev.userId == msg.userId && !newDay;
+                            prev != null &&
+                            prev.userId == msg.userId &&
+                            !newDay;
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -462,15 +477,15 @@ class _Bubble extends StatelessWidget {
             GestureDetector(
               onTap: onImageTap,
               child: Hero(
-                tag: 'attachment-chat-${message.id}',
+                tag: tdAnhangHeroTag(
+                  'chat',
+                  _ChatScreenState._alsAnhang(message),
+                ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 260),
-                  child: TdAttachmentImage(
-                    item: TdAttachmentItem(
-                      id: 'chat-${message.id}',
-                      name: message.userName,
-                      url: message.imageUrl,
-                    ),
+                  child: TdAnhangBild(
+                    service: context.read<AttachmentService>(),
+                    pfad: message.imagePreviewPath ?? message.imagePath!,
                     fit: BoxFit.cover,
                   ),
                 ),

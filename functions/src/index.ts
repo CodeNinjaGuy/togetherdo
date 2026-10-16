@@ -24,7 +24,7 @@ export {
 } from './notifications';
 export { createList, previewListByCode, joinListByCode, onListDeleted } from './lists';
 export { deleteAccount, onUserDeleted } from './account';
-export { onTerminCreated, onTerminDeleted, onListDeletedTermine } from './termine';
+export { onTerminCreated, onTerminDeleted } from './termine';
 export { erinnerungenSenden, wochenueberblickSenden } from './erinnerungen';
 export { monatsueberblickSenden } from './monatsueberblick';
 export { inviteByEmail } from './einladungen';

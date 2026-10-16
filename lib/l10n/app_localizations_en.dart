@@ -1570,47 +1570,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attachmentSendImage => 'Send image';
 
   @override
-  String get attachments => 'Attachments';
-
-  @override
-  String get attachmentAdd => 'Add attachment';
-
-  @override
-  String get attachmentTakePhoto => 'Take photo';
-
-  @override
-  String get attachmentChooseFromPhotos => 'Choose from photos';
-
-  @override
-  String get attachmentChooseFile => 'Choose file (PDF)';
-
-  @override
-  String get attachmentDelete => 'Delete attachment';
-
-  @override
-  String attachmentDeleteConfirm(String name) {
-    return 'Really delete “$name”?';
-  }
-
-  @override
-  String get attachmentOpen => 'Open';
-
-  @override
-  String get attachmentTooLarge => 'The file is too large (images up to 10 MB, PDF up to 20 MB).';
-
-  @override
-  String get attachmentUnsupported => 'Only photos and PDF files can be attached.';
-
-  @override
-  String get attachmentUploadFailed => 'The attachment could not be uploaded.';
-
-  @override
-  String get attachmentDeleteFailed => 'The attachment could not be deleted.';
-
-  @override
-  String get attachmentPermissionMessage => 'Please allow access to the camera or photos in Settings.';
-
-  @override
   String get showPassword => 'Show password';
 
   @override
@@ -2318,6 +2277,9 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get anhangZugriffVerweigert => 'Please allow access to the camera or photos in Settings.';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).

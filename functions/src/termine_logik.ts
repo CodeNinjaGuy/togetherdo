@@ -30,17 +30,6 @@ export interface Wiederholung {
   ausnahmen: string[];
 }
 
-export interface Anhang {
-  id: string;
-  name: string;
-  typ: string;
-  groesse: number;
-  pfad: string;
-  vorschauPfad: string | null;
-  hochgeladenVon: string;
-  hochgeladenAm: Date | null;
-}
-
 export interface Termin {
   id: string;
   listId: string;
@@ -58,7 +47,6 @@ export interface Termin {
   wiederholung: Wiederholung | null;
   /** Minuten vor Start, 0 = zum Start */
   erinnerungen: number[];
-  anhaenge: Anhang[];
   erstelltVon: string;
   erstelltAm: Date | null;
   aktualisiertAm: Date | null;
@@ -425,22 +413,6 @@ export function wiederholungAusDaten(v: unknown): Wiederholung | null {
   });
 }
 
-function anhangAusDaten(v: unknown): Anhang | null {
-  if (typeof v !== 'object' || v === null) return null;
-  const d = v as Record<string, unknown>;
-  if (typeof d.pfad !== 'string') return null;
-  return {
-    id: alsText(d.id) ?? '',
-    name: alsText(d.name) ?? 'Datei',
-    typ: alsText(d.typ) ?? 'application/octet-stream',
-    groesse: typeof d.groesse === 'number' ? d.groesse : 0,
-    pfad: d.pfad,
-    vorschauPfad: alsText(d.vorschauPfad),
-    hochgeladenVon: alsText(d.hochgeladenVon) ?? '',
-    hochgeladenAm: alsDatum(d.hochgeladenAm),
-  };
-}
-
 /** Baut aus einem Firestore-Dokument (`termine/{id}`) einen `Termin`. */
 export function terminAusDaten(id: string, daten: Record<string, unknown>): Termin | null {
   const start = alsDatum(daten.start);
@@ -460,9 +432,6 @@ export function terminAusDaten(id: string, daten: Record<string, unknown>): Term
     zeitzone: gueltigeZeitzone(daten.zeitzone),
     wiederholung: wiederholungAusDaten(daten.wiederholung),
     erinnerungen: alsZahlListe(daten.erinnerungen),
-    anhaenge: Array.isArray(daten.anhaenge)
-      ? daten.anhaenge.map(anhangAusDaten).filter((a): a is Anhang => a !== null)
-      : [],
     erstelltVon: alsText(daten.erstelltVon) ?? '',
     erstelltAm: alsDatum(daten.erstelltAm),
     aktualisiertAm: alsDatum(daten.aktualisiertAm),

@@ -11,12 +11,12 @@ import 'package:togetherdo/l10n/app_localizations.dart';
 import '../../design/td_design.dart';
 import '../../fairness/fairness.dart';
 import '../../models/todo_model.dart';
-import '../../repositories/attachment_repository.dart';
+import '../../repositories/anhang_repository.dart';
 import '../../repositories/chat_repository.dart';
 import '../../repositories/todo_repository.dart';
-import '../../services/aufgaben_anhang_service.dart';
+import '../../services/attachment_service.dart';
 import '../../services/review_service.dart';
-import '../attachments/attachment_section.dart';
+import '../attachments/anhang_abschnitt.dart';
 import '../fairness/fairness_widgets.dart';
 
 /// Öffnet das Sheet zum Anlegen ([todo] = null), Bearbeiten oder – ohne
@@ -49,7 +49,7 @@ Future<void> showTaskEditorSheet(
       canEdit: canEdit,
       repository: context.read<TodoRepository>(),
       chatRepository: context.read<ChatRepository>(),
-      attachmentRepository: context.read<AttachmentRepository>(),
+      attachmentRepository: context.read<AnhangRepository>(),
       attachmentService: context.read<AttachmentService>(),
     ),
   );
@@ -87,7 +87,7 @@ class TaskEditorForm extends StatefulWidget {
   final ChatRepository? chatRepository;
 
   /// Ohne beides bleibt der Abschnitt „Anhänge“ aus (Tests, Vorschau).
-  final AttachmentRepository? attachmentRepository;
+  final AnhangRepository? attachmentRepository;
   final AttachmentService? attachmentService;
 
   /// Nur für Tests.
@@ -108,7 +108,7 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
   String? _assigneeId;
   FairnessSuggestion? _suggestion;
   bool _saving = false;
-  final AttachmentStaging _staging = AttachmentStaging();
+  final AnhangVormerkung _vormerkung = AnhangVormerkung();
 
   bool get _isNew => widget.todo == null;
   bool get _editable => widget.canEdit;
@@ -145,7 +145,7 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
     _title.dispose();
     _description.dispose();
     _category.dispose();
-    _staging.dispose();
+    _vormerkung.dispose();
     super.dispose();
   }
 
@@ -240,17 +240,13 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
   Future<void> _uploadStaged(String todoId) async {
     final service = widget.attachmentService;
     final repo = widget.attachmentRepository;
-    if (service == null || repo == null) return;
-    for (final file in _staging.value) {
-      final model = await service.upload(
-        file: file,
-        listId: widget.listId,
-        todoId: todoId,
-        userId: widget.currentUserId,
-        userName: widget.currentUserName,
-      );
-      await repo.add(model);
-    }
+    if (service == null || repo == null || _vormerkung.leer) return;
+    await _vormerkung.hochladen(
+      ziel: AnhangZiel.aufgabe(listId: widget.listId, todoId: todoId),
+      service: service,
+      repository: repo,
+      userId: widget.currentUserId,
+    );
   }
 
   Future<void> _delete() async {
@@ -472,22 +468,24 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
           const SizedBox(height: TdSpace.lg),
           _Label(l10n.todoCategory),
           Row(
-            children: [
-              TdTag(label: _category.text, icon: Icons.sell_outlined),
-            ],
+            children: [TdTag(label: _category.text, icon: Icons.sell_outlined)],
           ),
         ],
         if (_withAttachments) ...[
           const SizedBox(height: TdSpace.xl),
-          AttachmentSection(
-            listId: widget.listId,
-            todoId: widget.todo?.id,
-            staging: _staging,
-            currentUserId: widget.currentUserId,
-            currentUserName: widget.currentUserName,
-            canEdit: widget.canEdit,
+          AnhangAbschnitt(
+            ziel: widget.todo == null
+                ? null
+                : AnhangZiel.aufgabe(
+                    listId: widget.listId,
+                    todoId: widget.todo!.id,
+                  ),
+            vormerkung: _vormerkung,
+            userId: widget.currentUserId,
+            darfFremdeLoeschen: widget.canEdit,
             service: widget.attachmentService!,
             repository: widget.attachmentRepository!,
+            heroPraefix: 'aufgabe',
           ),
         ],
         const SizedBox(height: TdSpace.xxl),

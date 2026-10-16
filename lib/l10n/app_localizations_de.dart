@@ -1570,47 +1570,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get attachmentSendImage => 'Bild senden';
 
   @override
-  String get attachments => 'Anhänge';
-
-  @override
-  String get attachmentAdd => 'Anhang hinzufügen';
-
-  @override
-  String get attachmentTakePhoto => 'Foto aufnehmen';
-
-  @override
-  String get attachmentChooseFromPhotos => 'Aus Fotos wählen';
-
-  @override
-  String get attachmentChooseFile => 'Datei wählen (PDF)';
-
-  @override
-  String get attachmentDelete => 'Anhang löschen';
-
-  @override
-  String attachmentDeleteConfirm(String name) {
-    return '„$name“ wirklich löschen?';
-  }
-
-  @override
-  String get attachmentOpen => 'Öffnen';
-
-  @override
-  String get attachmentTooLarge => 'Die Datei ist zu groß (Bilder bis 10 MB, PDF bis 20 MB).';
-
-  @override
-  String get attachmentUnsupported => 'Nur Fotos und PDF-Dateien lassen sich anhängen.';
-
-  @override
-  String get attachmentUploadFailed => 'Der Anhang konnte nicht hochgeladen werden.';
-
-  @override
-  String get attachmentDeleteFailed => 'Der Anhang konnte nicht gelöscht werden.';
-
-  @override
-  String get attachmentPermissionMessage => 'Bitte erlaube den Zugriff auf Kamera bzw. Fotos in den Einstellungen.';
-
-  @override
   String get showPassword => 'Passwort anzeigen';
 
   @override
@@ -2318,6 +2277,9 @@ class AppLocalizationsDe extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get anhangZugriffVerweigert => 'Bitte erlaube den Zugriff auf Kamera bzw. Fotos in den Einstellungen.';
 }
 
 /// The translations for German, as used in Austria (`de_AT`).

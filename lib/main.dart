@@ -29,7 +29,7 @@ import 'blocs/language/language_state.dart';
 import 'design/td_design.dart';
 import 'navigation/app_shell.dart';
 import 'navigation/kalender_platzhalter.dart';
-import 'repositories/attachment_repository.dart';
+import 'repositories/anhang_repository.dart';
 import 'repositories/auth_repository.dart';
 import 'repositories/todo_repository.dart';
 import 'repositories/shopping_repository.dart';
@@ -47,7 +47,7 @@ import 'screens/lists/lists_screen.dart';
 import 'screens/chat/chat_screen.dart';
 import 'design/showcase/design_gallery_screen.dart';
 import 'design/showcase/today_screen.dart';
-import 'services/aufgaben_anhang_service.dart';
+import 'services/attachment_service.dart';
 import 'utils/app_theme.dart';
 import 'utils/global_navigator.dart';
 import 'firebase_options.dart';
@@ -101,9 +101,10 @@ void main() async {
         RepositoryProvider<ChatRepository>(
           create: (context) => FirestoreChatRepository(),
         ),
-        // Anhänge (Fotos/PDF) an Aufgaben und Bilder im Chat.
-        RepositoryProvider<AttachmentRepository>(
-          create: (context) => FirestoreAttachmentRepository(),
+        // Anhänge (Fotos, PDFs, Dokumente) an Aufgaben und Terminen,
+        // Bilder im Chat: ein Dienst, eine Ablage.
+        RepositoryProvider<AnhangRepository>(
+          create: (context) => FirestoreAnhangRepository(),
         ),
         RepositoryProvider<AttachmentService>(
           create: (context) => AttachmentService(),

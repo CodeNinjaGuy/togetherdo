@@ -72,6 +72,7 @@ extension AnhangTexte on AppLocalizations {
       return anhangTypUnzulaessig(fehler.name);
     }
     if (fehler is AnhangLimitErreicht) return anhangLimitErreicht(fehler.max);
+    if (fehler is AnhangZugriffVerweigert) return anhangZugriffVerweigert;
     return anhangFehlerAllgemein;
   }
 }

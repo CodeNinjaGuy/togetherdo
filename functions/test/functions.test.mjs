@@ -140,17 +140,41 @@ describe('Listen und Beitritt per Code', () => {
     await expectCode(max.call('createList', { name: 'X', type: 'todo' }), 'unauthenticated');
   });
 
-  test('gelöschte Liste nimmt Todos, Chats und Artikel mit (onListDeleted)', async () => {
+  test('gelöschte Liste nimmt Todos, Chats, Artikel, Termine, Anhänge und Dateien mit (onListDeleted)', async () => {
     const olga = await newUser('Olga');
     const list = await olga.call('createList', { name: 'Weg', type: 'todo' });
     await db.doc('todos/LD-T1').set({ id: 'LD-T1', listId: list.id, userId: olga.uid, title: 'x' });
     await db.doc('todos/LD-T1/chatMessages/m1').set({ id: 'm1', todoId: 'LD-T1', userId: olga.uid, message: 'hi' });
+    await db.doc('todos/LD-T1/anhaenge/a1').set({ id: 'a1', pfad: `todos/${list.id}/LD-T1/a1` });
     await db.doc('shopping_items/LD-I1').set({ id: 'LD-I1', listId: list.id, userId: olga.uid, name: 'Milch' });
+    await db.doc('termine/LD-E1').set({ id: 'LD-E1', listId: list.id, titel: 'Arzt', erstelltVon: olga.uid });
+    await db.doc('termine/LD-E1/anhaenge/b1').set({ id: 'b1', pfad: `termine/${list.id}/LD-E1/b1` });
+    const bucket = admin.storage().bucket(`${PROJECT_ID}.firebasestorage.app`);
+    const dateien = [`todos/${list.id}/LD-T1/a1`, `chats/${list.id}/LD-T1/c1`, `termine/${list.id}/LD-E1/b1`];
+    for (const f of dateien) await bucket.file(f).save('x');
     await db.doc(`lists/${list.id}`).delete();
     await eventually(async () => {
       assert.equal(await exists('todos/LD-T1'), false);
       assert.equal(await exists('todos/LD-T1/chatMessages/m1'), false);
+      assert.equal(await exists('todos/LD-T1/anhaenge/a1'), false);
       assert.equal(await exists('shopping_items/LD-I1'), false);
+      assert.equal(await exists('termine/LD-E1'), false);
+      assert.equal(await exists('termine/LD-E1/anhaenge/b1'), false);
+      for (const f of dateien) assert.equal((await bucket.file(f).exists())[0], false, f);
+    });
+  });
+
+  test('gelöschter Termin nimmt Anhänge und Dateien mit (onTerminDeleted)', async () => {
+    const olga = await newUser('Olga');
+    const list = await olga.call('createList', { name: 'Kalender', type: 'todo' });
+    await db.doc('termine/TD-E1').set({ id: 'TD-E1', listId: list.id, titel: 'Arzt', erstelltVon: olga.uid });
+    await db.doc('termine/TD-E1/anhaenge/b1').set({ id: 'b1', pfad: `termine/${list.id}/TD-E1/b1` });
+    const bucket = admin.storage().bucket(`${PROJECT_ID}.firebasestorage.app`);
+    await bucket.file(`termine/${list.id}/TD-E1/b1`).save('x');
+    await db.doc('termine/TD-E1').delete();
+    await eventually(async () => {
+      assert.equal(await exists('termine/TD-E1/anhaenge/b1'), false);
+      assert.equal((await bucket.file(`termine/${list.id}/TD-E1/b1`).exists())[0], false);
     });
   });
 });

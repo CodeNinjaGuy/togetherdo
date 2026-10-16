@@ -15,10 +15,11 @@ import '../../design/td_design.dart';
 import '../../fairness/fairness.dart';
 import '../../models/list_model.dart';
 import '../../models/todo_model.dart';
-import '../../repositories/attachment_repository.dart';
+import '../../repositories/anhang_repository.dart';
 import '../../repositories/chat_repository.dart';
 import '../../repositories/todo_repository.dart';
 import '../../services/review_service.dart';
+import '../attachments/anhang_abschnitt.dart';
 import '../common/user_avatar.dart';
 import '../fairness/fairness_widgets.dart';
 
@@ -171,10 +172,11 @@ class TodoItemWidget extends StatelessWidget {
       );
     }
     return TdTag(
-      label: (hasTime
-              ? DateFormat.MMMEd(locale).add_Hm()
-              : DateFormat.MMMEd(locale))
-          .format(due),
+      label:
+          (hasTime
+                  ? DateFormat.MMMEd(locale).add_Hm()
+                  : DateFormat.MMMEd(locale))
+              .format(due),
       icon: Icons.event_rounded,
       filled: false,
     );
@@ -199,16 +201,17 @@ class TodoItemWidget extends StatelessWidget {
           color: td.danger,
         ),
       if (todo.priority == TodoPriority.low)
-        TdTag(label: l10n.priorityLow, icon: Icons.south_rounded, filled: false),
+        TdTag(
+          label: l10n.priorityLow,
+          icon: Icons.south_rounded,
+          filled: false,
+        ),
       TdWeightTag(weight: tdWeightOf(todo.effort)),
       if (todo.category != null && todo.category!.isNotEmpty)
         TdTag(label: todo.category!, icon: Icons.sell_outlined, filled: false),
-      StreamBuilder<int>(
-        stream: context
-            .read<AttachmentRepository>()
-            .watch(todo.id)
-            .map((a) => a.length),
-        builder: (context, snap) => TdAttachmentBadge(count: snap.data ?? 0),
+      AnhangAnzahl(
+        repository: context.read<AnhangRepository>(),
+        ziel: AnhangZiel.aufgabe(listId: todo.listId, todoId: todo.id),
       ),
       if (todo.isCompleted && todo.completedByUserName != null)
         TdTag(

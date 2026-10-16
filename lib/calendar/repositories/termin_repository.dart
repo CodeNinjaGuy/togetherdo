@@ -32,9 +32,6 @@ abstract class TerminRepository {
 
   Future<void> loeschen(String id);
 
-  /// Nur das Feld `anhaenge` ändern (jedes Mitglied darf eigene hinzufügen).
-  Future<void> anhaengeSetzen(String id, List<Anhang> anhaenge);
-
   String neueId();
 }
 
@@ -155,13 +152,6 @@ class FirebaseTerminRepository implements TerminRepository {
 
   @override
   Future<void> loeschen(String id) => _termine.doc(id).delete();
-
-  @override
-  Future<void> anhaengeSetzen(String id, List<Anhang> anhaenge) =>
-      _termine.doc(id).update({
-        'anhaenge': anhaenge.map((a) => a.toJson()).toList(),
-        'aktualisiertAm': FieldValue.serverTimestamp(),
-      });
 }
 
 /// Speicher-Fassung für Tests und den Demo-Einstieg ohne Firebase.
@@ -221,13 +211,6 @@ class SpeicherTerminRepository implements TerminRepository {
   @override
   Future<void> loeschen(String id) async {
     _termine.remove(id);
-    _melden();
-  }
-
-  @override
-  Future<void> anhaengeSetzen(String id, List<Anhang> anhaenge) async {
-    final t = _termine[id];
-    if (t != null) _termine[id] = t.copyWith(anhaenge: anhaenge);
     _melden();
   }
 }

@@ -8,8 +8,6 @@
 /// Ein Import genügt: `import 'package:togetherdo/design/td_design.dart';`
 library;
 
-export 'attachments/td_attachment_gallery.dart';
-export 'attachments/td_attachment_viewer.dart';
 export 'components/td_avatar.dart';
 export 'components/td_button.dart';
 export 'components/td_card.dart';
