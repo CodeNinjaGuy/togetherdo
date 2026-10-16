@@ -42,7 +42,7 @@ class BarcodeScannerScreen extends StatefulWidget {
     required this.session,
     this.pickMode = false,
     this.demo = false,
-    this.demoCodes = const ['3017620422003', '4008400202020', '0000000000000'],
+    this.demoCodes = const ['3017620422003', '8076800195057', '0000000000000'],
   });
 
   final ScannerSession session;

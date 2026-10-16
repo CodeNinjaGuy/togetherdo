@@ -256,9 +256,11 @@ class _VoiceInputPanelState extends State<VoiceInputPanel>
                     child: child,
                   ),
                   child: Center(
+                    // Keine Überschwing-Kurve: beim Zurückrechnen des
+                    // Schattens würde der Weichzeichner sonst negativ.
                     child: AnimatedContainer(
                       duration: TdMotion.of(context, TdMotion.base),
-                      curve: TdMotion.spring,
+                      curve: TdMotion.standard,
                       width: 72 + (listening ? _level * 10 : 0),
                       height: 72 + (listening ? _level * 10 : 0),
                       decoration: BoxDecoration(
@@ -267,9 +269,11 @@ class _VoiceInputPanelState extends State<VoiceInputPanel>
                         color: listening
                             ? null
                             : scheme.surfaceContainerHighest,
-                        boxShadow: listening
-                            ? TdShadows.glow(scheme.primary)
-                            : null,
+                        boxShadow: TdShadows.glow(
+                          listening
+                              ? scheme.primary
+                              : scheme.primary.withValues(alpha: 0),
+                        ),
                       ),
                       child: Icon(
                         listening ? Icons.mic_rounded : Icons.mic_none_rounded,

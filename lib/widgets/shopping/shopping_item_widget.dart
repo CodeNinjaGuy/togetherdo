@@ -313,7 +313,7 @@ class _CheckRing extends StatelessWidget {
       scale: 0.85,
       child: AnimatedContainer(
         duration: TdMotion.of(context, TdMotion.base),
-        curve: reduced ? Curves.linear : TdMotion.spring,
+        curve: TdMotion.standard,
         width: 28,
         height: 28,
         decoration: BoxDecoration(

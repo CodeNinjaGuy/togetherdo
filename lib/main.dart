@@ -109,7 +109,10 @@ void main() async {
 
   // Push erst nach dem ersten Bild einrichten: Berechtigungsdialog und
   // APNs-Token dürfen den Start nicht blockieren (weißer Bildschirm).
-  unawaited(MessagingService().initialize());
+  // Beim Debug-Start auf einer Design-Route (Screenshots) kein Push.
+  if (!(kDebugMode && _debugStart.startsWith('/design/'))) {
+    unawaited(MessagingService().initialize());
+  }
 }
 
 class TogetherDoApp extends StatelessWidget {

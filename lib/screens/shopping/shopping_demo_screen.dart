@@ -36,27 +36,27 @@ abstract final class DemoProducts {
     brand: 'Ferrero',
     quantity: '400 g',
     imageUrl:
-        'https://images.openfoodfacts.org/images/products/301/762/042/2003/front_de.400.200.jpg',
+        'https://images.openfoodfacts.org/images/products/301/762/042/2003/front_en.879.200.jpg',
     source: ProductSource.off,
     updatedAt: _t,
   );
-  static final haferdrink = ProductInfo(
-    ean: '4008400202020',
-    name: 'Hafer Drink Natur',
-    brand: 'Oatly',
-    quantity: '1 l',
-    imageUrl:
-        'https://images.openfoodfacts.org/images/products/736/409/700/0070/front_de.4.200.jpg',
-    source: ProductSource.off,
-    updatedAt: _t,
-  );
-  static final tomaten = ProductInfo(
+  static final spaghetti = ProductInfo(
     ean: '8076800195057',
-    name: 'Passierte Tomaten',
-    brand: 'Mutti',
-    quantity: '700 g',
+    name: 'Spaghetti No. 5',
+    brand: 'Barilla',
+    quantity: '500 g',
     imageUrl:
-        'https://images.openfoodfacts.org/images/products/807/680/019/5057/front_de.52.200.jpg',
+        'https://images.openfoodfacts.org/images/products/807/680/019/5057/front_en.3881.200.jpg',
+    source: ProductSource.off,
+    updatedAt: _t,
+  );
+  static final marzipan = ProductInfo(
+    ean: '4000417025005',
+    name: 'Marzipan',
+    brand: 'Ritter Sport',
+    quantity: '100 g',
+    imageUrl:
+        'https://images.openfoodfacts.org/images/products/400/041/702/5005/front_en.237.200.jpg',
     source: ProductSource.off,
     updatedAt: _t,
   );
@@ -65,7 +65,7 @@ abstract final class DemoProducts {
   static const String unknownCode = '0000000000000';
 
   static ProductInfo? byEan(String ean) =>
-      [nutella, haferdrink, tomaten].where((p) => p.ean == ean).firstOrNull;
+      [nutella, spaghetti, marzipan].where((p) => p.ean == ean).firstOrNull;
 }
 
 /// Scanner-Sitzung ohne Netz und Firebase.
@@ -158,8 +158,8 @@ class _ShoppingDemoScreenState extends State<ShoppingDemoScreen> {
     final now = DateTime.now();
     for (final (p, qty, done) in [
       (DemoProducts.nutella, 1.0, false),
-      (DemoProducts.haferdrink, 2.0, false),
-      (DemoProducts.tomaten, 3.0, true),
+      (DemoProducts.spaghetti, 2.0, false),
+      (DemoProducts.marzipan, 3.0, true),
     ]) {
       final item = await _repo.addItem(
         name: p.name,
