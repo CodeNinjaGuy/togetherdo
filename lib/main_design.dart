@@ -78,7 +78,8 @@ class _DesignShowcaseAppState extends State<DesignShowcaseApp> {
           onOpenGallery: () => Navigator.of(context).push(
             TdPageRoute(
               builder: (_) => TdDesignGalleryScreen(
-                initialPaletteId: ShowcaseThemeScope.maybeOf(context)?.paletteId ?? 'Light',
+                initialPaletteId:
+                    ShowcaseThemeScope.maybeOf(context)?.paletteId ?? 'Light',
               ),
             ),
           ),

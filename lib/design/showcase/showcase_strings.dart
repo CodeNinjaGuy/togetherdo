@@ -15,7 +15,8 @@ class ShowcaseStrings {
   final bool _de;
 
   static ShowcaseStrings of(BuildContext context) {
-    final code = Localizations.maybeLocaleOf(context)?.languageCode ??
+    final code =
+        Localizations.maybeLocaleOf(context)?.languageCode ??
         WidgetsBinding.instance.platformDispatcher.locale.languageCode;
     return ShowcaseStrings._(code != 'en');
   }
@@ -35,7 +36,8 @@ class ShowcaseStrings {
     return _t('Guten Abend, $name', 'Good evening, $name');
   }
 
-  String get tagline => _t('Gemeinsam erledigt, fair verteilt.', 'Done together, shared fairly.');
+  String get tagline =>
+      _t('Gemeinsam erledigt, fair verteilt.', 'Done together, shared fairly.');
   String openToday(int n) => _de
       ? (n == 1 ? '1 Aufgabe offen' : '$n Aufgaben offen')
       : (n == 1 ? '1 task open' : '$n tasks open');
@@ -75,14 +77,16 @@ class ShowcaseStrings {
   // Neue Aufgabe
   String get newTask => _t('Neue Aufgabe', 'New task');
   String get taskTitleLabel => _t('Was ist zu tun?', 'What needs doing?');
-  String get taskTitleHint => _t('z. B. Müll rausbringen', 'e.g. take out the trash');
+  String get taskTitleHint =>
+      _t('z. B. Müll rausbringen', 'e.g. take out the trash');
   String get listLabel => _t('Liste', 'List');
   String get weightLabel => _t('Aufwand', 'Effort');
   String get assigneeLabel => _t('Wer macht’s?', 'Who does it?');
   String get suggestedTurn => _t('Vorschlag: dran', 'Suggested: next up');
   String get create => _t('Anlegen', 'Create');
   String get cancel => _t('Abbrechen', 'Cancel');
-  String taskCreated(String title) => _t('„$title“ angelegt', '“$title” created');
+  String taskCreated(String title) =>
+      _t('„$title“ angelegt', '“$title” created');
   String get taskDeleted => _t('Aufgabe gelöscht', 'Task deleted');
   String get undo => _t('Rückgängig', 'Undo');
   String get weightLight => _t('leicht', 'light');
@@ -96,7 +100,8 @@ class ShowcaseStrings {
   // Listendetail
   String get detailMembers => _t('Mitglieder', 'Members');
   String get detailProgress => _t('Fortschritt', 'Progress');
-  String doneOf(int done, int total) => _t('$done von $total erledigt', '$done of $total done');
+  String doneOf(int done, int total) =>
+      _t('$done von $total erledigt', '$done of $total done');
 
   // Platzhalter-Reiter
   String get comingLater => _t(

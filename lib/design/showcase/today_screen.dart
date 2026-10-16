@@ -16,7 +16,11 @@ import 'showcase_theme_scope.dart';
 /// Verlauf, Kennzahlen, heutige Aufgaben aller Listen (abhakbar mit
 /// Konfetti), Einkauf, Fairness-Karte und Schnellaktion „Neue Aufgabe“.
 class TdTodayScreen extends StatefulWidget {
-  const TdTodayScreen({super.key, this.onOpenGallery, this.userName = 'Martin'});
+  const TdTodayScreen({
+    super.key,
+    this.onOpenGallery,
+    this.userName = 'Martin',
+  });
 
   /// Öffnet die Design-Galerie (nur im Debug-Einstieg gesetzt).
   final VoidCallback? onOpenGallery;
@@ -56,7 +60,8 @@ class _TdTodayScreenState extends State<TdTodayScreen> {
       variant: TdToastVariant.info,
       icon: Icons.delete_outline_rounded,
       actionLabel: s.undo,
-      onAction: () => setState(() => _tasks.insert(index.clamp(0, _tasks.length), task)),
+      onAction: () =>
+          setState(() => _tasks.insert(index.clamp(0, _tasks.length), task)),
     );
   }
 
@@ -81,11 +86,8 @@ class _TdTodayScreenState extends State<TdTodayScreen> {
         : _tasks.where((t) => t.listId == list.id).toList();
     Navigator.of(context).push(
       TdPageRoute(
-        builder: (_) => TdListDetailScreen(
-          list: list,
-          tasks: tasks,
-          onToggle: _toggle,
-        ),
+        builder: (_) =>
+            TdListDetailScreen(list: list, tasks: tasks, onToggle: _toggle),
       ),
     );
   }
@@ -94,10 +96,22 @@ class _TdTodayScreenState extends State<TdTodayScreen> {
   Widget build(BuildContext context) {
     final s = ShowcaseStrings.of(context);
     final destinations = [
-      TdDestination(icon: Icons.wb_sunny_outlined, selectedIcon: Icons.wb_sunny_rounded, label: s.navToday),
+      TdDestination(
+        icon: Icons.wb_sunny_outlined,
+        selectedIcon: Icons.wb_sunny_rounded,
+        label: s.navToday,
+      ),
       TdDestination(icon: Icons.checklist_rounded, label: s.navLists),
-      TdDestination(icon: Icons.balance_outlined, selectedIcon: Icons.balance_rounded, label: s.navFair),
-      TdDestination(icon: Icons.person_outline_rounded, selectedIcon: Icons.person_rounded, label: s.navProfile),
+      TdDestination(
+        icon: Icons.balance_outlined,
+        selectedIcon: Icons.balance_rounded,
+        label: s.navFair,
+      ),
+      TdDestination(
+        icon: Icons.person_outline_rounded,
+        selectedIcon: Icons.person_rounded,
+        label: s.navProfile,
+      ),
     ];
 
     return TdAdaptiveScaffold(
@@ -215,39 +229,47 @@ class _TdTodayScreenState extends State<TdTodayScreen> {
       ],
     );
 
-    return CustomScrollView(
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(TdSpace.page, TdSpace.lg, TdSpace.page, 120),
-          sliver: SliverList.list(
-            children: [
-              TdFadeSlideIn(index: 0, child: header),
-              const SizedBox(height: TdSpace.lg),
-              TdFadeSlideIn(index: 1, child: stats),
-              if (wide)
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(flex: 5, child: tasksSection),
-                    const SizedBox(width: TdSpace.xl),
-                    Expanded(
-                      flex: 4,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [fairnessSection, shoppingSection],
+    return SafeArea(
+      bottom: false,
+      child: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(
+              TdSpace.page,
+              TdSpace.lg,
+              TdSpace.page,
+              120,
+            ),
+            sliver: SliverList.list(
+              children: [
+                TdFadeSlideIn(index: 0, child: header),
+                const SizedBox(height: TdSpace.lg),
+                TdFadeSlideIn(index: 1, child: stats),
+                if (wide)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(flex: 5, child: tasksSection),
+                      const SizedBox(width: TdSpace.xl),
+                      Expanded(
+                        flex: 4,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [fairnessSection, shoppingSection],
+                        ),
                       ),
-                    ),
-                  ],
-                )
-              else ...[
-                tasksSection,
-                shoppingSection,
-                fairnessSection,
+                    ],
+                  )
+                else ...[
+                  tasksSection,
+                  shoppingSection,
+                  fairnessSection,
+                ],
               ],
-            ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -259,9 +281,21 @@ class _TdTodayScreenState extends State<TdTodayScreen> {
   Widget _dueTag(DemoDue due, ShowcaseStrings s) {
     final td = context.td;
     return switch (due) {
-      DemoDue.overdue => TdTag(label: s.overdue, color: td.danger, icon: Icons.schedule_rounded),
-      DemoDue.tonight => TdTag(label: s.dueTonight, color: td.warning, icon: Icons.nightlight_round),
-      DemoDue.today => TdTag(label: s.dueToday, icon: Icons.today_rounded, filled: false),
+      DemoDue.overdue => TdTag(
+        label: s.overdue,
+        color: td.danger,
+        icon: Icons.schedule_rounded,
+      ),
+      DemoDue.tonight => TdTag(
+        label: s.dueTonight,
+        color: td.warning,
+        icon: Icons.nightlight_round,
+      ),
+      DemoDue.today => TdTag(
+        label: s.dueToday,
+        icon: Icons.today_rounded,
+        filled: false,
+      ),
       DemoDue.later => const SizedBox.shrink(),
     };
   }
@@ -317,7 +351,9 @@ class _TodayHeader extends StatelessWidget {
                     const SizedBox(height: TdSpace.xs),
                     Text(
                       s.greeting(userName, hour),
-                      style: context.text.headlineLarge?.copyWith(color: Colors.white),
+                      style: context.text.headlineLarge?.copyWith(
+                        color: Colors.white,
+                      ),
                     ),
                     const SizedBox(height: TdSpace.xs),
                     Text(
@@ -357,13 +393,18 @@ class _TodayHeader extends StatelessWidget {
               ),
               if (scope != null) ...[
                 _GlassIconButton(
-                  icon: scope.isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                  icon: scope.isDark
+                      ? Icons.light_mode_rounded
+                      : Icons.dark_mode_rounded,
                   onTap: scope.toggleMode,
                 ),
                 const SizedBox(width: TdSpace.sm),
               ],
               if (onOpenGallery != null)
-                _GlassIconButton(icon: Icons.palette_outlined, onTap: onOpenGallery!),
+                _GlassIconButton(
+                  icon: Icons.palette_outlined,
+                  onTap: onOpenGallery!,
+                ),
             ],
           ),
         ],
@@ -399,7 +440,11 @@ class _GlassIconButton extends StatelessWidget {
 }
 
 class _StatsRow extends StatelessWidget {
-  const _StatsRow({required this.open, required this.doneWeek, required this.myShare});
+  const _StatsRow({
+    required this.open,
+    required this.doneWeek,
+    required this.myShare,
+  });
 
   final int open;
   final int doneWeek;
@@ -410,36 +455,39 @@ class _StatsRow extends StatelessWidget {
     final s = ShowcaseStrings.of(context);
     final td = context.td;
     final scheme = context.colors;
-    return Row(
-      children: [
-        Expanded(
-          child: _StatCard(
-            value: open,
-            label: s.statOpen,
-            icon: Icons.radio_button_unchecked_rounded,
-            color: scheme.primary,
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: _StatCard(
+              value: open,
+              label: s.statOpen,
+              icon: Icons.radio_button_unchecked_rounded,
+              color: scheme.primary,
+            ),
           ),
-        ),
-        const SizedBox(width: TdSpace.md),
-        Expanded(
-          child: _StatCard(
-            value: doneWeek,
-            label: s.statDoneWeek,
-            icon: Icons.check_circle_rounded,
-            color: td.success,
+          const SizedBox(width: TdSpace.md),
+          Expanded(
+            child: _StatCard(
+              value: doneWeek,
+              label: s.statDoneWeek,
+              icon: Icons.check_circle_rounded,
+              color: td.success,
+            ),
           ),
-        ),
-        const SizedBox(width: TdSpace.md),
-        Expanded(
-          child: _StatCard(
-            value: myShare,
-            format: (v) => '${v.round()} %',
-            label: s.statFairness,
-            icon: Icons.balance_rounded,
-            color: scheme.secondary,
+          const SizedBox(width: TdSpace.md),
+          Expanded(
+            child: _StatCard(
+              value: myShare,
+              format: (v) => '${v.round()} %',
+              label: s.statFairness,
+              icon: Icons.balance_rounded,
+              color: scheme.secondary,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -525,7 +573,10 @@ class _ShoppingCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Icon(Icons.chevron_right_rounded, color: context.colors.onSurfaceVariant),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: context.colors.onSurfaceVariant,
+                  ),
                 ],
               ),
             ),
@@ -584,13 +635,17 @@ class _FairnessCard extends StatelessWidget {
     final shares = [
       for (final p in DemoData.people)
         TdFairnessShare(
-          person: p.id == 'me' ? TdAvatarData(id: 'me', name: s.you, color: p.color) : p,
+          person: p.id == 'me'
+              ? TdAvatarData(id: 'me', name: s.you, color: p.color)
+              : p,
           value: DemoData.weekPoints[p.id] ?? 0,
         ),
     ];
     final top = shares.reduce((a, b) => a.value >= b.value ? a : b);
     final me = shares.firstWhere((x) => x.person.id == 'me');
-    final hint = top.value > me.value * 1.2 ? s.fairnessHint(top.person.name) : s.fairnessBalanced;
+    final hint = top.value > me.value * 1.2
+        ? s.fairnessHint(top.person.name)
+        : s.fairnessBalanced;
 
     return TdCard(
       child: Column(
@@ -601,12 +656,18 @@ class _FairnessCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(TdSpace.md),
             decoration: BoxDecoration(
-              color: context.colors.secondaryContainer.withValues(alpha: td.isDark ? 0.5 : 1),
+              color: context.colors.secondaryContainer.withValues(
+                alpha: td.isDark ? 0.5 : 1,
+              ),
               borderRadius: TdRadius.control,
             ),
             child: Row(
               children: [
-                Icon(Icons.auto_awesome_rounded, color: context.colors.secondary, size: 20),
+                Icon(
+                  Icons.auto_awesome_rounded,
+                  color: context.colors.secondary,
+                  size: 20,
+                ),
                 const SizedBox(width: TdSpace.md),
                 Expanded(
                   child: Text(
@@ -733,7 +794,11 @@ class _NewTaskFormState extends State<_NewTaskForm> {
         const SizedBox(height: TdSpace.sm),
         Row(
           children: [
-            Icon(Icons.auto_awesome_rounded, size: 14, color: context.colors.secondary),
+            Icon(
+              Icons.auto_awesome_rounded,
+              size: 14,
+              color: context.colors.secondary,
+            ),
             const SizedBox(width: TdSpace.xs),
             Text(
               '${s.suggestedTurn}: ${DemoData.leo.name}',
@@ -802,7 +867,12 @@ class _TdListDetailScreenState extends State<TdListDetailScreen> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 760),
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(TdSpace.page, 0, TdSpace.page, TdSpace.xxxl),
+            padding: const EdgeInsets.fromLTRB(
+              TdSpace.page,
+              0,
+              TdSpace.page,
+              TdSpace.xxxl,
+            ),
             children: [
               Row(
                 children: [
@@ -840,15 +910,26 @@ class _TdListDetailScreenState extends State<TdListDetailScreen> {
                     children: [
                       Row(
                         children: [
-                          Expanded(child: Text(s.detailProgress, style: context.text.titleMedium)),
-                          Text(s.doneOf(done, total), style: context.text.bodySmall),
+                          Expanded(
+                            child: Text(
+                              s.detailProgress,
+                              style: context.text.titleMedium,
+                            ),
+                          ),
+                          Text(
+                            s.doneOf(done, total),
+                            style: context.text.bodySmall,
+                          ),
                         ],
                       ),
                       const SizedBox(height: TdSpace.md),
                       TdProgressBar(
                         value: total == 0 ? 0 : done / total,
                         gradient: LinearGradient(
-                          colors: [list.color, Color.lerp(list.color, Colors.white, 0.3)!],
+                          colors: [
+                            list.color,
+                            Color.lerp(list.color, Colors.white, 0.3)!,
+                          ],
                         ),
                       ),
                     ],
@@ -869,7 +950,9 @@ class _TdListDetailScreenState extends State<TdListDetailScreen> {
                       accent: list.color,
                       assignee: task.assignee,
                       leadingLabel: task.quantity,
-                      tags: list.isShopping ? const [] : [TdWeightTag(weight: task.weight)],
+                      tags: list.isShopping
+                          ? const []
+                          : [TdWeightTag(weight: task.weight)],
                       onChanged: (v) {
                         widget.onToggle(task, v);
                         setState(() {});

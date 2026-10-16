@@ -11,7 +11,11 @@ import 'package:togetherdo/design/showcase/today_screen.dart';
 import 'package:togetherdo/design/td_design.dart';
 import 'package:togetherdo/utils/app_theme.dart';
 
-Widget _wrap(Widget child, {Size size = const Size(390, 844), String theme = 'Light'}) {
+Widget _wrap(
+  Widget child, {
+  Size size = const Size(390, 844),
+  String theme = 'Light',
+}) {
   return MediaQuery(
     data: MediaQueryData(size: size),
     child: MaterialApp(
@@ -42,8 +46,17 @@ void main() {
 
     test('AppTheme kennt alle bisherigen Namen und den Standard', () {
       for (final name in [
-        'Light', 'Dark', 'Matrix', 'Neo', 'Summer', 'Aurora',
-        'Sunset', 'Ocean', 'Forest', 'Galaxy', 'Fiberoptics25',
+        'Light',
+        'Dark',
+        'Matrix',
+        'Neo',
+        'Summer',
+        'Aurora',
+        'Sunset',
+        'Ocean',
+        'Forest',
+        'Galaxy',
+        'Fiberoptics25',
       ]) {
         expect(AppTheme.themes.containsKey(name), isTrue, reason: name);
       }
@@ -58,10 +71,16 @@ void main() {
 
     testWidgets('context.td liefert Erweiterung', (tester) async {
       late TdTheme td;
-      await tester.pumpWidget(_wrap(Builder(builder: (c) {
-        td = c.td;
-        return const SizedBox();
-      })));
+      await tester.pumpWidget(
+        _wrap(
+          Builder(
+            builder: (c) {
+              td = c.td;
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
       expect(td.palette.id, 'Light');
       expect(td.confettiColors, isNotEmpty);
     });
@@ -70,16 +89,22 @@ void main() {
   group('TdButton', () {
     testWidgets('ruft onPressed, nicht bei loading', (tester) async {
       var taps = 0;
-      await tester.pumpWidget(_wrap(
-        TdButton.primary(label: 'Anlegen', onPressed: () => taps++),
-      ));
+      await tester.pumpWidget(
+        _wrap(TdButton.primary(label: 'Anlegen', onPressed: () => taps++)),
+      );
       await tester.tap(find.text('Anlegen'));
       await tester.pumpAndSettle();
       expect(taps, 1);
 
-      await tester.pumpWidget(_wrap(
-        TdButton.primary(label: 'Anlegen', loading: true, onPressed: () => taps++),
-      ));
+      await tester.pumpWidget(
+        _wrap(
+          TdButton.primary(
+            label: 'Anlegen',
+            loading: true,
+            onPressed: () => taps++,
+          ),
+        ),
+      );
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       await tester.tap(find.byType(TdButton));
@@ -89,18 +114,22 @@ void main() {
   });
 
   group('TdTaskTile', () {
-    testWidgets('Haken antippen meldet true und streicht durch', (tester) async {
+    testWidgets('Haken antippen meldet true und streicht durch', (
+      tester,
+    ) async {
       bool? value;
-      await tester.pumpWidget(_wrap(
-        StatefulBuilder(
-          builder: (context, setState) => TdTaskTile(
-            title: 'Müll rausbringen',
-            done: value ?? false,
-            onChanged: (v) => setState(() => value = v),
-            onDelete: () {},
+      await tester.pumpWidget(
+        _wrap(
+          StatefulBuilder(
+            builder: (context, setState) => TdTaskTile(
+              title: 'Müll rausbringen',
+              done: value ?? false,
+              onChanged: (v) => setState(() => value = v),
+              onDelete: () {},
+            ),
           ),
         ),
-      ));
+      );
       expect(find.text('Müll rausbringen'), findsOneWidget);
       await tester.tap(find.byType(TdCheck));
       await tester.pumpAndSettle();
@@ -110,7 +139,9 @@ void main() {
     });
 
     testWidgets('ohne onChanged nicht abhakbar', (tester) async {
-      await tester.pumpWidget(_wrap(const TdTaskTile(title: 'Gesperrt', done: false)));
+      await tester.pumpWidget(
+        _wrap(const TdTaskTile(title: 'Gesperrt', done: false)),
+      );
       expect(find.byType(Dismissible), findsNothing);
       await tester.tap(find.byType(TdCheck));
       await tester.pumpAndSettle();
@@ -118,9 +149,16 @@ void main() {
 
     testWidgets('Wischen nach links löscht', (tester) async {
       var deleted = false;
-      await tester.pumpWidget(_wrap(
-        TdTaskTile(title: 'Weg damit', done: false, onChanged: (_) {}, onDelete: () => deleted = true),
-      ));
+      await tester.pumpWidget(
+        _wrap(
+          TdTaskTile(
+            title: 'Weg damit',
+            done: false,
+            onChanged: (_) {},
+            onDelete: () => deleted = true,
+          ),
+        ),
+      );
       await tester.drag(find.text('Weg damit'), const Offset(-400, 0));
       await tester.pumpAndSettle();
       expect(deleted, isTrue);
@@ -137,16 +175,20 @@ void main() {
     testWidgets('TdAnimatedList entfernt Einträge animiert', (tester) async {
       var items = ['a', 'b', 'c'];
       late StateSetter set;
-      await tester.pumpWidget(_wrap(
-        StatefulBuilder(builder: (context, setState) {
-          set = setState;
-          return TdAnimatedList<String>(
-            items: items,
-            keyOf: (s) => s,
-            itemBuilder: (c, s, i) => Text('Eintrag $s'),
-          );
-        }),
-      ));
+      await tester.pumpWidget(
+        _wrap(
+          StatefulBuilder(
+            builder: (context, setState) {
+              set = setState;
+              return TdAnimatedList<String>(
+                items: items,
+                keyOf: (s) => s,
+                itemBuilder: (c, s, i) => Text('Eintrag $s'),
+              );
+            },
+          ),
+        ),
+      );
       expect(find.text('Eintrag b'), findsOneWidget);
       set(() => items = ['a', 'c']);
       await tester.pump();
@@ -159,21 +201,30 @@ void main() {
     });
 
     testWidgets('TdFairnessBar zeigt Prozent je Person', (tester) async {
-      await tester.pumpWidget(_wrap(
-        const TdFairnessBar(shares: [
-          TdFairnessShare(person: TdAvatarData(name: 'Anna'), value: 3),
-          TdFairnessShare(person: TdAvatarData(name: 'Leo'), value: 1),
-        ]),
-      ));
+      await tester.pumpWidget(
+        _wrap(
+          const TdFairnessBar(
+            shares: [
+              TdFairnessShare(person: TdAvatarData(name: 'Anna'), value: 3),
+              TdFairnessShare(person: TdAvatarData(name: 'Leo'), value: 1),
+            ],
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.text('75 %'), findsOneWidget);
       expect(find.text('25 %'), findsOneWidget);
     });
 
-    testWidgets('Bewegung reduzieren: Konfetti wird übersprungen', (tester) async {
+    testWidgets('Bewegung reduzieren: Konfetti wird übersprungen', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MediaQuery(
-          data: const MediaQueryData(size: Size(390, 844), disableAnimations: true),
+          data: const MediaQueryData(
+            size: Size(390, 844),
+            disableAnimations: true,
+          ),
           child: MaterialApp(
             theme: AppTheme.of('Light'),
             home: Scaffold(
@@ -191,7 +242,9 @@ void main() {
       await tester.pump();
       expect(find.byType(ConfettiPainter), findsNothing);
       expect(
-        tester.widgetList(find.byType(CustomPaint)).where((w) => (w as CustomPaint).painter is ConfettiPainter),
+        tester
+            .widgetList(find.byType(CustomPaint))
+            .where((w) => (w as CustomPaint).painter is ConfettiPainter),
         isEmpty,
       );
     });
@@ -228,7 +281,9 @@ void main() {
   });
 
   group('Vorzeige-Bildschirme', () {
-    testWidgets('Heute: Begrüßung, Aufgaben, Abhaken, neue Aufgabe', (tester) async {
+    testWidgets('Heute: Begrüßung, Aufgaben, Abhaken, neue Aufgabe', (
+      tester,
+    ) async {
       await tester.pumpWidget(_wrap(const TdTodayScreen(userName: 'Martin')));
       await tester.pump(const Duration(seconds: 1));
       await tester.pumpAndSettle();
@@ -251,14 +306,18 @@ void main() {
     });
 
     testWidgets('Heute auf iPad: zwei Spalten mit Schiene', (tester) async {
-      await tester.pumpWidget(_wrap(const TdTodayScreen(), size: const Size(1024, 1366)));
+      await tester.pumpWidget(
+        _wrap(const TdTodayScreen(), size: const Size(1024, 1366)),
+      );
       await tester.pumpAndSettle();
       expect(find.byType(NavigationRail), findsOneWidget);
       expect(find.text('Fair verteilt'), findsOneWidget);
     });
 
     testWidgets('Galerie baut in hell und dunkel', (tester) async {
-      await tester.pumpWidget(_wrap(const TdDesignGalleryScreen(), size: const Size(1400, 1000)));
+      await tester.pumpWidget(
+        _wrap(const TdDesignGalleryScreen(), size: const Size(1400, 1000)),
+      );
       await tester.pumpAndSettle();
       expect(find.text('Light'), findsWidgets);
       expect(find.text('Dark'), findsWidgets);
@@ -267,10 +326,12 @@ void main() {
     });
 
     testWidgets('Galerie Fiberoptics25', (tester) async {
-      await tester.pumpWidget(_wrap(
-        const TdDesignGalleryScreen(initialPaletteId: 'Fiberoptics25'),
-        size: const Size(390, 844),
-      ));
+      await tester.pumpWidget(
+        _wrap(
+          const TdDesignGalleryScreen(initialPaletteId: 'Fiberoptics25'),
+          size: const Size(390, 844),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.text('Fiberoptics25'), findsWidgets);
     });

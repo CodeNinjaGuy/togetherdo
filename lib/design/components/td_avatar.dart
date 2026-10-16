@@ -23,7 +23,8 @@ class TdAvatarData {
     final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
     if (parts.isEmpty) return '?';
     if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
-    return (parts.first.substring(0, 1) + parts.last.substring(0, 1)).toUpperCase();
+    return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
+        .toUpperCase();
   }
 
   /// Warme, gut unterscheidbare Farben; stabil je Name.
@@ -79,7 +80,10 @@ class TdAvatar extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         border: borderWidth > 0
-            ? Border.all(color: borderColor ?? context.colors.surface, width: borderWidth)
+            ? Border.all(
+                color: borderColor ?? context.colors.surface,
+                width: borderWidth,
+              )
             : null,
         image: url != null && url.isNotEmpty
             ? DecorationImage(image: NetworkImage(url), fit: BoxFit.cover)

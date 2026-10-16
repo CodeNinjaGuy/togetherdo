@@ -22,9 +22,7 @@ abstract final class TdThemeBuilder {
     final td = TdTheme.fromPalette(p);
     final outline = p.outline ?? scheme.outlineVariant;
 
-    final controlShape = RoundedRectangleBorder(
-      borderRadius: TdRadius.control,
-    );
+    final controlShape = RoundedRectangleBorder(borderRadius: TdRadius.control);
     const controlPadding = EdgeInsets.symmetric(
       horizontal: TdSpace.xl,
       vertical: TdSpace.lg,

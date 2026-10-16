@@ -53,7 +53,8 @@ class TdProgressBar extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   color: gradient == null ? (color ?? scheme.primary) : null,
-                  gradient: gradient ?? (color == null ? td.primaryGradient : null),
+                  gradient:
+                      gradient ?? (color == null ? td.primaryGradient : null),
                   borderRadius: BorderRadius.circular(height),
                 ),
               ),
@@ -119,16 +120,25 @@ class TdFairnessBar extends StatelessWidget {
                     Flexible(
                       flex: total == 0
                           ? 1
-                          : math.max(1, (shares[i].value / total * 1000 * t).round()),
+                          : math.max(
+                              1,
+                              (shares[i].value / total * 1000 * t).round(),
+                            ),
                       child: Container(
-                        margin: EdgeInsets.only(right: i < shares.length - 1 ? 2 : 0),
+                        margin: EdgeInsets.only(
+                          right: i < shares.length - 1 ? 2 : 0,
+                        ),
                         decoration: BoxDecoration(
                           color: shares[i].person.resolveColor(),
                           borderRadius: BorderRadius.circular(height),
                         ),
                       ),
                     ),
-                  if (t < 1) Flexible(flex: math.max(1, (1000 * (1 - t)).round()), child: const SizedBox()),
+                  if (t < 1)
+                    Flexible(
+                      flex: math.max(1, (1000 * (1 - t)).round()),
+                      child: const SizedBox(),
+                    ),
                 ],
               ),
             ),

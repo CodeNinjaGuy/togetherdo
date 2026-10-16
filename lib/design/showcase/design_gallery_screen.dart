@@ -64,7 +64,9 @@ class _TdDesignGalleryScreenState extends State<TdDesignGalleryScreen> {
                             height: 14,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              gradient: LinearGradient(colors: p.resolvedHeroGradient),
+                              gradient: LinearGradient(
+                                colors: p.resolvedHeroGradient,
+                              ),
                             ),
                           ),
                           const SizedBox(width: TdSpace.sm),
@@ -92,14 +94,25 @@ class _TdDesignGalleryScreenState extends State<TdDesignGalleryScreen> {
                   padding: const EdgeInsets.all(TdSpace.md),
                   child: SegmentedButton<bool>(
                     segments: [
-                      ButtonSegment(value: false, label: Text(s.light), icon: const Icon(Icons.light_mode_outlined)),
-                      ButtonSegment(value: true, label: Text(s.dark), icon: const Icon(Icons.dark_mode_outlined)),
+                      ButtonSegment(
+                        value: false,
+                        label: Text(s.light),
+                        icon: const Icon(Icons.light_mode_outlined),
+                      ),
+                      ButtonSegment(
+                        value: true,
+                        label: Text(s.dark),
+                        icon: const Icon(Icons.dark_mode_outlined),
+                      ),
                     ],
                     selected: {_showDark},
-                    onSelectionChanged: (v) => setState(() => _showDark = v.first),
+                    onSelectionChanged: (v) =>
+                        setState(() => _showDark = v.first),
                   ),
                 ),
-                Expanded(child: _ThemedColumn(palette: _showDark ? second : first)),
+                Expanded(
+                  child: _ThemedColumn(palette: _showDark ? second : first),
+                ),
               ],
             ),
     );
@@ -120,7 +133,12 @@ class _ThemedColumn extends StatelessWidget {
         builder: (ctx) => Container(
           color: theme.scaffoldBackgroundColor,
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(TdSpace.page, TdSpace.lg, TdSpace.page, TdSpace.xxxl),
+            padding: const EdgeInsets.fromLTRB(
+              TdSpace.page,
+              TdSpace.lg,
+              TdSpace.page,
+              TdSpace.xxxl,
+            ),
             children: [
               Text(palette.id, style: ctx.text.displaySmall),
               Text(
@@ -135,9 +153,15 @@ class _ThemedColumn extends StatelessWidget {
               const _Section(title: 'Karten', child: _CardsDemo()),
               const _Section(title: 'Listenzeilen', child: _TilesDemo()),
               const _Section(title: 'Avatare', child: _AvatarsDemo()),
-              const _Section(title: 'Fortschritt & Fairness', child: _ProgressDemo()),
+              const _Section(
+                title: 'Fortschritt & Fairness',
+                child: _ProgressDemo(),
+              ),
               const _Section(title: 'Leerzustand', child: _EmptyDemo()),
-              const _Section(title: 'Sheet, Toast, Konfetti', child: _OverlaysDemo()),
+              const _Section(
+                title: 'Sheet, Toast, Konfetti',
+                child: _OverlaysDemo(),
+              ),
             ],
           ),
         ),
@@ -187,7 +211,10 @@ class _ColorsDemo extends StatelessWidget {
       children: [
         Container(
           height: 56,
-          decoration: BoxDecoration(gradient: td.heroGradient, borderRadius: TdRadius.control),
+          decoration: BoxDecoration(
+            gradient: td.heroGradient,
+            borderRadius: TdRadius.control,
+          ),
         ),
         const SizedBox(height: TdSpace.md),
         Wrap(
@@ -231,8 +258,14 @@ class _TypographyDemo extends StatelessWidget {
         Text('Überschrift klein', style: t.headlineSmall),
         Text('Titel mittel', style: t.titleMedium),
         const SizedBox(height: TdSpace.sm),
-        Text('Fließtext groß: Paare, Familien und WGs teilen Aufgaben.', style: t.bodyLarge),
-        Text('Fließtext mittel: Wer wie viel trägt, wird sichtbar.', style: t.bodyMedium),
+        Text(
+          'Fließtext groß: Paare, Familien und WGs teilen Aufgaben.',
+          style: t.bodyLarge,
+        ),
+        Text(
+          'Fließtext mittel: Wer wie viel trägt, wird sichtbar.',
+          style: t.bodyMedium,
+        ),
         Text('Hinweis klein, gedämpft', style: t.bodySmall),
         const SizedBox(height: TdSpace.sm),
         Text('BESCHRIFTUNG', style: t.labelSmall),
@@ -269,13 +302,33 @@ class _ButtonsDemoState extends State<_ButtonsDemo> {
           },
         ),
         TdButton.secondary(label: 'Abbrechen', onPressed: () {}),
-        TdButton.tonal(label: 'Teilen', icon: Icons.ios_share_rounded, onPressed: () {}),
+        TdButton.tonal(
+          label: 'Teilen',
+          icon: Icons.ios_share_rounded,
+          onPressed: () {},
+        ),
         TdButton.ghost(label: 'Mehr', onPressed: () {}),
-        TdButton.danger(label: 'Löschen', icon: Icons.delete_outline_rounded, onPressed: () {}),
+        TdButton.danger(
+          label: 'Löschen',
+          icon: Icons.delete_outline_rounded,
+          onPressed: () {},
+        ),
         const TdButton.primary(label: 'Inaktiv'),
-        TdButton.primary(label: 'Klein', size: TdButtonSize.small, onPressed: () {}),
-        TdIconButton(icon: Icons.notifications_outlined, badge: 3, onPressed: () {}),
-        TdIconButton(icon: Icons.chat_bubble_outline_rounded, filled: true, onPressed: () {}),
+        TdButton.primary(
+          label: 'Klein',
+          size: TdButtonSize.small,
+          onPressed: () {},
+        ),
+        TdIconButton(
+          icon: Icons.notifications_outlined,
+          badge: 3,
+          onPressed: () {},
+        ),
+        TdIconButton(
+          icon: Icons.chat_bubble_outline_rounded,
+          filled: true,
+          onPressed: () {},
+        ),
       ],
     );
   }
@@ -288,9 +341,18 @@ class _InputsDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Column(
       children: [
-        TdTextField(label: 'E-Mail', hint: 'name@beispiel.de', prefixIcon: Icons.mail_outline_rounded),
+        TdTextField(
+          label: 'E-Mail',
+          hint: 'name@beispiel.de',
+          prefixIcon: Icons.mail_outline_rounded,
+        ),
         SizedBox(height: TdSpace.md),
-        TdTextField(label: 'Passwort', hint: '••••••••', prefixIcon: Icons.lock_outline_rounded, obscureText: true),
+        TdTextField(
+          label: 'Passwort',
+          hint: '••••••••',
+          prefixIcon: Icons.lock_outline_rounded,
+          obscureText: true,
+        ),
         SizedBox(height: TdSpace.md),
         TdTextField(hint: 'Suchen …', prefixIcon: Icons.search_rounded),
       ],
@@ -333,10 +395,26 @@ class _ChipsDemoState extends State<_ChipsDemo> {
           spacing: TdSpace.sm,
           runSpacing: TdSpace.sm,
           children: [
-            const TdTag(label: 'Haushalt', icon: Icons.home_rounded, color: Color(0xFF6A5AE0)),
-            TdTag(label: 'überfällig', icon: Icons.schedule_rounded, color: td.danger),
-            TdTag(label: 'heute Abend', icon: Icons.nightlight_round, color: td.warning),
-            const TdTag(label: 'heute', icon: Icons.today_rounded, filled: false),
+            const TdTag(
+              label: 'Haushalt',
+              icon: Icons.home_rounded,
+              color: Color(0xFF6A5AE0),
+            ),
+            TdTag(
+              label: 'überfällig',
+              icon: Icons.schedule_rounded,
+              color: td.danger,
+            ),
+            TdTag(
+              label: 'heute Abend',
+              icon: Icons.nightlight_round,
+              color: td.warning,
+            ),
+            const TdTag(
+              label: 'heute',
+              icon: Icons.today_rounded,
+              filled: false,
+            ),
             const TdWeightTag(weight: TdWeight.light, label: 'leicht'),
             const TdWeightTag(weight: TdWeight.medium, label: 'mittel'),
             const TdWeightTag(weight: TdWeight.heavy, label: 'schwer'),
@@ -372,7 +450,10 @@ class _CardsDemo extends StatelessWidget {
                 top: 0,
                 child: TdCard(
                   variant: TdCardVariant.glass,
-                  padding: const EdgeInsets.symmetric(horizontal: TdSpace.md, vertical: TdSpace.sm),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: TdSpace.md,
+                    vertical: TdSpace.sm,
+                  ),
                   child: const Text('Glas'),
                 ),
               ),
@@ -413,7 +494,10 @@ class _TilesDemoState extends State<_TilesDemo> {
             accent: DemoData.listById(t.listId).color,
             assignee: t.assignee,
             tags: [
-              TdTag(label: DemoData.listById(t.listId).name, color: DemoData.listById(t.listId).color),
+              TdTag(
+                label: DemoData.listById(t.listId).name,
+                color: DemoData.listById(t.listId).color,
+              ),
               TdWeightTag(weight: t.weight),
             ],
             onChanged: (v) => setState(() => t.done = v),
@@ -429,7 +513,10 @@ class _TilesDemoState extends State<_TilesDemo> {
           onChanged: (v) => setState(() => _item.done = v),
         ),
         const SizedBox(height: TdSpace.sm),
-        const TdTaskTile(title: 'Ohne Berechtigung (nicht abhakbar)', done: false),
+        const TdTaskTile(
+          title: 'Ohne Berechtigung (nicht abhakbar)',
+          done: false,
+        ),
       ],
     );
   }
@@ -493,7 +580,10 @@ class _ProgressDemoState extends State<_ProgressDemo> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TdAnimatedCounter(value: _count, style: context.text.displaySmall),
+                  TdAnimatedCounter(
+                    value: _count,
+                    style: context.text.displaySmall,
+                  ),
                   const SizedBox(height: TdSpace.sm),
                   TdProgressBar(value: _v),
                 ],
@@ -532,8 +622,13 @@ class _EmptyDemo extends StatelessWidget {
         compact: true,
         icon: Icons.shopping_basket_outlined,
         title: 'Noch nichts auf der Liste',
-        message: 'Füge den ersten Artikel hinzu – alle in der Liste sehen ihn sofort.',
-        action: TdButton.primary(label: 'Artikel hinzufügen', icon: Icons.add_rounded, onPressed: () {}),
+        message:
+            'Füge den ersten Artikel hinzu – alle in der Liste sehen ihn sofort.',
+        action: TdButton.primary(
+          label: 'Artikel hinzufügen',
+          icon: Icons.add_rounded,
+          onPressed: () {},
+        ),
       ),
     );
   }
@@ -559,7 +654,10 @@ class _OverlaysDemo extends StatelessWidget {
               children: [
                 const TdTextField(label: 'Name', hint: 'Neue Liste'),
                 const SizedBox(height: TdSpace.xl),
-                TdButton.primary(label: 'Fertig', onPressed: () => Navigator.of(ctx).pop()),
+                TdButton.primary(
+                  label: 'Fertig',
+                  onPressed: () => Navigator.of(ctx).pop(),
+                ),
               ],
             ),
           ),

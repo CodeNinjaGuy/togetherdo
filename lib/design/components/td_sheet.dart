@@ -21,7 +21,8 @@ Future<T?> showTdSheet<T>(
   final td = context.td;
   final scheme = context.colors;
 
-  Widget body(BuildContext ctx) => _SheetBody(title: title, child: builder(ctx));
+  Widget body(BuildContext ctx) =>
+      _SheetBody(title: title, child: builder(ctx));
 
   if (compact) {
     return showModalBottomSheet<T>(
@@ -97,10 +98,17 @@ class _SheetBody extends StatelessWidget {
           ),
         if (title != null)
           Padding(
-            padding: const EdgeInsets.fromLTRB(TdSpace.xl, TdSpace.xl, TdSpace.lg, 0),
+            padding: const EdgeInsets.fromLTRB(
+              TdSpace.xl,
+              TdSpace.xl,
+              TdSpace.lg,
+              0,
+            ),
             child: Row(
               children: [
-                Expanded(child: Text(title!, style: context.text.headlineSmall)),
+                Expanded(
+                  child: Text(title!, style: context.text.headlineSmall),
+                ),
                 if (!compact)
                   IconButton(
                     onPressed: () => Navigator.of(context).maybePop(),

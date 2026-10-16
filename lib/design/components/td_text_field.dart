@@ -75,7 +75,9 @@ class _TdTextFieldState extends State<TdTextField> {
     if (widget.obscureText) {
       suffix = IconButton(
         onPressed: () => setState(() => _obscure = !_obscure),
-        icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+        icon: Icon(
+          _obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+        ),
         tooltip: _obscure ? widget.showPasswordLabel : widget.hidePasswordLabel,
       );
     }
@@ -113,7 +115,9 @@ class _TdTextFieldState extends State<TdTextField> {
           decoration: InputDecoration(
             hintText: widget.hint,
             helperText: widget.helper,
-            prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
+            prefixIcon: widget.prefixIcon != null
+                ? Icon(widget.prefixIcon)
+                : null,
             suffixIcon: suffix,
           ),
         ),

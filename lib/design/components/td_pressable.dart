@@ -40,7 +40,8 @@ class TdPressable extends StatefulWidget {
 class _TdPressableState extends State<TdPressable> {
   bool _down = false;
 
-  bool get _active => widget.enabled && (widget.onTap != null || widget.onLongPress != null);
+  bool get _active =>
+      widget.enabled && (widget.onTap != null || widget.onLongPress != null);
 
   void _set(bool v) {
     if (_down != v && mounted) setState(() => _down = v);

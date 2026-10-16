@@ -162,10 +162,7 @@ class TdSectionHeader extends StatelessWidget {
               children: [
                 Text(title, style: context.text.titleLarge),
                 if (subtitle != null)
-                  Text(
-                    subtitle!,
-                    style: context.text.bodySmall,
-                  ),
+                  Text(subtitle!, style: context.text.bodySmall),
               ],
             ),
           ),

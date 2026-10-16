@@ -150,7 +150,10 @@ class _TdTaskTileState extends State<TdTaskTile> {
                   ),
                   if (widget.assignee != null) ...[
                     const SizedBox(width: TdSpace.md),
-                    TdAvatar(data: widget.assignee!, size: widget.dense ? 28 : 32),
+                    TdAvatar(
+                      data: widget.assignee!,
+                      size: widget.dense ? 28 : 32,
+                    ),
                   ],
                   if (widget.trailing != null) ...[
                     const SizedBox(width: TdSpace.sm),
@@ -180,12 +183,16 @@ class _TdTaskTileState extends State<TdTaskTile> {
     }
 
     final direction = widget.onDelete != null
-        ? (canToggle ? DismissDirection.horizontal : DismissDirection.endToStart)
+        ? (canToggle
+              ? DismissDirection.horizontal
+              : DismissDirection.endToStart)
         : (canToggle ? DismissDirection.startToEnd : DismissDirection.none);
     if (direction == DismissDirection.none) return tile;
 
     return Dismissible(
-      key: ValueKey('td-tile-${widget.heroTag ?? widget.title}-${identityHashCode(widget.onChanged)}'),
+      key: ValueKey(
+        'td-tile-${widget.heroTag ?? widget.title}-${identityHashCode(widget.onChanged)}',
+      ),
       direction: direction,
       dismissThresholds: const {
         DismissDirection.startToEnd: 0.3,
@@ -258,7 +265,12 @@ class _Leading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final check = TdCheck(value: done, enabled: enabled, onTap: onTap, accent: accent);
+    final check = TdCheck(
+      value: done,
+      enabled: enabled,
+      onTap: onTap,
+      accent: accent,
+    );
     if (label == null) return check;
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -267,7 +279,10 @@ class _Leading extends StatelessWidget {
         const SizedBox(width: TdSpace.sm),
         Container(
           constraints: const BoxConstraints(minWidth: 36),
-          padding: const EdgeInsets.symmetric(horizontal: TdSpace.sm, vertical: TdSpace.xs),
+          padding: const EdgeInsets.symmetric(
+            horizontal: TdSpace.sm,
+            vertical: TdSpace.xs,
+          ),
           decoration: BoxDecoration(
             color: context.colors.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(TdRadius.sm),
@@ -355,14 +370,18 @@ class _TdCheckState extends State<TdCheck> with SingleTickerProviderStateMixin {
             builder: (context, _) {
               final t = _c.value;
               // Überschwinger um 70 % des Weges.
-              final bump = t < 0.7 ? 1.0 : 1 + 0.18 * (1 - ((t - 0.7) / 0.3)) * ((t - 0.7) / 0.3) * 4;
+              final bump = t < 0.7
+                  ? 1.0
+                  : 1 + 0.18 * (1 - ((t - 0.7) / 0.3)) * ((t - 0.7) / 0.3) * 4;
               return Transform.scale(
                 scale: bump,
                 child: CustomPaint(
                   size: Size.square(widget.size),
                   painter: _CheckPainter(
                     t: t,
-                    ring: widget.enabled ? scheme.outline : scheme.outlineVariant,
+                    ring: widget.enabled
+                        ? scheme.outline
+                        : scheme.outlineVariant,
                     fill: fill,
                     check: Colors.white,
                   ),
@@ -472,8 +491,10 @@ class _StrikeText extends StatelessWidget {
     if (heroTag != null) {
       label = Hero(
         tag: heroTag!,
-        flightShuttleBuilder: (_, _, _, _, _) =>
-            DefaultTextStyle(style: style ?? const TextStyle(), child: Text(text)),
+        flightShuttleBuilder: (_, _, _, _, _) => DefaultTextStyle(
+          style: style ?? const TextStyle(),
+          child: Text(text),
+        ),
         child: Material(color: Colors.transparent, child: label),
       );
     }

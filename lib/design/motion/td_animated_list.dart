@@ -114,7 +114,8 @@ class _TdAnimatedListState<T> extends State<TdAnimatedList<T>> {
       initialItemCount: _shown.length,
       shrinkWrap: widget.shrinkWrap,
       physics: widget.physics,
-      padding: widget.padding,
+      // Ohne Angabe keine automatische Polsterung aus MediaQuery.
+      padding: widget.padding ?? EdgeInsets.zero,
       primary: widget.primary,
       itemBuilder: (context, index, animation) {
         if (index >= _shown.length) return const SizedBox.shrink();

@@ -94,12 +94,17 @@ class TdTheme extends ThemeExtension<TdTheme> {
     if (other is! TdTheme) return this;
     return TdTheme(
       palette: t < 0.5 ? palette : other.palette,
-      heroGradient:
-          LinearGradient.lerp(heroGradient, other.heroGradient, t)!,
-      primaryGradient:
-          LinearGradient.lerp(primaryGradient, other.primaryGradient, t)!,
-      successGradient:
-          LinearGradient.lerp(successGradient, other.successGradient, t)!,
+      heroGradient: LinearGradient.lerp(heroGradient, other.heroGradient, t)!,
+      primaryGradient: LinearGradient.lerp(
+        primaryGradient,
+        other.primaryGradient,
+        t,
+      )!,
+      successGradient: LinearGradient.lerp(
+        successGradient,
+        other.successGradient,
+        t,
+      )!,
       glassFill: Color.lerp(glassFill, other.glassFill, t)!,
       glassBorder: Color.lerp(glassBorder, other.glassBorder, t)!,
       success: Color.lerp(success, other.success, t)!,
@@ -134,8 +139,9 @@ TdPalette _fallbackPalette(Brightness b) => TdPalette(
       ? const Color(0xFF131218)
       : const Color(0xFFF8F5F0),
   surface: b == Brightness.dark ? const Color(0xFF1C1B23) : Colors.white,
-  surfaceElevated:
-      b == Brightness.dark ? const Color(0xFF26242F) : Colors.white,
+  surfaceElevated: b == Brightness.dark
+      ? const Color(0xFF26242F)
+      : Colors.white,
   onSurface: b == Brightness.dark
       ? const Color(0xFFF2EFF8)
       : const Color(0xFF1C1B22),

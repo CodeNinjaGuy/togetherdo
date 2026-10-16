@@ -30,9 +30,10 @@ abstract final class TdTransitions {
       begin: const Offset(0, 0.06),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: animation, curve: TdMotion.emphasized));
-    final scaleIn = Tween<double>(begin: 0.985, end: 1).animate(
-      CurvedAnimation(parent: animation, curve: TdMotion.standard),
-    );
+    final scaleIn = Tween<double>(
+      begin: 0.985,
+      end: 1,
+    ).animate(CurvedAnimation(parent: animation, curve: TdMotion.standard));
     final scaleOut = Tween<double>(begin: 1, end: 0.97).animate(
       CurvedAnimation(parent: secondaryAnimation, curve: TdMotion.standard),
     );

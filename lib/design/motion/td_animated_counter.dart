@@ -47,11 +47,8 @@ class _TdAnimatedCounterState extends State<TdAnimatedCounter> {
       tween: Tween(begin: _from.toDouble(), end: widget.value.toDouble()),
       duration: TdMotion.of(context, widget.duration),
       curve: widget.curve,
-      builder: (context, v, _) => Text(
-        format(v),
-        style: widget.style,
-        textAlign: widget.textAlign,
-      ),
+      builder: (context, v, _) =>
+          Text(format(v), style: widget.style, textAlign: widget.textAlign),
     );
   }
 }

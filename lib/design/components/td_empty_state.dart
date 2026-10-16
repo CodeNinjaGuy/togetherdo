@@ -81,8 +81,12 @@ class _TdEmptyStateState extends State<TdEmptyState>
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
                       colors: [
-                        scheme.primary.withValues(alpha: td.isDark ? 0.35 : 0.16),
-                        scheme.secondary.withValues(alpha: td.isDark ? 0.3 : 0.14),
+                        scheme.primary.withValues(
+                          alpha: td.isDark ? 0.35 : 0.16,
+                        ),
+                        scheme.secondary.withValues(
+                          alpha: td.isDark ? 0.3 : 0.14,
+                        ),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -106,7 +110,9 @@ class _TdEmptyStateState extends State<TdEmptyState>
           SizedBox(height: widget.compact ? TdSpace.lg : TdSpace.xl),
           Text(
             widget.title,
-            style: widget.compact ? context.text.titleMedium : context.text.headlineSmall,
+            style: widget.compact
+                ? context.text.titleMedium
+                : context.text.headlineSmall,
             textAlign: TextAlign.center,
           ),
           if (widget.message != null) ...[
@@ -115,7 +121,9 @@ class _TdEmptyStateState extends State<TdEmptyState>
               constraints: const BoxConstraints(maxWidth: 320),
               child: Text(
                 widget.message!,
-                style: context.text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                style: context.text.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -132,6 +140,9 @@ class _TdEmptyStateState extends State<TdEmptyState>
   Widget _dot(Color c, double d) => Container(
     width: d,
     height: d,
-    decoration: BoxDecoration(shape: BoxShape.circle, color: c.withValues(alpha: 0.8)),
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: c.withValues(alpha: 0.8),
+    ),
   );
 }

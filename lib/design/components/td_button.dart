@@ -118,7 +118,12 @@ class TdButton extends StatelessWidget {
     final (height, hPad, textStyle, iconSize) = switch (size) {
       TdButtonSize.small => (40.0, TdSpace.lg, text.labelMedium, 18.0),
       TdButtonSize.medium => (52.0, TdSpace.xl, text.labelLarge, 20.0),
-      TdButtonSize.large => (58.0, TdSpace.xxl, text.labelLarge?.copyWith(fontSize: 16), 22.0),
+      TdButtonSize.large => (
+        58.0,
+        TdSpace.xxl,
+        text.labelLarge?.copyWith(fontSize: 16),
+        22.0,
+      ),
     };
 
     Color fg;
@@ -187,7 +192,10 @@ class TdButton extends StatelessWidget {
           switchOutCurve: TdMotion.exit,
           transitionBuilder: (c, a) => FadeTransition(
             opacity: a,
-            child: ScaleTransition(scale: Tween(begin: 0.9, end: 1.0).animate(a), child: c),
+            child: ScaleTransition(
+              scale: Tween(begin: 0.9, end: 1.0).animate(a),
+              child: c,
+            ),
           ),
           child: loading
               ? Stack(

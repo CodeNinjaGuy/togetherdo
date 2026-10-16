@@ -79,8 +79,10 @@ class _TdFadeSlideInState extends State<TdFadeSlideIn>
     final reduced = TdMotion.reduced(context);
     final fade = CurvedAnimation(parent: _c, curve: Curves.easeOut);
     if (reduced) return FadeTransition(opacity: fade, child: widget.child);
-    final slide = Tween<Offset>(begin: widget.offset, end: Offset.zero)
-        .animate(CurvedAnimation(parent: _c, curve: TdMotion.standard));
+    final slide = Tween<Offset>(
+      begin: widget.offset,
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _c, curve: TdMotion.standard));
     return FadeTransition(
       opacity: fade,
       child: SlideTransition(position: slide, child: widget.child),
@@ -91,11 +93,7 @@ class _TdFadeSlideInState extends State<TdFadeSlideIn>
 /// Sanft wachsender/schrumpfender Platz für ein Kind, das ein- oder
 /// ausgeblendet wird (z. B. Fehlerzeile unter einem Feld).
 class TdReveal extends StatelessWidget {
-  const TdReveal({
-    super.key,
-    required this.visible,
-    required this.child,
-  });
+  const TdReveal({super.key, required this.visible, required this.child});
 
   final bool visible;
   final Widget child;

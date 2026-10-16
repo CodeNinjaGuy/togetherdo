@@ -113,21 +113,44 @@ class _ToastWidgetState extends State<_ToastWidget>
     final td = context.td;
     final scheme = context.colors;
     final (accent, icon) = switch (widget.variant) {
-      TdToastVariant.info => (scheme.primary, widget.icon ?? Icons.info_outline_rounded),
-      TdToastVariant.success => (td.success, widget.icon ?? Icons.check_circle_rounded),
-      TdToastVariant.warning => (td.warning, widget.icon ?? Icons.warning_amber_rounded),
-      TdToastVariant.error => (td.danger, widget.icon ?? Icons.error_outline_rounded),
+      TdToastVariant.info => (
+        scheme.primary,
+        widget.icon ?? Icons.info_outline_rounded,
+      ),
+      TdToastVariant.success => (
+        td.success,
+        widget.icon ?? Icons.check_circle_rounded,
+      ),
+      TdToastVariant.warning => (
+        td.warning,
+        widget.icon ?? Icons.warning_amber_rounded,
+      ),
+      TdToastVariant.error => (
+        td.danger,
+        widget.icon ?? Icons.error_outline_rounded,
+      ),
     };
 
     final reduced = TdMotion.reduced(context);
-    final curved = CurvedAnimation(parent: _c, curve: TdMotion.spring, reverseCurve: TdMotion.exit);
-    final offset = widget.compact ? const Offset(0, 0.4) : const Offset(0, -0.4);
+    final curved = CurvedAnimation(
+      parent: _c,
+      curve: TdMotion.spring,
+      reverseCurve: TdMotion.exit,
+    );
+    final offset = widget.compact
+        ? const Offset(0, 0.4)
+        : const Offset(0, -0.4);
 
     Widget card = Material(
       color: Colors.transparent,
       child: Container(
         constraints: const BoxConstraints(maxWidth: 480),
-        padding: const EdgeInsets.fromLTRB(TdSpace.lg, TdSpace.md, TdSpace.md, TdSpace.md),
+        padding: const EdgeInsets.fromLTRB(
+          TdSpace.lg,
+          TdSpace.md,
+          TdSpace.md,
+          TdSpace.md,
+        ),
         decoration: BoxDecoration(
           color: td.isDark ? scheme.surfaceContainerHigh : scheme.onSurface,
           borderRadius: TdRadius.control,

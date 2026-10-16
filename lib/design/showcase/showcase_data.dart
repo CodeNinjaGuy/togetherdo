@@ -69,16 +69,43 @@ class DemoTask {
 class DemoData {
   DemoData._();
 
-  static const me = TdAvatarData(id: 'me', name: 'Martin', color: Color(0xFF6A5AE0));
-  static const anna = TdAvatarData(id: 'anna', name: 'Anna', color: Color(0xFFFF7A59));
-  static const leo = TdAvatarData(id: 'leo', name: 'Leo', color: Color(0xFF1FB38F));
+  static const me = TdAvatarData(
+    id: 'me',
+    name: 'Martin',
+    color: Color(0xFF6A5AE0),
+  );
+  static const anna = TdAvatarData(
+    id: 'anna',
+    name: 'Anna',
+    color: Color(0xFFFF7A59),
+  );
+  static const leo = TdAvatarData(
+    id: 'leo',
+    name: 'Leo',
+    color: Color(0xFF1FB38F),
+  );
 
   static const people = [me, anna, leo];
 
   static const lists = <DemoList>[
-    DemoList(id: 'haus', name: 'Haushalt', color: Color(0xFF6A5AE0), icon: Icons.home_rounded),
-    DemoList(id: 'kids', name: 'Kinder', color: Color(0xFFF2A500), icon: Icons.child_care_rounded),
-    DemoList(id: 'garten', name: 'Garten', color: Color(0xFF1FB38F), icon: Icons.yard_rounded),
+    DemoList(
+      id: 'haus',
+      name: 'Haushalt',
+      color: Color(0xFF6A5AE0),
+      icon: Icons.home_rounded,
+    ),
+    DemoList(
+      id: 'kids',
+      name: 'Kinder',
+      color: Color(0xFFF2A500),
+      icon: Icons.child_care_rounded,
+    ),
+    DemoList(
+      id: 'garten',
+      name: 'Garten',
+      color: Color(0xFF1FB38F),
+      icon: Icons.yard_rounded,
+    ),
     DemoList(
       id: 'einkauf',
       name: 'Wocheneinkauf',
@@ -133,10 +160,34 @@ class DemoData {
   ];
 
   static List<DemoTask> shopping() => [
-    DemoTask(id: 's1', title: 'Hafermilch', listId: 'einkauf', quantity: '2 L', weight: TdWeight.light),
-    DemoTask(id: 's2', title: 'Tomaten', listId: 'einkauf', quantity: '500 g', weight: TdWeight.light),
-    DemoTask(id: 's3', title: 'Brot', listId: 'einkauf', subtitle: 'Vollkorn, geschnitten', weight: TdWeight.light),
-    DemoTask(id: 's4', title: 'Spülmittel', listId: 'einkauf', done: true, weight: TdWeight.light),
+    DemoTask(
+      id: 's1',
+      title: 'Hafermilch',
+      listId: 'einkauf',
+      quantity: '2 L',
+      weight: TdWeight.light,
+    ),
+    DemoTask(
+      id: 's2',
+      title: 'Tomaten',
+      listId: 'einkauf',
+      quantity: '500 g',
+      weight: TdWeight.light,
+    ),
+    DemoTask(
+      id: 's3',
+      title: 'Brot',
+      listId: 'einkauf',
+      subtitle: 'Vollkorn, geschnitten',
+      weight: TdWeight.light,
+    ),
+    DemoTask(
+      id: 's4',
+      title: 'Spülmittel',
+      listId: 'einkauf',
+      done: true,
+      weight: TdWeight.light,
+    ),
   ];
 
   /// Erledigte Gewichtspunkte diese Woche (Attrappe).

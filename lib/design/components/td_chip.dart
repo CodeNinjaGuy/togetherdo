@@ -40,8 +40,12 @@ class TdChip extends StatelessWidget {
     final bg = selected
         ? accent.withValues(alpha: td.isDark ? 0.3 : 0.14)
         : scheme.surface;
-    final fg = selected ? (td.isDark ? scheme.onSurface : _darken(accent)) : scheme.onSurface;
-    final border = selected ? accent.withValues(alpha: 0.6) : scheme.outlineVariant;
+    final fg = selected
+        ? (td.isDark ? scheme.onSurface : _darken(accent))
+        : scheme.onSurface;
+    final border = selected
+        ? accent.withValues(alpha: 0.6)
+        : scheme.outlineVariant;
 
     return TdPressable(
       onTap: onTap,
@@ -64,15 +68,23 @@ class TdChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (leading != null) ...[leading!, const SizedBox(width: TdSpace.sm)],
+            if (leading != null) ...[
+              leading!,
+              const SizedBox(width: TdSpace.sm),
+            ],
             if (icon != null) ...[
-              Icon(icon, size: dense ? 14 : 16, color: selected ? accent : scheme.onSurfaceVariant),
+              Icon(
+                icon,
+                size: dense ? 14 : 16,
+                color: selected ? accent : scheme.onSurfaceVariant,
+              ),
               const SizedBox(width: TdSpace.xs + 2),
             ],
             Text(
               label,
-              style: (dense ? context.text.labelSmall : context.text.labelMedium)
-                  ?.copyWith(color: fg),
+              style:
+                  (dense ? context.text.labelSmall : context.text.labelMedium)
+                      ?.copyWith(color: fg),
             ),
           ],
         ),
@@ -107,14 +119,20 @@ class TdTag extends StatelessWidget {
     final td = context.td;
     final accent = color ?? scheme.onSurfaceVariant;
     final fg = filled
-        ? (td.isDark ? Color.lerp(accent, Colors.white, 0.35)! : TdChip._darken(accent))
+        ? (td.isDark
+              ? Color.lerp(accent, Colors.white, 0.35)!
+              : TdChip._darken(accent))
         : accent;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: TdSpace.sm, vertical: 3),
       decoration: BoxDecoration(
-        color: filled ? accent.withValues(alpha: td.isDark ? 0.24 : 0.12) : null,
+        color: filled
+            ? accent.withValues(alpha: td.isDark ? 0.24 : 0.12)
+            : null,
         borderRadius: BorderRadius.circular(TdRadius.sm),
-        border: filled ? null : Border.all(color: accent.withValues(alpha: 0.5)),
+        border: filled
+            ? null
+            : Border.all(color: accent.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

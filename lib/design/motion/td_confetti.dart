@@ -194,7 +194,11 @@ class ConfettiPainter extends CustomPainter {
         case ConfettiShape.strip:
           canvas.drawRRect(
             RRect.fromRectAndRadius(
-              Rect.fromCenter(center: Offset.zero, width: s * 1.6, height: s * 0.35),
+              Rect.fromCenter(
+                center: Offset.zero,
+                width: s * 1.6,
+                height: s * 0.35,
+              ),
               const Radius.circular(1),
             ),
             paint,
