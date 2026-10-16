@@ -1,0 +1,5 @@
+# Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+# Written by Martin Bundschuh.
+
+app_identifier("com.example.togetherdo")
+team_id("8PVYD479QJ")

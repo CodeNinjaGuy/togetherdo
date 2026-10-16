@@ -1,0 +1,63 @@
+# Copyright (c) 2026 Martin Bundschuh, SeeBubble Media FlexCo. All rights reserved.
+# Written by Martin Bundschuh.
+#
+# TestFlight-Auslieferung für ToGetherDo (iOS).
+# Das Repo ist öffentlich: Schlüssel und IDs kommen nur aus der Umgebung.
+#
+#   ASC_KEY_PATH=/pfad/AuthKey_XXXX.p8 ASC_KEY_ID=XXXX ASC_ISSUER_ID=… \
+#   CHANGELOG="Was ist neu" LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 fastlane ios beta
+#
+# Die Versionsnummer kommt aus pubspec.yaml, die Build-Nummer ist die höchste
+# bei TestFlight + 1 (mindestens die aus pubspec.yaml).
+
+default_platform(:ios)
+
+def asc_schluessel
+  pfad = ENV["ASC_KEY_PATH"].to_s
+  id = ENV["ASC_KEY_ID"].to_s
+  issuer = ENV["ASC_ISSUER_ID"].to_s
+  UI.user_error!("ASC_KEY_PATH, ASC_KEY_ID und ASC_ISSUER_ID setzen") if pfad.empty? || id.empty? || issuer.empty?
+  { pfad: File.expand_path(pfad), id: id, issuer: issuer }
+end
+
+def pubspec_version
+  zeile = File.read(File.expand_path("../../pubspec.yaml", __dir__))[/^version:\s*(\S+)/, 1]
+  name, nummer = zeile.split("+")
+  [name, nummer.to_i]
+end
+
+platform :ios do
+  desc "Bauen und zu TestFlight hochladen"
+  lane :beta do
+    s = asc_schluessel
+    api_key = app_store_connect_api_key(key_id: s[:id], issuer_id: s[:issuer], key_filepath: s[:pfad])
+    name, aus_pubspec = pubspec_version
+    letzte = latest_testflight_build_number(api_key: api_key, version: nil, initial_build_number: 0) rescue 0
+    nummer = [letzte.to_i + 1, aus_pubspec].max
+    UI.message("Baue #{name} (#{nummer})")
+
+    Dir.chdir(File.expand_path("../..", __dir__)) do
+      sh("flutter", "build", "ios", "--release", "--config-only", "--build-name=#{name}", "--build-number=#{nummer}")
+    end
+
+    auth = "-allowProvisioningUpdates -authenticationKeyPath #{s[:pfad]} -authenticationKeyID #{s[:id]} -authenticationKeyIssuerID #{s[:issuer]}"
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Release",
+      export_method: "app-store",
+      xcargs: auth,
+      export_xcargs: auth,
+      output_directory: "build/fastlane",
+      output_name: "ToGetherDo.ipa"
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      changelog: ENV["CHANGELOG"].to_s.strip.empty? ? nil : ENV["CHANGELOG"],
+      skip_waiting_for_build_processing: false,
+      distribute_external: false
+    )
+    UI.success("TestFlight: #{name} (#{nummer})")
+  end
+end
