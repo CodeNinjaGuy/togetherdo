@@ -79,6 +79,13 @@ class _AppShellState extends State<AppShell> {
 
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, authState) {
+        if (authState is AuthUnauthenticated) {
+          // Nach dem Abmelden (Profil, Kontolöschung) zur Anmeldung.
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) context.go('/login');
+          });
+          return const Scaffold(body: SizedBox.shrink());
+        }
         if (authState is! AuthAuthenticated) {
           return Scaffold(
             body: Center(

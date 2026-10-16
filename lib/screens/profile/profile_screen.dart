@@ -500,7 +500,7 @@ class _Preview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: p.background,
-      padding: const EdgeInsets.all(6),
+      padding: const EdgeInsets.all(4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -514,7 +514,7 @@ class _Preview extends StatelessWidget {
           const SizedBox(height: 4),
           Container(
             height: 8,
-            width: 30,
+            width: 22,
             decoration: BoxDecoration(
               color: p.surface,
               borderRadius: BorderRadius.circular(3),
@@ -526,8 +526,8 @@ class _Preview extends StatelessWidget {
             children: [
               for (final c in [p.primary, p.secondary, p.tertiary])
                 Container(
-                  width: 6,
-                  height: 6,
+                  width: 5,
+                  height: 5,
                   margin: const EdgeInsets.only(right: 2),
                   decoration: BoxDecoration(color: c, shape: BoxShape.circle),
                 ),

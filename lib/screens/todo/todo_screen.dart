@@ -521,25 +521,34 @@ class _TodoScreenState extends State<TodoScreen> {
       children: [
         TdFadeSlideIn(index: 0, child: header),
         const SizedBox(height: TdSpace.xl),
-        if (!compact && fairness != null)
-          TdFadeSlideIn(
-            index: 1,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        LayoutBuilder(
+          builder: (context, c) {
+            final sideBySide = fairness != null && c.maxWidth >= 720;
+            if (sideBySide) {
+              return TdFadeSlideIn(
+                index: 1,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 2, child: progress),
+                    const SizedBox(width: TdSpace.lg),
+                    Expanded(flex: 3, child: fairness),
+                  ],
+                ),
+              );
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(child: progress),
-                const SizedBox(width: TdSpace.lg),
-                Expanded(flex: 2, child: fairness),
+                TdFadeSlideIn(index: 1, child: progress),
+                if (fairness != null) ...[
+                  const SizedBox(height: TdSpace.lg),
+                  TdFadeSlideIn(index: 2, child: fairness),
+                ],
               ],
-            ),
-          )
-        else ...[
-          TdFadeSlideIn(index: 1, child: progress),
-          if (fairness != null) ...[
-            const SizedBox(height: TdSpace.lg),
-            TdFadeSlideIn(index: 2, child: fairness),
-          ],
-        ],
+            );
+          },
+        ),
         const SizedBox(height: TdSpace.xl),
         filters,
         const SizedBox(height: TdSpace.sm),

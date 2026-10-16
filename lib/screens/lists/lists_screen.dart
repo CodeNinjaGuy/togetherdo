@@ -261,14 +261,18 @@ class _ListsBody extends StatelessWidget {
             ),
           ),
           if (wide)
-            GridView.count(
-              crossAxisCount: context.tdLayout == TdLayoutSize.expanded ? 3 : 2,
+            GridView(
               shrinkWrap: true,
               primary: false,
               physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: TdSpace.md,
-              crossAxisSpacing: TdSpace.md,
-              childAspectRatio: 1.9,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: context.tdLayout == TdLayoutSize.expanded
+                    ? 3
+                    : 2,
+                mainAxisSpacing: TdSpace.md,
+                crossAxisSpacing: TdSpace.md,
+                mainAxisExtent: 168,
+              ),
               children: cards,
             )
           else
