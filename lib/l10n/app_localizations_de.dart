@@ -81,7 +81,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get cancel => 'Abbrechen';
 
   @override
-  String get readOnlyMode => 'Nur-Lese-Modus: Du kannst diese Liste nur anzeigen. Nur der Besitzer kann Items bearbeiten.';
+  String get readOnlyMode => 'Nur lesen: Du kannst diese Liste ansehen und abhaken. Bearbeiten darf nur der Besitzer.';
 
   @override
   String get delete => 'Löschen';
@@ -635,7 +635,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get membersCanEditSubtitle => 'Andere Mitglieder können Todos und Einkaufslisten bearbeiten';
 
   @override
-  String get newTodoTitle => 'Neues Todo';
+  String get newTodoTitle => 'Neue Aufgabe';
 
   @override
   String get todoTitle => 'Titel';
@@ -1376,6 +1376,272 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get voiceRemoveEntry => 'Eintrag entfernen';
+
+  @override
+  String get navToday => 'Heute';
+
+  @override
+  String get navLists => 'Listen';
+
+  @override
+  String get navCalendar => 'Kalender';
+
+  @override
+  String get navProfile => 'Profil';
+
+  @override
+  String get calendarComingSoon => 'Der Familienkalender kommt mit dem nächsten Update.';
+
+  @override
+  String get comingSoon => 'Bald verfügbar';
+
+  @override
+  String get mailReminders => 'E-Mail-Erinnerungen';
+
+  @override
+  String greetingMorning(String name) {
+    return 'Guten Morgen, $name';
+  }
+
+  @override
+  String greetingDay(String name) {
+    return 'Hallo, $name';
+  }
+
+  @override
+  String greetingEvening(String name) {
+    return 'Guten Abend, $name';
+  }
+
+  @override
+  String get tagline => 'Gemeinsam erledigt, fair verteilt.';
+
+  @override
+  String teamCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Personen',
+      one: 'Nur du',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get statOpen => 'Offen heute';
+
+  @override
+  String get statDoneWeek => 'Erledigt diese Woche';
+
+  @override
+  String get statFairness => 'Dein Anteil';
+
+  @override
+  String get sectionToday => 'Heute fällig';
+
+  @override
+  String get sectionForYou => 'Für dich';
+
+  @override
+  String get sectionShopping => 'Einkauf';
+
+  @override
+  String get sectionFairness => 'Fair verteilt';
+
+  @override
+  String openToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Aufgaben offen',
+      one: '1 Aufgabe offen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get allDone => 'Alles erledigt. Stark!';
+
+  @override
+  String get emptyTodayTitle => 'Heute ist frei';
+
+  @override
+  String get emptyTodayMessage => 'Keine Aufgaben fällig. Gönn dir eine Pause oder plane voraus.';
+
+  @override
+  String itemsLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'noch $count Artikel',
+      one: 'noch 1 Artikel',
+      zero: 'alles besorgt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get showAll => 'Alle';
+
+  @override
+  String get chooseList => 'Welche Liste?';
+
+  @override
+  String memberCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Mitglieder',
+      one: '1 Mitglied',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String listCountSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Listen',
+      one: '1 Liste',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get more => 'Mehr';
+
+  @override
+  String get listDeleted => 'Liste gelöscht';
+
+  @override
+  String get todoListDescription => 'Aufgaben verteilen, abhaken, fair bleiben';
+
+  @override
+  String get shoppingListDescription => 'Artikel sammeln, scannen, einkaufen';
+
+  @override
+  String get joinListDescription => 'Gib den 6-stelligen Code ein, den du bekommen hast.';
+
+  @override
+  String get overdue => 'überfällig';
+
+  @override
+  String get dueToday => 'heute';
+
+  @override
+  String doneBy(String name) {
+    return 'Erledigt von $name';
+  }
+
+  @override
+  String get onlyMembersCanComplete => 'Nur Mitglieder der Liste können abhaken.';
+
+  @override
+  String get taskDeleted => 'Aufgabe gelöscht';
+
+  @override
+  String get progress => 'Fortschritt';
+
+  @override
+  String doneOf(int done, int total) {
+    return '$done von $total erledigt';
+  }
+
+  @override
+  String get allDoneTitle => 'Alles erledigt';
+
+  @override
+  String get allDoneMessage => 'Keine offenen Aufgaben in dieser Liste.';
+
+  @override
+  String get taskDetails => 'Aufgabe';
+
+  @override
+  String get chatSubtitle => 'Chat zur Aufgabe';
+
+  @override
+  String get chatEmptyMessage => 'Schreib die erste Nachricht oder schick ein Foto.';
+
+  @override
+  String get yesterday => 'Gestern';
+
+  @override
+  String get attachmentSendImage => 'Bild senden';
+
+  @override
+  String get attachments => 'Anhänge';
+
+  @override
+  String get attachmentAdd => 'Anhang hinzufügen';
+
+  @override
+  String get attachmentTakePhoto => 'Foto aufnehmen';
+
+  @override
+  String get attachmentChooseFromPhotos => 'Aus Fotos wählen';
+
+  @override
+  String get attachmentChooseFile => 'Datei wählen (PDF)';
+
+  @override
+  String get attachmentDelete => 'Anhang löschen';
+
+  @override
+  String attachmentDeleteConfirm(String name) {
+    return '„$name“ wirklich löschen?';
+  }
+
+  @override
+  String get attachmentOpen => 'Öffnen';
+
+  @override
+  String get attachmentTooLarge => 'Die Datei ist zu groß (Bilder bis 10 MB, PDF bis 20 MB).';
+
+  @override
+  String get attachmentUnsupported => 'Nur Fotos und PDF-Dateien lassen sich anhängen.';
+
+  @override
+  String get attachmentUploadFailed => 'Der Anhang konnte nicht hochgeladen werden.';
+
+  @override
+  String get attachmentDeleteFailed => 'Der Anhang konnte nicht gelöscht werden.';
+
+  @override
+  String get attachmentPermissionMessage => 'Bitte erlaube den Zugriff auf Kamera bzw. Fotos in den Einstellungen.';
+
+  @override
+  String get showPassword => 'Passwort anzeigen';
+
+  @override
+  String get hidePassword => 'Passwort verbergen';
+
+  @override
+  String get promiseLists => 'Aufgaben und Einkauf für alle zu Hause';
+
+  @override
+  String get promiseFair => 'Fair verteilt: wer ist dran?';
+
+  @override
+  String get promiseScan => 'Strichcode scannen, Sprache, Fotos anhängen';
+
+  @override
+  String get appearance => 'Darstellung';
+
+  @override
+  String get theme_dark => 'Dunkel';
+
+  @override
+  String get theme_system => 'Wie das Gerät';
+
+  @override
+  String get aboutApp => 'App';
+
+  @override
+  String get version => 'Version';
+
+  @override
+  String get account => 'Konto';
 }
 
 /// The translations for German, as used in Austria (`de_AT`).

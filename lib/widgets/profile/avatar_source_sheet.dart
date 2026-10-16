@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:togetherdo/l10n/app_localizations.dart';
 
+import '../../design/td_design.dart';
 import '../../services/avatar_service.dart';
 
 /// Auswahl „Foto aufnehmen / Aus Fotos wählen / Entfernen“.
@@ -94,9 +95,8 @@ Future<AvatarAction?> showAvatarSourceSheet(
   required bool canUseCamera,
   required bool hasAvatar,
 }) {
-  return showModalBottomSheet<AvatarAction>(
-    context: context,
-    showDragHandle: true,
+  return showTdSheet<AvatarAction>(
+    context,
     builder: (_) =>
         AvatarSourceSheet(canUseCamera: canUseCamera, hasAvatar: hasAvatar),
   );

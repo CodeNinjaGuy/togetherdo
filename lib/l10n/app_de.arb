@@ -17,7 +17,7 @@
   "noLists": "Keine Listen vorhanden",
   "noSharedLists": "Keine geteilten Listen",
   "logout": "Abmelden",
-  "readOnlyMode": "Nur-Lese-Modus: Du kannst diese Liste nur anzeigen. Nur der Besitzer kann Items bearbeiten.",
+  "readOnlyMode": "Nur lesen: Du kannst diese Liste ansehen und abhaken. Bearbeiten darf nur der Besitzer.",
   "profile": "Profil",
   "shoppingListEmpty": "Einkaufsliste ist leer",
   "save": "Speichern",
@@ -229,7 +229,7 @@
   "newListTitle": "Neue Liste erstellen",
   "membersCanEditTitle": "Mitglieder können bearbeiten",
   "membersCanEditSubtitle": "Andere Mitglieder können Todos und Einkaufslisten bearbeiten",
-  "newTodoTitle": "Neues Todo",
+  "newTodoTitle": "Neue Aufgabe",
   "todoTitle": "Titel",
   "todoDescription": "Beschreibung (optional)",
   "todoCategory": "Kategorie (optional)",
@@ -535,5 +535,156 @@
       }
     }
   },
-  "voiceRemoveEntry": "Eintrag entfernen"
+  "voiceRemoveEntry": "Eintrag entfernen",
+  "navToday": "Heute",
+  "navLists": "Listen",
+  "navCalendar": "Kalender",
+  "navProfile": "Profil",
+  "calendarComingSoon": "Der Familienkalender kommt mit dem nächsten Update.",
+  "comingSoon": "Bald verfügbar",
+  "mailReminders": "E-Mail-Erinnerungen",
+  "greetingMorning": "Guten Morgen, {name}",
+  "@greetingMorning": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingDay": "Hallo, {name}",
+  "@greetingDay": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingEvening": "Guten Abend, {name}",
+  "@greetingEvening": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagline": "Gemeinsam erledigt, fair verteilt.",
+  "teamCount": "{count, plural, =1{Nur du} other{{count} Personen}}",
+  "@teamCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statOpen": "Offen heute",
+  "statDoneWeek": "Erledigt diese Woche",
+  "statFairness": "Dein Anteil",
+  "sectionToday": "Heute fällig",
+  "sectionForYou": "Für dich",
+  "sectionShopping": "Einkauf",
+  "sectionFairness": "Fair verteilt",
+  "openToday": "{count, plural, =1{1 Aufgabe offen} other{{count} Aufgaben offen}}",
+  "@openToday": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "allDone": "Alles erledigt. Stark!",
+  "emptyTodayTitle": "Heute ist frei",
+  "emptyTodayMessage": "Keine Aufgaben fällig. Gönn dir eine Pause oder plane voraus.",
+  "itemsLeft": "{count, plural, =0{alles besorgt} =1{noch 1 Artikel} other{noch {count} Artikel}}",
+  "@itemsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "showAll": "Alle",
+  "chooseList": "Welche Liste?",
+  "memberCount": "{count, plural, =1{1 Mitglied} other{{count} Mitglieder}}",
+  "@memberCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "listCountSummary": "{count, plural, =1{1 Liste} other{{count} Listen}}",
+  "@listCountSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "more": "Mehr",
+  "listDeleted": "Liste gelöscht",
+  "todoListDescription": "Aufgaben verteilen, abhaken, fair bleiben",
+  "shoppingListDescription": "Artikel sammeln, scannen, einkaufen",
+  "joinListDescription": "Gib den 6-stelligen Code ein, den du bekommen hast.",
+  "overdue": "überfällig",
+  "dueToday": "heute",
+  "doneBy": "Erledigt von {name}",
+  "@doneBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "onlyMembersCanComplete": "Nur Mitglieder der Liste können abhaken.",
+  "taskDeleted": "Aufgabe gelöscht",
+  "progress": "Fortschritt",
+  "doneOf": "{done} von {total} erledigt",
+  "@doneOf": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "allDoneTitle": "Alles erledigt",
+  "allDoneMessage": "Keine offenen Aufgaben in dieser Liste.",
+  "taskDetails": "Aufgabe",
+  "chatSubtitle": "Chat zur Aufgabe",
+  "chatEmptyMessage": "Schreib die erste Nachricht oder schick ein Foto.",
+  "yesterday": "Gestern",
+  "attachmentSendImage": "Bild senden",
+  "attachments": "Anhänge",
+  "attachmentAdd": "Anhang hinzufügen",
+  "attachmentTakePhoto": "Foto aufnehmen",
+  "attachmentChooseFromPhotos": "Aus Fotos wählen",
+  "attachmentChooseFile": "Datei wählen (PDF)",
+  "attachmentDelete": "Anhang löschen",
+  "attachmentDeleteConfirm": "„{name}“ wirklich löschen?",
+  "@attachmentDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "attachmentOpen": "Öffnen",
+  "attachmentTooLarge": "Die Datei ist zu groß (Bilder bis 10 MB, PDF bis 20 MB).",
+  "attachmentUnsupported": "Nur Fotos und PDF-Dateien lassen sich anhängen.",
+  "attachmentUploadFailed": "Der Anhang konnte nicht hochgeladen werden.",
+  "attachmentDeleteFailed": "Der Anhang konnte nicht gelöscht werden.",
+  "attachmentPermissionMessage": "Bitte erlaube den Zugriff auf Kamera bzw. Fotos in den Einstellungen.",
+  "showPassword": "Passwort anzeigen",
+  "hidePassword": "Passwort verbergen",
+  "promiseLists": "Aufgaben und Einkauf für alle zu Hause",
+  "promiseFair": "Fair verteilt: wer ist dran?",
+  "promiseScan": "Strichcode scannen, Sprache, Fotos anhängen",
+  "appearance": "Darstellung",
+  "theme_dark": "Dunkel",
+  "theme_system": "Wie das Gerät",
+  "aboutApp": "App",
+  "version": "Version",
+  "account": "Konto"
 }

@@ -4,6 +4,7 @@
  */
 
 import '../models/todo_model.dart';
+import '../utils/stream_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class TodoRepository {
@@ -231,6 +232,28 @@ class FirebaseTodoRepository implements TodoRepository {
       'assignedToUserName': assignedToUserName,
       'effort': effort.name,
     });
+  }
+
+  /// Alle Aufgaben mehrerer Listen (Startseite „Heute“). Firestore erlaubt
+  /// höchstens 30 Werte je `whereIn`, deshalb in Blöcken.
+  Stream<List<TodoModel>> todosForListsStream(List<String> listIds) {
+    return combineLatestLists([
+      for (final ids in chunked(listIds))
+        _firestore
+            .collection('todos')
+            .where('listId', whereIn: ids)
+            .snapshots()
+            .map(
+              (s) => s.docs.map((d) => TodoModel.fromJson(d.data())).toList(),
+            ),
+    ]);
+  }
+
+  /// Eine Aufgabe (z. B. für den Chat nach einer Push-Nachricht).
+  Future<TodoModel?> getTodoById(String todoId) async {
+    final doc = await _firestore.collection('todos').doc(todoId).get();
+    final data = doc.data();
+    return data == null ? null : TodoModel.fromJson(data);
   }
 
   /// Erledigte Aufgaben einer Liste seit [since] – Grundlage der

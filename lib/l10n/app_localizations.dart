@@ -245,7 +245,7 @@ abstract class AppLocalizations {
   /// No description provided for @readOnlyMode.
   ///
   /// In en, this message translates to:
-  /// **'Read-Only Mode: You can only view this list. Only the owner can edit items.'**
+  /// **'Read-only: you can view this list and tick things off. Only the owner can edit.'**
   String get readOnlyMode;
 
   /// No description provided for @delete.
@@ -1325,7 +1325,7 @@ abstract class AppLocalizations {
   /// No description provided for @newTodoTitle.
   ///
   /// In en, this message translates to:
-  /// **'New Todo'**
+  /// **'New task'**
   String get newTodoTitle;
 
   /// No description provided for @todoTitle.
@@ -2665,6 +2665,432 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove entry'**
   String get voiceRemoveEntry;
+
+  /// No description provided for @navToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get navToday;
+
+  /// No description provided for @navLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Lists'**
+  String get navLists;
+
+  /// No description provided for @navCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get navCalendar;
+
+  /// No description provided for @navProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get navProfile;
+
+  /// No description provided for @calendarComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'The family calendar arrives with the next update.'**
+  String get calendarComingSoon;
+
+  /// No description provided for @comingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get comingSoon;
+
+  /// No description provided for @mailReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Email reminders'**
+  String get mailReminders;
+
+  /// No description provided for @greetingMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning, {name}'**
+  String greetingMorning(String name);
+
+  /// No description provided for @greetingDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, {name}'**
+  String greetingDay(String name);
+
+  /// No description provided for @greetingEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening, {name}'**
+  String greetingEvening(String name);
+
+  /// No description provided for @tagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Done together, shared fairly.'**
+  String get tagline;
+
+  /// No description provided for @teamCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Just you} other{{count} people}}'**
+  String teamCount(int count);
+
+  /// No description provided for @statOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open today'**
+  String get statOpen;
+
+  /// No description provided for @statDoneWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Done this week'**
+  String get statDoneWeek;
+
+  /// No description provided for @statFairness.
+  ///
+  /// In en, this message translates to:
+  /// **'Your share'**
+  String get statFairness;
+
+  /// No description provided for @sectionToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Due today'**
+  String get sectionToday;
+
+  /// No description provided for @sectionForYou.
+  ///
+  /// In en, this message translates to:
+  /// **'For you'**
+  String get sectionForYou;
+
+  /// No description provided for @sectionShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get sectionShopping;
+
+  /// No description provided for @sectionFairness.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared fairly'**
+  String get sectionFairness;
+
+  /// No description provided for @openToday.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 task open} other{{count} tasks open}}'**
+  String openToday(int count);
+
+  /// No description provided for @allDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All done. Nice!'**
+  String get allDone;
+
+  /// No description provided for @emptyTodayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing due today'**
+  String get emptyTodayTitle;
+
+  /// No description provided for @emptyTodayMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No tasks due. Take a break or plan ahead.'**
+  String get emptyTodayMessage;
+
+  /// No description provided for @itemsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{all bought} =1{1 item left} other{{count} items left}}'**
+  String itemsLeft(int count);
+
+  /// No description provided for @showAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get showAll;
+
+  /// No description provided for @chooseList.
+  ///
+  /// In en, this message translates to:
+  /// **'Which list?'**
+  String get chooseList;
+
+  /// No description provided for @memberCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 member} other{{count} members}}'**
+  String memberCount(int count);
+
+  /// No description provided for @listCountSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 list} other{{count} lists}}'**
+  String listCountSummary(int count);
+
+  /// No description provided for @more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get more;
+
+  /// No description provided for @listDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'List deleted'**
+  String get listDeleted;
+
+  /// No description provided for @todoListDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Share tasks, tick them off, stay fair'**
+  String get todoListDescription;
+
+  /// No description provided for @shoppingListDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect items, scan, shop'**
+  String get shoppingListDescription;
+
+  /// No description provided for @joinListDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code you received.'**
+  String get joinListDescription;
+
+  /// No description provided for @overdue.
+  ///
+  /// In en, this message translates to:
+  /// **'overdue'**
+  String get overdue;
+
+  /// No description provided for @dueToday.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get dueToday;
+
+  /// No description provided for @doneBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Done by {name}'**
+  String doneBy(String name);
+
+  /// No description provided for @onlyMembersCanComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Only list members can tick this off.'**
+  String get onlyMembersCanComplete;
+
+  /// No description provided for @taskDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Task deleted'**
+  String get taskDeleted;
+
+  /// No description provided for @progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get progress;
+
+  /// No description provided for @doneOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} done'**
+  String doneOf(int done, int total);
+
+  /// No description provided for @allDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All done'**
+  String get allDoneTitle;
+
+  /// No description provided for @allDoneMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No open tasks in this list.'**
+  String get allDoneMessage;
+
+  /// No description provided for @taskDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Task'**
+  String get taskDetails;
+
+  /// No description provided for @chatSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Task chat'**
+  String get chatSubtitle;
+
+  /// No description provided for @chatEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the first message or send a photo.'**
+  String get chatEmptyMessage;
+
+  /// No description provided for @yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
+  /// No description provided for @attachmentSendImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Send image'**
+  String get attachmentSendImage;
+
+  /// No description provided for @attachments.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments'**
+  String get attachments;
+
+  /// No description provided for @attachmentAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add attachment'**
+  String get attachmentAdd;
+
+  /// No description provided for @attachmentTakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get attachmentTakePhoto;
+
+  /// No description provided for @attachmentChooseFromPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from photos'**
+  String get attachmentChooseFromPhotos;
+
+  /// No description provided for @attachmentChooseFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose file (PDF)'**
+  String get attachmentChooseFile;
+
+  /// No description provided for @attachmentDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete attachment'**
+  String get attachmentDelete;
+
+  /// No description provided for @attachmentDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Really delete “{name}”?'**
+  String attachmentDeleteConfirm(String name);
+
+  /// No description provided for @attachmentOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get attachmentOpen;
+
+  /// No description provided for @attachmentTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'The file is too large (images up to 10 MB, PDF up to 20 MB).'**
+  String get attachmentTooLarge;
+
+  /// No description provided for @attachmentUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Only photos and PDF files can be attached.'**
+  String get attachmentUnsupported;
+
+  /// No description provided for @attachmentUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The attachment could not be uploaded.'**
+  String get attachmentUploadFailed;
+
+  /// No description provided for @attachmentDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The attachment could not be deleted.'**
+  String get attachmentDeleteFailed;
+
+  /// No description provided for @attachmentPermissionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please allow access to the camera or photos in Settings.'**
+  String get attachmentPermissionMessage;
+
+  /// No description provided for @showPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get showPassword;
+
+  /// No description provided for @hidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get hidePassword;
+
+  /// No description provided for @promiseLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks and shopping for everyone at home'**
+  String get promiseLists;
+
+  /// No description provided for @promiseFair.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared fairly: whose turn is it?'**
+  String get promiseFair;
+
+  /// No description provided for @promiseScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan barcodes, speak, attach photos'**
+  String get promiseScan;
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @theme_dark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get theme_dark;
+
+  /// No description provided for @theme_system.
+  ///
+  /// In en, this message translates to:
+  /// **'Match device'**
+  String get theme_system;
+
+  /// No description provided for @aboutApp.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get aboutApp;
+
+  /// No description provided for @version.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get version;
+
+  /// No description provided for @account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get account;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

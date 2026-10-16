@@ -11,8 +11,8 @@ import 'package:togetherdo/l10n/app_localizations.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
 import '../../blocs/auth/auth_state.dart';
-import '../../widgets/auth/auth_form_field.dart';
-import '../../widgets/common/legal_links_row.dart';
+import '../../design/td_design.dart';
+import '../../widgets/auth/auth_scaffold.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -23,236 +23,147 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _displayNameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
+  final _name = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  final _confirm = TextEditingController();
 
   @override
   void dispose() {
-    _displayNameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
+    _name.dispose();
+    _email.dispose();
+    _password.dispose();
+    _confirm.dispose();
     super.dispose();
   }
 
-  void _handleRegister() {
-    if (_formKey.currentState!.validate()) {
-      context.read<AuthBloc>().add(
-        AuthRegisterRequested(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-          displayName: _displayNameController.text.trim(),
-        ),
-      );
-    }
+  void _register() {
+    if (!_formKey.currentState!.validate()) return;
+    context.read<AuthBloc>().add(
+      AuthRegisterRequested(
+        email: _email.text.trim(),
+        password: _password.text,
+        displayName: _name.text.trim(),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    if (l10n == null) {
-      return const SizedBox.shrink();
-    }
+    if (l10n == null) return const SizedBox.shrink();
 
-    return Scaffold(
-      body: BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) {
-          if (state is AuthAuthenticated) {
-            context.go('/');
-          }
-        },
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 400),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Logo und Titel
-                    Icon(
-                      Icons.person_add_outlined,
-                      size: 80,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      l10n.createAccount,
-                      style: Theme.of(context).textTheme.headlineMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.createAccountSubtitle,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 48),
-
-                    // Register Form
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          AuthFormField(
-                            controller: _displayNameController,
-                            labelText: l10n.displayName,
-                            hintText: l10n.nameHint,
-                            textInputAction: TextInputAction.next,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return l10n.displayNameRequired;
-                              }
-                              if (value.length < 2) {
-                                return l10n.displayNameMinLength;
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          AuthFormField(
-                            controller: _emailController,
-                            labelText: l10n.email,
-                            hintText: l10n.emailHint,
-                            keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.next,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'E-Mail ist erforderlich';
-                              }
-                              if (!RegExp(
-                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                              ).hasMatch(value)) {
-                                return l10n.invalidEmail;
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          AuthFormField(
-                            controller: _passwordController,
-                            labelText: l10n.password,
-                            hintText: l10n.passwordMinLength,
-                            obscureText: _obscurePassword,
-                            textInputAction: TextInputAction.next,
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
-                              },
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return l10n.passwordRequired;
-                              }
-                              if (value.length < 6) {
-                                return l10n.passwordMinLength;
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          AuthFormField(
-                            controller: _confirmPasswordController,
-                            labelText: l10n.confirmPassword,
-                            hintText: l10n.passwordConfirmHint,
-                            obscureText: _obscureConfirmPassword,
-                            textInputAction: TextInputAction.done,
-                            onFieldSubmitted: _handleRegister,
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscureConfirmPassword
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscureConfirmPassword =
-                                      !_obscureConfirmPassword;
-                                });
-                              },
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return l10n.confirmPasswordRequired;
-                              }
-                              if (value != _passwordController.text) {
-                                return l10n.passwordsDoNotMatch;
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 24),
-
-                          // Register Button
-                          BlocBuilder<AuthBloc, AuthState>(
-                            builder: (context, state) {
-                              return SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: state is AuthLoading
-                                      ? null
-                                      : _handleRegister,
-                                  child: state is AuthLoading
-                                      ? const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                          ),
-                                        )
-                                      : Text(
-                                          l10n.register,
-                                          style: const TextStyle(fontSize: 16),
-                                        ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // Login Link
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          l10n.alreadyHaveAccount,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        TextButton(
-                          onPressed: () => context.go('/login'),
-                          child: Text(l10n.login),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const LegalLinksRow(),
-                  ],
-                ),
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthAuthenticated) context.go('/');
+      },
+      builder: (context, state) {
+        final loading = state is AuthLoading;
+        return AuthScaffold(
+          title: l10n.createAccount,
+          subtitle: l10n.createAccountSubtitle,
+          footer: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(l10n.alreadyHaveAccount, style: context.text.bodyMedium),
+              TextButton(
+                onPressed: loading ? null : () => context.go('/login'),
+                child: Text(l10n.login),
+              ),
+            ],
+          ),
+          child: AutofillGroup(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TdTextField(
+                    controller: _name,
+                    label: l10n.displayName,
+                    hint: l10n.nameHint,
+                    prefixIcon: Icons.person_outline_rounded,
+                    textCapitalization: TextCapitalization.words,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.name],
+                    enabled: !loading,
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) {
+                        return l10n.displayNameRequired;
+                      }
+                      if (v.trim().length < 2) return l10n.displayNameMinLength;
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: TdSpace.lg),
+                  TdTextField(
+                    controller: _email,
+                    label: l10n.email,
+                    hint: l10n.emailHint,
+                    prefixIcon: Icons.mail_outline_rounded,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.email],
+                    enabled: !loading,
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) return l10n.emailRequired;
+                      if (!looksLikeEmail(v)) return l10n.invalidEmail;
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: TdSpace.lg),
+                  TdTextField(
+                    controller: _password,
+                    label: l10n.password,
+                    hint: l10n.passwordMinLength,
+                    prefixIcon: Icons.lock_outline_rounded,
+                    obscureText: true,
+                    showPasswordLabel: l10n.showPassword,
+                    hidePasswordLabel: l10n.hidePassword,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.newPassword],
+                    enabled: !loading,
+                    validator: (v) {
+                      if (v == null || v.isEmpty) return l10n.passwordRequired;
+                      if (v.length < 6) return l10n.passwordMinLength;
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: TdSpace.lg),
+                  TdTextField(
+                    controller: _confirm,
+                    label: l10n.confirmPassword,
+                    hint: l10n.passwordConfirmHint,
+                    prefixIcon: Icons.lock_reset_rounded,
+                    obscureText: true,
+                    showPasswordLabel: l10n.showPassword,
+                    hidePasswordLabel: l10n.hidePassword,
+                    textInputAction: TextInputAction.done,
+                    enabled: !loading,
+                    onSubmitted: (_) => _register(),
+                    validator: (v) {
+                      if (v == null || v.isEmpty) {
+                        return l10n.confirmPasswordRequired;
+                      }
+                      if (v != _password.text) return l10n.passwordsDoNotMatch;
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: TdSpace.xl),
+                  TdButton.primary(
+                    label: l10n.register,
+                    icon: Icons.person_add_alt_1_rounded,
+                    size: TdButtonSize.large,
+                    expanded: true,
+                    loading: loading,
+                    onPressed: loading ? null : _register,
+                  ),
+                ],
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

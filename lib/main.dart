@@ -26,6 +26,10 @@ import 'blocs/notification/notification_bloc.dart';
 import 'blocs/language/language_bloc.dart';
 import 'blocs/language/language_event.dart';
 import 'blocs/language/language_state.dart';
+import 'design/td_design.dart';
+import 'navigation/app_shell.dart';
+import 'navigation/kalender_platzhalter.dart';
+import 'repositories/attachment_repository.dart';
 import 'repositories/auth_repository.dart';
 import 'repositories/todo_repository.dart';
 import 'repositories/shopping_repository.dart';
@@ -34,7 +38,7 @@ import 'repositories/chat_repository.dart';
 import 'repositories/product_repository.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
-import 'screens/home/home_screen.dart';
+import 'screens/home/heute_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/todo/todo_screen.dart';
 import 'screens/shopping/shopping_screen.dart';
@@ -43,6 +47,7 @@ import 'screens/lists/lists_screen.dart';
 import 'screens/chat/chat_screen.dart';
 import 'design/showcase/design_gallery_screen.dart';
 import 'design/showcase/today_screen.dart';
+import 'services/attachment_service.dart';
 import 'utils/app_theme.dart';
 import 'utils/global_navigator.dart';
 import 'firebase_options.dart';
@@ -95,6 +100,13 @@ void main() async {
         ),
         RepositoryProvider<ChatRepository>(
           create: (context) => FirestoreChatRepository(),
+        ),
+        // Anhänge (Fotos/PDF) an Aufgaben und Bilder im Chat.
+        RepositoryProvider<AttachmentRepository>(
+          create: (context) => FirestoreAttachmentRepository(),
+        ),
+        RepositoryProvider<AttachmentService>(
+          create: (context) => AttachmentService(),
         ),
         // Produktsuche per Strichcode: Gerät → Firestore → Open Food Facts.
         RepositoryProvider<ProductRepository>(
@@ -162,6 +174,13 @@ class TogetherDoApp extends StatelessWidget {
 
 const String _debugStart = String.fromEnvironment('TD_START');
 
+/// Gespeicherter Theme-Name aus dem [ThemeState].
+String themeNameOf(ThemeState state) => switch (state) {
+  ThemeLoadSuccess(:final themeName) => themeName,
+  ThemeChangedSuccess(:final themeName) => themeName,
+  _ => AppTheme.defaultTheme,
+};
+
 class TogetherDoAppView extends StatelessWidget {
   TogetherDoAppView({super.key});
 
@@ -169,14 +188,11 @@ class TogetherDoAppView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeBloc, ThemeState>(
       builder: (context, themeState) {
-        String themeName = 'Light';
-        if (themeState is ThemeLoadSuccess) {
-          themeName = themeState.themeName;
-        } else if (themeState is ThemeChangedSuccess) {
-          themeName = themeState.themeName;
-        }
-        final themeData =
-            AppTheme.themes[themeName] ?? AppTheme.themes['Light'];
+        final themeName = themeNameOf(themeState);
+        // „System“: hell/dunkel folgt dem Gerät; sonst das gewählte Theme
+        // unabhängig von der Systemeinstellung.
+        final system = AppTheme.isSystem(themeName);
+        final chosen = AppTheme.of(themeName);
         // Global Navigator Router setzen
         GlobalNavigator().setRouter(_router);
 
@@ -191,7 +207,10 @@ class TogetherDoAppView extends StatelessWidget {
 
             return MaterialApp.router(
               title: 'ToGetherDo',
-              theme: themeData,
+              debugShowCheckedModeBanner: false,
+              theme: system ? AppTheme.of(AppTheme.defaultTheme) : chosen,
+              darkTheme: system ? AppTheme.of(AppTheme.darkTheme) : chosen,
+              themeMode: system ? ThemeMode.system : ThemeMode.light,
               routerConfig: _router,
               locale: currentLocale,
               localeResolutionCallback: (locale, supportedLocales) {
@@ -214,11 +233,10 @@ class TogetherDoAppView extends StatelessWidget {
                 return BlocListener<AuthBloc, AuthState>(
                   listener: (context, state) {
                     if (state is AuthFailure) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(state.message),
-                          backgroundColor: Theme.of(context).colorScheme.error,
-                        ),
+                      TdToast.show(
+                        context,
+                        state.message,
+                        variant: TdToastVariant.error,
                       );
                     } else if (state is AuthAuthenticated &&
                         state is! AuthAvatarState) {
@@ -226,28 +244,9 @@ class TogetherDoAppView extends StatelessWidget {
                       context.read<LanguageBloc>().add(
                         const LanguageLoadProfileRequested(),
                       );
-                    } else if (state is AuthUnauthenticated) {
-                      // Nach Logout: Keine Sprachänderung - gespeicherte Sprache beibehalten
-                      // context.read<LanguageBloc>().add(
-                      //   const LanguageLoadSystemRequested(),
-                      // );
                     }
                   },
-                  child: BlocListener<LanguageBloc, LanguageState>(
-                    listener: (context, state) {
-                      if (state is LanguageChangedSuccess) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Sprache geändert zu ${state.languageCode.toUpperCase()}',
-                            ),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      }
-                    },
-                    child: child!,
-                  ),
+                  child: child!,
                 );
               },
             );
@@ -267,26 +266,28 @@ class TogetherDoAppView extends StatelessWidget {
       // Prüfe Auth-Status
       final authBloc = context.read<AuthBloc>();
       final authState = authBloc.state;
+      final loc = state.matchedLocation;
+      final isAuthRoute =
+          loc.startsWith('/login') ||
+          loc.startsWith('/register') ||
+          loc.startsWith('/passwort-vergessen');
 
       // Wenn nicht authentifiziert und nicht auf Login/Register-Seite
       if (authState is! AuthAuthenticated &&
-          !state.matchedLocation.startsWith('/login') &&
-          !state.matchedLocation.startsWith('/register') &&
-          !state.matchedLocation.startsWith('/design/')) {
+          !isAuthRoute &&
+          !loc.startsWith('/design/')) {
         return '/login';
       }
 
       // Wenn authentifiziert und auf Login/Register-Seite
-      if (authState is AuthAuthenticated &&
-          (state.matchedLocation.startsWith('/login') ||
-              state.matchedLocation.startsWith('/register'))) {
+      if (authState is AuthAuthenticated && isAuthRoute) {
         return '/';
       }
 
       return null;
     },
     routes: [
-      // Auth Routes (außerhalb der ShellRoute)
+      // Auth Routes (außerhalb der Shell)
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',
@@ -313,11 +314,42 @@ class TogetherDoAppView extends StatelessWidget {
         ),
       ],
 
+      // Chat je Aufgabe: Vollbild über der Shell (Tastatur, Bilder).
+      GoRoute(
+        path: '/chat/:todoId',
+        pageBuilder: (context, state) {
+          final todoId = state.pathParameters['todoId']!;
+          final todoTitle = state.uri.queryParameters['title'] ?? '';
+          final listId = state.uri.queryParameters['liste'];
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: ChatScreen(
+              todoId: todoId,
+              todoTitle: todoTitle,
+              listId: listId,
+            ),
+            transitionDuration: TdMotion.page,
+            reverseTransitionDuration: TdMotion.page,
+            transitionsBuilder: TdTransitions.fadeSlide,
+          );
+        },
+      ),
+
       // App Routes (nur für authentifizierte Benutzer)
       ShellRoute(
-        builder: (context, state, child) => HomeScreen(child: child),
+        builder: (context, state, child) => AppShell(child: child),
         routes: [
-          GoRoute(path: '/', builder: (context, state) => const ListsScreen()),
+          GoRoute(path: '/', builder: (context, state) => const HeuteScreen()),
+          GoRoute(
+            path: '/lists',
+            builder: (context, state) => const ListsScreen(),
+          ),
+          GoRoute(
+            path: '/kalender',
+            builder: (context, state) => KalenderPlatzhalter(
+              listId: state.uri.queryParameters['liste'],
+            ),
+          ),
           GoRoute(
             path: '/profile',
             builder: (context, state) => const ProfileScreen(),
@@ -333,19 +365,10 @@ class TogetherDoAppView extends StatelessWidget {
             path: '/shopping/:listId',
             builder: (context, state) {
               final listId = state.pathParameters['listId']!;
-              return ShoppingScreen(listId: listId);
-            },
-          ),
-          GoRoute(
-            path: '/lists',
-            builder: (context, state) => const ListsScreen(),
-          ),
-          GoRoute(
-            path: '/chat/:todoId',
-            builder: (context, state) {
-              final todoId = state.pathParameters['todoId']!;
-              final todoTitle = state.uri.queryParameters['title'] ?? 'Chat';
-              return ChatScreen(todoId: todoId, todoTitle: todoTitle);
+              return ShoppingScreen(
+                listId: listId,
+                highlightItemId: state.uri.queryParameters['highlight'],
+              );
             },
           ),
         ],

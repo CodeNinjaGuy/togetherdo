@@ -24,7 +24,7 @@
   "ownerCannotLeave": "The owner cannot leave the list",
   "save": "Save",
   "cancel": "Cancel",
-  "readOnlyMode": "Read-Only Mode: You can only view this list. Only the owner can edit items.",
+  "readOnlyMode": "Read-only: you can view this list and tick things off. Only the owner can edit.",
   "delete": "Delete",
   "noLists": "No Lists",
   "createOrJoinList": "Create your first list or join a list",
@@ -204,7 +204,7 @@
   "newListTitle": "Create New List",
   "membersCanEditTitle": "Members can edit",
   "membersCanEditSubtitle": "Other members can edit todos and shopping lists",
-  "newTodoTitle": "New Todo",
+  "newTodoTitle": "New task",
   "todoTitle": "Title",
   "todoDescription": "Description (optional)",
   "todoCategory": "Category (optional)",
@@ -535,5 +535,156 @@
       }
     }
   },
-  "voiceRemoveEntry": "Remove entry"
+  "voiceRemoveEntry": "Remove entry",
+  "navToday": "Today",
+  "navLists": "Lists",
+  "navCalendar": "Calendar",
+  "navProfile": "Profile",
+  "calendarComingSoon": "The family calendar arrives with the next update.",
+  "comingSoon": "Coming soon",
+  "mailReminders": "Email reminders",
+  "greetingMorning": "Good morning, {name}",
+  "@greetingMorning": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingDay": "Hello, {name}",
+  "@greetingDay": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingEvening": "Good evening, {name}",
+  "@greetingEvening": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagline": "Done together, shared fairly.",
+  "teamCount": "{count, plural, =1{Just you} other{{count} people}}",
+  "@teamCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statOpen": "Open today",
+  "statDoneWeek": "Done this week",
+  "statFairness": "Your share",
+  "sectionToday": "Due today",
+  "sectionForYou": "For you",
+  "sectionShopping": "Shopping",
+  "sectionFairness": "Shared fairly",
+  "openToday": "{count, plural, =1{1 task open} other{{count} tasks open}}",
+  "@openToday": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "allDone": "All done. Nice!",
+  "emptyTodayTitle": "Nothing due today",
+  "emptyTodayMessage": "No tasks due. Take a break or plan ahead.",
+  "itemsLeft": "{count, plural, =0{all bought} =1{1 item left} other{{count} items left}}",
+  "@itemsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "showAll": "All",
+  "chooseList": "Which list?",
+  "memberCount": "{count, plural, =1{1 member} other{{count} members}}",
+  "@memberCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "listCountSummary": "{count, plural, =1{1 list} other{{count} lists}}",
+  "@listCountSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "more": "More",
+  "listDeleted": "List deleted",
+  "todoListDescription": "Share tasks, tick them off, stay fair",
+  "shoppingListDescription": "Collect items, scan, shop",
+  "joinListDescription": "Enter the 6-digit code you received.",
+  "overdue": "overdue",
+  "dueToday": "today",
+  "doneBy": "Done by {name}",
+  "@doneBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "onlyMembersCanComplete": "Only list members can tick this off.",
+  "taskDeleted": "Task deleted",
+  "progress": "Progress",
+  "doneOf": "{done} of {total} done",
+  "@doneOf": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "allDoneTitle": "All done",
+  "allDoneMessage": "No open tasks in this list.",
+  "taskDetails": "Task",
+  "chatSubtitle": "Task chat",
+  "chatEmptyMessage": "Write the first message or send a photo.",
+  "yesterday": "Yesterday",
+  "attachmentSendImage": "Send image",
+  "attachments": "Attachments",
+  "attachmentAdd": "Add attachment",
+  "attachmentTakePhoto": "Take photo",
+  "attachmentChooseFromPhotos": "Choose from photos",
+  "attachmentChooseFile": "Choose file (PDF)",
+  "attachmentDelete": "Delete attachment",
+  "attachmentDeleteConfirm": "Really delete “{name}”?",
+  "@attachmentDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "attachmentOpen": "Open",
+  "attachmentTooLarge": "The file is too large (images up to 10 MB, PDF up to 20 MB).",
+  "attachmentUnsupported": "Only photos and PDF files can be attached.",
+  "attachmentUploadFailed": "The attachment could not be uploaded.",
+  "attachmentDeleteFailed": "The attachment could not be deleted.",
+  "attachmentPermissionMessage": "Please allow access to the camera or photos in Settings.",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+  "promiseLists": "Tasks and shopping for everyone at home",
+  "promiseFair": "Shared fairly: whose turn is it?",
+  "promiseScan": "Scan barcodes, speak, attach photos",
+  "appearance": "Appearance",
+  "theme_dark": "Dark",
+  "theme_system": "Match device",
+  "aboutApp": "App",
+  "version": "Version",
+  "account": "Account"
 }

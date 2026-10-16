@@ -7,22 +7,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:togetherdo/l10n/app_localizations.dart';
 
+import '../../design/td_design.dart';
 import '../../repositories/auth_repository.dart';
 
-/// Dialog „Passwort vergessen“: schickt den Firebase-Link zum Zurücksetzen.
+/// „Passwort vergessen“: schickt den Firebase-Link zum Zurücksetzen.
+/// Als Sheet (Handy) bzw. Dialog (iPad/Mac) über [show].
 ///
 /// Die Rückmeldung verrät bewusst nicht, ob es zur Adresse ein Konto gibt.
 class ForgotPasswordDialog extends StatefulWidget {
   final String initialEmail;
 
-  const ForgotPasswordDialog({super.key, this.initialEmail = ''});
+  const ForgotPasswordDialog({
+    super.key,
+    this.initialEmail = '',
+    this.embedded = false,
+  });
 
   static Future<void> show(BuildContext context, {String initialEmail = ''}) {
-    return showDialog<void>(
-      context: context,
-      builder: (_) => ForgotPasswordDialog(initialEmail: initialEmail),
+    final repo = context.read<AuthRepository>();
+    return showTdSheet<void>(
+      context,
+      title: AppLocalizations.of(context)!.resetPasswordTitle,
+      builder: (_) => RepositoryProvider.value(
+        value: repo,
+        child: ForgotPasswordDialog(initialEmail: initialEmail, embedded: true),
+      ),
     );
   }
+
+  /// Im Sheet trägt das Sheet den Titel.
+  final bool embedded;
 
   @override
   State<ForgotPasswordDialog> createState() => _ForgotPasswordDialogState();
@@ -70,55 +84,108 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return AlertDialog(
-      title: Text(l10n.resetPasswordTitle),
-      content: _sent
-          ? Text(l10n.resetPasswordSent)
-          : Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.resetPasswordDescription),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    autofillHints: const [AutofillHints.email],
-                    decoration: InputDecoration(
-                      labelText: l10n.email,
-                      hintText: l10n.emailHint,
-                      errorText: _error,
+    final body = AnimatedSwitcher(
+      duration: TdMotion.of(context, TdMotion.base),
+      child: _sent
+          ? Column(
+              key: const ValueKey('sent'),
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.mark_email_read_outlined, color: context.td.success),
+                    const SizedBox(width: TdSpace.md),
+                    Expanded(child: Text(l10n.resetPasswordSent)),
+                  ],
+                ),
+                const SizedBox(height: TdSpace.xl),
+                TdButton.secondary(
+                  label: l10n.close,
+                  expanded: true,
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
+              ],
+            )
+          : KeyedSubtree(
+              key: const ValueKey('form'),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(l10n.resetPasswordDescription),
+                    const SizedBox(height: TdSpace.lg),
+                    TdTextField(
+                      controller: _emailController,
+                      label: l10n.email,
+                      hint: l10n.emailHint,
+                      prefixIcon: Icons.mail_outline_rounded,
+                      keyboardType: TextInputType.emailAddress,
+                      autofillHints: const [AutofillHints.email],
+                      autofocus: widget.initialEmail.isEmpty,
+                      validator: (value) {
+                        final v = value?.trim() ?? '';
+                        if (v.isEmpty) return l10n.emailRequired;
+                        if (!v.contains('@')) return l10n.invalidEmail;
+                        return null;
+                      },
+                      onSubmitted: (_) => _send(),
                     ),
-                    validator: (value) {
-                      final v = value?.trim() ?? '';
-                      if (v.isEmpty) return l10n.emailRequired;
-                      if (!v.contains('@')) return l10n.invalidEmail;
-                      return null;
-                    },
-                    onFieldSubmitted: (_) => _send(),
-                  ),
-                ],
+                    TdReveal(
+                      visible: _error != null,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: TdSpace.sm),
+                        child: Text(
+                          _error ?? '',
+                          style: context.text.bodySmall?.copyWith(
+                            color: context.td.danger,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: TdSpace.xl),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TdButton.secondary(
+                            label: l10n.cancel,
+                            onPressed: _sending
+                                ? null
+                                : () => Navigator.of(context).maybePop(),
+                          ),
+                        ),
+                        const SizedBox(width: TdSpace.md),
+                        Expanded(
+                          flex: 2,
+                          child: TdButton.primary(
+                            label: l10n.resetPasswordSend,
+                            icon: Icons.send_rounded,
+                            expanded: true,
+                            loading: _sending,
+                            onPressed: _sending ? null : _send,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-      actions: [
-        TextButton(
-          onPressed: _sending ? null : () => Navigator.of(context).pop(),
-          child: Text(_sent ? l10n.close : l10n.cancel),
-        ),
-        if (!_sent)
-          FilledButton(
-            onPressed: _sending ? null : _send,
-            child: _sending
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l10n.resetPasswordSend),
-          ),
-      ],
+    );
+    if (widget.embedded) return body;
+    return Padding(
+      padding: const EdgeInsets.all(TdSpace.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(l10n.resetPasswordTitle, style: context.text.headlineSmall),
+          const SizedBox(height: TdSpace.lg),
+          body,
+        ],
+      ),
     );
   }
 }

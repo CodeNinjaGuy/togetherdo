@@ -5,438 +5,266 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:togetherdo/l10n/app_localizations.dart';
 
-import '../../design/td_design.dart';
-import '../../services/review_service.dart';
-import '../fairness/fairness_widgets.dart';
-
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
-import '../../repositories/list_repository.dart';
-import '../../repositories/todo_repository.dart';
-import '../../models/todo_model.dart';
+import '../../design/td_design.dart';
+import '../../fairness/fairness.dart';
 import '../../models/list_model.dart';
-import '../../screens/chat/chat_screen.dart';
+import '../../models/todo_model.dart';
+import '../../repositories/attachment_repository.dart';
 import '../../repositories/chat_repository.dart';
+import '../../repositories/todo_repository.dart';
+import '../../services/review_service.dart';
 import '../common/user_avatar.dart';
+import '../fairness/fairness_widgets.dart';
 
+/// Zeile einer Aufgabe auf Basis von [TdTaskTile]: Abhaken (alle
+/// Mitglieder), Wischen zum Löschen (nur mit Bearbeitungsrecht), Etiketten
+/// für Fälligkeit, Priorität, Aufwand, Kategorie und Anhänge, Chat rechts.
 class TodoItemWidget extends StatelessWidget {
-  final TodoModel todo;
-
-  /// Öffnet das Bearbeiten-Sheet; `null` = keine Bearbeitung erlaubt.
-  final VoidCallback? onEdit;
-
-  /// Nach erfolgreichem eigenem Abhaken (für Bewertungsanfrage).
-  final VoidCallback? onCompleted;
-
   const TodoItemWidget({
     super.key,
     required this.todo,
-    this.onEdit,
+    required this.list,
+    required this.members,
+    required this.currentUserId,
+    required this.canEdit,
+    this.index = 0,
+    this.onTap,
     this.onCompleted,
+    this.accent,
+    this.showListTag = false,
   });
+
+  final TodoModel todo;
+  final ListModel list;
+  final List<FairnessMember> members;
+  final String currentUserId;
+
+  /// Bearbeiten/Löschen erlaubt (Besitzer oder Mitglied mit allowEdit).
+  final bool canEdit;
+  final int index;
+
+  /// Öffnet Bearbeiten bzw. Details.
+  final VoidCallback? onTap;
+
+  /// Nach erfolgreichem eigenem Abhaken (für die Bewertungsanfrage).
+  final VoidCallback? onCompleted;
+  final Color? accent;
+
+  /// Auf „Heute“: Listenname als Etikett zeigen.
+  final bool showListTag;
+
+  bool get _isMember =>
+      list.ownerId == currentUserId || list.memberIds.contains(currentUserId);
+
+  Future<void> _setCompleted(BuildContext context, bool value) async {
+    final auth = context.read<AuthBloc>().state;
+    if (auth is! AuthAuthenticated) return;
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      await context.read<TodoRepository>().setCompleted(
+        todoId: todo.id,
+        completed: value,
+        userId: auth.user.id,
+        userName: auth.user.displayName,
+      );
+      if (value) onCompleted?.call();
+    } catch (e) {
+      ReviewService.instance.noteError();
+      debugPrint('Abhaken fehlgeschlagen: $e');
+      if (context.mounted) {
+        TdToast.show(context, l10n.saveFailed, variant: TdToastVariant.error);
+      }
+    }
+  }
+
+  Future<bool> _confirmDelete(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteTodoTitle),
+        content: Text(l10n.deleteTodoContent(todo.title)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: ctx.td.danger),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    return ok == true;
+  }
+
+  Future<void> _delete(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      await context.read<ChatRepository>().deleteAllMessages(todo.id);
+      if (!context.mounted) return;
+      await context.read<TodoRepository>().deleteTodo(todo.id);
+      if (!context.mounted) return;
+      TdToast.show(
+        context,
+        l10n.taskDeleted,
+        variant: TdToastVariant.info,
+        icon: Icons.delete_outline_rounded,
+      );
+    } catch (e) {
+      debugPrint('Aufgabe löschen fehlgeschlagen: $e');
+      if (context.mounted) {
+        TdToast.show(context, l10n.saveFailed, variant: TdToastVariant.error);
+      }
+    }
+  }
+
+  TdAvatarData? _assignee() {
+    final id = todo.assignedToUserId;
+    if (id == null) return null;
+    for (final m in members) {
+      if (m.id == id) {
+        return avatarDataOf(m, imageUrl: UserAvatarCache.instance.peek(id));
+      }
+    }
+    return TdAvatarData(
+      id: id,
+      name: todo.assignedToUserName ?? '?',
+      imageUrl: UserAvatarCache.instance.peek(id),
+    );
+  }
+
+  Widget _dueTag(BuildContext context, AppLocalizations l10n) {
+    final due = todo.dueDate!;
+    final td = context.td;
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final hasTime = due.hour != 0 || due.minute != 0;
+    if (todo.isCompleted) {
+      return TdTag(
+        label: DateFormat.MMMd(locale).format(due),
+        icon: Icons.event_rounded,
+        filled: false,
+      );
+    }
+    if (todo.isOverdue) {
+      return TdTag(
+        label: l10n.overdue,
+        icon: Icons.schedule_rounded,
+        color: td.danger,
+      );
+    }
+    if (todo.isDueToday) {
+      return TdTag(
+        label: hasTime
+            ? '${l10n.dueToday}, ${DateFormat.Hm(locale).format(due)}'
+            : l10n.dueToday,
+        icon: Icons.today_rounded,
+        color: td.warning,
+      );
+    }
+    return TdTag(
+      label: (hasTime
+              ? DateFormat.MMMEd(locale).add_Hm()
+              : DateFormat.MMMEd(locale))
+          .format(due),
+      icon: Icons.event_rounded,
+      filled: false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<ListModel?>(
-      stream: (context.read<ListRepository>() as FirebaseListRepository)
-          .getListByIdStream(todo.listId),
-      builder: (context, listSnapshot) {
-        final list = listSnapshot.data;
-        final authState = context.read<AuthBloc>().state;
-        final currentUserId = authState is AuthAuthenticated
-            ? authState.user.id
-            : '';
+    final l10n = AppLocalizations.of(context)!;
+    final td = context.td;
+    final color = accent ?? context.colors.primary;
+    final shared = list.memberIds.isNotEmpty;
+    final locale = Localizations.localeOf(context).toLanguageTag();
 
-        final isOwner = list?.ownerId == currentUserId;
-        final isMember = list?.memberIds.contains(currentUserId) == true;
-        final canEdit = isOwner || (isMember && (list?.allowEdit ?? true));
-
-        // Prüfe, ob es sich um eine geteilte Liste handelt
-        final hasOtherParticipants =
-            list != null &&
-            (list.memberIds.isNotEmpty || // Es gibt andere Mitglieder
-                list.ownerId !=
-                    currentUserId); // Benutzer ist nicht der Besitzer
-
-        // Abhaken: jedes Mitglied (auch ohne allowEdit) – bei zugewiesenen
-        // Aufgaben nur die zuständige Person oder der Besitzer.
-        final canComplete =
-            (isOwner || isMember) &&
-            (todo.assignedToUserId == null ||
-                todo.assignedToUserId == currentUserId ||
-                isOwner);
-
-        // Visuelle Unterscheidung für Zuweisungen
-        final isAssignedToMe = todo.assignedToUserId == currentUserId;
-        final isAssignedToOther =
-            todo.assignedToUserId != null && !isAssignedToMe;
-
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
-              color: isAssignedToMe
-                  ? Colors.green.withValues(
-                      alpha: 0.6,
-                    ) // Hellgrün für zugewiesen an mich
-                  : isAssignedToOther
-                  ? Colors.blue.withValues(
-                      alpha: 0.4,
-                    ) // Hellblau für zugewiesen an andere
-                  : Colors.transparent,
-              width: isAssignedToMe || isAssignedToOther ? 2 : 0,
-            ),
-          ),
-          child: ListTile(
-            onTap: onEdit,
-            leading: Checkbox(
-              value: todo.isCompleted,
-              onChanged: canComplete
-                  ? (value) async {
-                      if (value == null) return;
-                      final authState = context.read<AuthBloc>().state;
-                      if (authState is! AuthAuthenticated) return;
-                      final l10n = AppLocalizations.of(context)!;
-                      try {
-                        await context.read<TodoRepository>().setCompleted(
-                          todoId: todo.id,
-                          completed: value,
-                          userId: authState.user.id,
-                          userName: authState.user.displayName,
-                        );
-                        if (value) onCompleted?.call();
-                      } catch (e) {
-                        ReviewService.instance.noteError();
-                        debugPrint('Abhaken fehlgeschlagen: $e');
-                        if (context.mounted) {
-                          TdToast.show(
-                            context,
-                            l10n.saveFailed,
-                            variant: TdToastVariant.error,
-                          );
-                        }
-                      }
-                    }
-                  : null,
-            ),
-            title: Text(
-              todo.title,
-              style: TextStyle(
-                decoration: todo.isCompleted
-                    ? TextDecoration.lineThrough
-                    : null,
-                color: todo.isCompleted
-                    ? Theme.of(context).colorScheme.onSurfaceVariant
-                    : null,
-              ),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (todo.description.isNotEmpty)
-                  Text(
-                    todo.description,
-                    style: TextStyle(
-                      decoration: todo.isCompleted
-                          ? TextDecoration.lineThrough
-                          : null,
-                      color: todo.isCompleted
-                          ? Theme.of(context).colorScheme.onSurfaceVariant
-                          : null,
-                    ),
-                  ),
-                if (todo.assignedToUserId != null) ...[
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isAssignedToMe
-                          ? Colors.green.withValues(alpha: 0.1)
-                          : Colors.blue.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        UserAvatar(
-                          userId: todo.assignedToUserId,
-                          name: todo.assignedToUserName ?? '?',
-                          radius: 9,
-                        ),
-                        const SizedBox(width: 4),
-                        Flexible(
-                          child: Text(
-                            isAssignedToMe
-                                ? AppLocalizations.of(context)!.assignedToYou
-                                : '${AppLocalizations.of(context)!.assignedTo} ${todo.assignedToUserName ?? AppLocalizations.of(context)!.unknown}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: isAssignedToMe
-                                  ? Colors.green.shade700
-                                  : Colors.blue.shade700,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 4),
-                TdWeightTag(
-                  weight: tdWeightOf(todo.effort),
-                  label: effortLabel(
-                    AppLocalizations.of(context)!,
-                    todo.effort,
-                  ),
+    final tags = <Widget>[
+      if (showListTag)
+        TdTag(label: list.name, color: color, icon: Icons.checklist_rounded),
+      if (todo.dueDate != null) _dueTag(context, l10n),
+      if (todo.priority == TodoPriority.high)
+        TdTag(
+          label: l10n.priorityHigh,
+          icon: Icons.priority_high_rounded,
+          color: td.danger,
+        ),
+      if (todo.priority == TodoPriority.low)
+        TdTag(label: l10n.priorityLow, icon: Icons.south_rounded, filled: false),
+      TdWeightTag(weight: tdWeightOf(todo.effort)),
+      if (todo.category != null && todo.category!.isNotEmpty)
+        TdTag(label: todo.category!, icon: Icons.sell_outlined, filled: false),
+      StreamBuilder<int>(
+        stream: context
+            .read<AttachmentRepository>()
+            .watch(todo.id)
+            .map((a) => a.length),
+        builder: (context, snap) => TdAttachmentBadge(count: snap.data ?? 0),
+      ),
+      if (todo.isCompleted && todo.completedByUserName != null)
+        TdTag(
+          label: todo.completedAt == null
+              ? l10n.doneBy(todo.completedByUserName!)
+              : l10n.completedByAt(
+                  todo.completedByUserName!,
+                  DateFormat.MMMEd(locale).add_Hm().format(todo.completedAt!),
                 ),
-                if (todo.isCompleted && todo.completedByUserName != null) ...[
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.check_circle,
-                        size: 14,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          todo.completedAt == null
-                              ? '${AppLocalizations.of(context)!.completedBy} ${todo.completedByUserName}'
-                              : '${AppLocalizations.of(context)!.completedBy} ${AppLocalizations.of(context)!.completedByAt(todo.completedByUserName!, DateFormat.MMMEd(Localizations.localeOf(context).toLanguageTag()).add_Hm().format(todo.completedAt!))}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-                if (todo.dueDate != null) ...[
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.schedule,
-                        size: 16,
-                        color: _getDueDateColor(context),
-                      ),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          DateFormat('dd.MM.yyyy HH:mm').format(todo.dueDate!),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: _getDueDateColor(context),
-                            fontWeight: FontWeight.w500,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-                if (todo.category != null) ...[
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      todo.category!,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSecondaryContainer,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildPriorityChip(context),
-                if (canComplete && canEdit)
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: () => _showDeleteDialog(context),
-                  ),
-                if (hasOtherParticipants)
-                  StreamBuilder<int>(
-                    stream:
-                        (context.read<ChatRepository>()
-                                as FirestoreChatRepository)
-                            .getUnreadCount(todo.id, currentUserId),
-                    builder: (context, unreadSnapshot) {
-                      final unreadCount = unreadSnapshot.data ?? 0;
-                      return Stack(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.chat_bubble_outline),
-                            tooltip: AppLocalizations.of(context)!.chat,
-                            onPressed: () async {
-                              // Markiere Nachrichten als gelesen beim Öffnen
-                              await (context.read<ChatRepository>()
-                                      as FirestoreChatRepository)
-                                  .markAsRead(todo.id, currentUserId);
-                              if (context.mounted) {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => ChatScreen(
-                                      todoId: todo.id,
-                                      todoTitle: todo.title,
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                          if (unreadCount > 0)
-                            Positioned(
-                              right: 8,
-                              top: 8,
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.error,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                constraints: const BoxConstraints(
-                                  minWidth: 16,
-                                  minHeight: 16,
-                                ),
-                                child: Text(
-                                  unreadCount > 99
-                                      ? '99+'
-                                      : unreadCount.toString(),
-                                  style: TextStyle(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onError,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                        ],
-                      );
-                    },
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Color _getDueDateColor(BuildContext context) {
-    if (todo.isCompleted) {
-      return Theme.of(context).colorScheme.onSurfaceVariant;
-    }
-
-    if (todo.isOverdue) {
-      return Theme.of(context).colorScheme.error;
-    }
-
-    if (todo.isDueToday) {
-      return Theme.of(context).colorScheme.primary;
-    }
-
-    return Theme.of(context).colorScheme.onSurfaceVariant;
-  }
-
-  Widget _buildPriorityChip(BuildContext context) {
-    Color color;
-    String label;
-
-    switch (todo.priority) {
-      case TodoPriority.high:
-        color = Theme.of(context).colorScheme.error;
-        label = 'Hoch';
-        break;
-      case TodoPriority.medium:
-        color = Theme.of(context).colorScheme.primary;
-        label = 'Mittel';
-        break;
-      case TodoPriority.low:
-        color = Theme.of(context).colorScheme.secondary;
-        label = 'Niedrig';
-        break;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 10,
-          color: color,
-          fontWeight: FontWeight.w500,
+          icon: Icons.check_circle_rounded,
+          color: td.success,
         ),
-      ),
-    );
-  }
+    ];
 
-  void _showDeleteDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.deleteTodoTitle),
-        content: Text(
-          AppLocalizations.of(context)!.deleteTodoContent(todo.title),
+    Widget? trailing;
+    if (shared) {
+      trailing = StreamBuilder<int>(
+        stream: (context.read<ChatRepository>()).getUnreadCount(
+          todo.id,
+          currentUserId,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(AppLocalizations.of(context)!.cancel),
-          ),
-          TextButton(
-            onPressed: () async {
-              // Zuerst Chat löschen
-              if (!context.mounted) return;
-              await (context.read<ChatRepository>() as FirestoreChatRepository)
-                  .deleteAllMessages(todo.id);
-              // Dann Todo löschen
-              if (!context.mounted) return;
-              await (context.read<TodoRepository>() as FirebaseTodoRepository)
-                  .deleteTodo(todo.id);
-              if (!context.mounted) return;
-              Navigator.of(context).pop();
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: Text(AppLocalizations.of(context)!.delete),
-          ),
-        ],
+        builder: (context, snap) => TdIconButton(
+          icon: Icons.chat_bubble_outline_rounded,
+          tooltip: l10n.chat,
+          size: 38,
+          badge: snap.data ?? 0,
+          onPressed: () async {
+            await context.read<ChatRepository>().markAsRead(
+              todo.id,
+              currentUserId,
+            );
+            if (!context.mounted) return;
+            context.push(
+              '/chat/${todo.id}?title=${Uri.encodeComponent(todo.title)}&liste=${list.id}',
+            );
+          },
+        ),
+      );
+    }
+
+    return TdFadeSlideIn(
+      index: index,
+      child: TdTaskTile(
+        heroTag: 'task-${todo.id}',
+        title: todo.title,
+        subtitle: todo.description.isEmpty ? null : todo.description,
+        done: todo.isCompleted,
+        accent: color,
+        assignee: _assignee(),
+        tags: tags,
+        trailing: trailing,
+        onChanged: _isMember ? (v) => _setCompleted(context, v) : null,
+        disabledHint: _isMember ? null : l10n.onlyMembersCanComplete,
+        onTap: onTap,
+        onDelete: canEdit ? () => _delete(context) : null,
+        confirmDelete: canEdit ? () => _confirmDelete(context) : null,
       ),
     );
   }

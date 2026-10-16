@@ -9,6 +9,8 @@ import 'package:togetherdo/l10n/app_localizations.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
+import 'package:go_router/go_router.dart';
+
 import '../../design/td_design.dart';
 import '../../models/list_model.dart';
 import '../../models/product_info.dart';
@@ -21,6 +23,7 @@ import '../../services/speech_service.dart';
 import '../../widgets/shopping/shopping_item_sheet.dart';
 import '../../widgets/shopping/shopping_item_widget.dart';
 import '../../widgets/shopping/shopping_quick_actions.dart';
+import '../../widgets/lists/list_visuals.dart';
 import '../../widgets/shopping/voice_input_sheet.dart';
 import 'barcode_scanner_screen.dart';
 
@@ -319,18 +322,10 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
             : _rights(list);
 
         return Scaffold(
-          appBar: AppBar(
-            title: Text(list?.name ?? l10n.shoppingList),
-            actions: [
-              if (rights.canEdit && barcodeScannerSupported)
-                IconButton(
-                  tooltip: l10n.scanBarcode,
-                  icon: const Icon(Icons.qr_code_scanner_rounded),
-                  onPressed: _openScanner,
-                ),
-            ],
+          body: SafeArea(
+            bottom: false,
+            child: _buildBody(context, l10n, listSnapshot, rights),
           ),
-          body: _buildBody(context, l10n, listSnapshot, rights),
           floatingActionButton: rights.canEdit
               ? ShoppingQuickActions(
                   onAdd: () => _addManually(),
@@ -340,6 +335,71 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
               : null,
         );
       },
+    );
+  }
+
+  /// Kopf wie bei Aufgabenlisten: Zurück (Handy), Symbol mit Hero, Name,
+  /// Mitglieder, Nur-lesen-Hinweis per Tooltip, Scanner.
+  Widget _header(
+    BuildContext context,
+    AppLocalizations l10n,
+    ListModel list,
+    ({bool canEdit, bool canToggle}) rights,
+  ) {
+    final compact = context.tdIsCompact;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        TdSpace.page,
+        TdSpace.md,
+        TdSpace.page,
+        TdSpace.sm,
+      ),
+      child: Row(
+        children: [
+          if (compact)
+            Padding(
+              padding: const EdgeInsets.only(right: TdSpace.sm),
+              child: TdIconButton(
+                icon: Icons.arrow_back_rounded,
+                tooltip: l10n.navLists,
+                size: 40,
+                onPressed: () =>
+                    context.canPop() ? context.pop() : context.go('/lists'),
+              ),
+            ),
+          Expanded(
+            child: ListHeader(
+              list: list,
+              iconSize: compact ? 52 : 64,
+              subtitle: l10n.memberCount(list.memberCount),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (!rights.canEdit)
+                    Tooltip(
+                      message: l10n.readOnlyMode,
+                      triggerMode: TooltipTriggerMode.tap,
+                      child: TdTag(
+                        label: l10n.readOnly,
+                        icon: Icons.lock_outline_rounded,
+                        filled: false,
+                      ),
+                    ),
+                  if (rights.canEdit && barcodeScannerSupported) ...[
+                    const SizedBox(width: TdSpace.sm),
+                    TdIconButton(
+                      icon: Icons.qr_code_scanner_rounded,
+                      tooltip: l10n.scanBarcode,
+                      size: 40,
+                      onPressed: _openScanner,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -354,42 +414,22 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
     }
     final list = listSnapshot.data;
     if (list == null) {
-      return Center(child: Text(l10n.listNotFound));
+      return Center(
+        child: TdEmptyState(
+          icon: Icons.search_off_rounded,
+          title: l10n.listNotFound,
+          action: TdButton.secondary(
+            label: l10n.navLists,
+            icon: Icons.arrow_back_rounded,
+            onPressed: () => context.go('/lists'),
+          ),
+        ),
+      );
     }
 
     return Column(
       children: [
-        if (!rights.canEdit)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              TdSpace.page,
-              TdSpace.lg,
-              TdSpace.page,
-              0,
-            ),
-            child: TdCard(
-              variant: TdCardVariant.outlined,
-              padding: const EdgeInsets.all(TdSpace.md),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.lock_outline_rounded,
-                    size: 20,
-                    color: context.td.muted,
-                  ),
-                  const SizedBox(width: TdSpace.sm),
-                  Expanded(
-                    child: Text(
-                      l10n.readOnlyMode,
-                      style: context.text.bodySmall?.copyWith(
-                        color: context.td.muted,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        TdFadeSlideIn(child: _header(context, l10n, list, rights)),
         Expanded(
           child: StreamBuilder<List<ShoppingItemModel>>(
             stream: _shoppingRepository.getItemsStream(widget.listId),

@@ -35,6 +35,8 @@ class TdTaskTile extends StatefulWidget {
     this.celebrate = true,
     this.heroTag,
     this.dense = false,
+    this.confirmDelete,
+    this.disabledHint,
   });
 
   final String title;
@@ -59,6 +61,12 @@ class TdTaskTile extends StatefulWidget {
   final bool celebrate;
   final Object? heroTag;
   final bool dense;
+
+  /// Wird vor dem Löschen per Wischen gefragt; `false` bricht ab.
+  final Future<bool> Function()? confirmDelete;
+
+  /// Erklärt als Tooltip, warum sich die Zeile nicht abhaken lässt.
+  final String? disabledHint;
 
   @override
   State<TdTaskTile> createState() => _TdTaskTileState();
@@ -104,14 +112,27 @@ class _TdTaskTileState extends State<TdTaskTile> {
               ),
               child: Row(
                 children: [
-                  _Leading(
-                    key: _checkKey,
-                    done: widget.done,
-                    enabled: canToggle,
-                    label: widget.leadingLabel,
-                    accent: accent,
-                    onTap: canToggle ? _toggle : null,
-                  ),
+                  if (!canToggle && widget.disabledHint != null)
+                    Tooltip(
+                      message: widget.disabledHint!,
+                      triggerMode: TooltipTriggerMode.tap,
+                      child: _Leading(
+                        key: _checkKey,
+                        done: widget.done,
+                        enabled: false,
+                        label: widget.leadingLabel,
+                        accent: accent,
+                      ),
+                    )
+                  else
+                    _Leading(
+                      key: _checkKey,
+                      done: widget.done,
+                      enabled: canToggle,
+                      label: widget.leadingLabel,
+                      accent: accent,
+                      onTap: canToggle ? _toggle : null,
+                    ),
                   const SizedBox(width: TdSpace.md),
                   Expanded(
                     child: Column(
@@ -203,7 +224,8 @@ class _TdTaskTileState extends State<TdTaskTile> {
           _toggle();
           return false;
         }
-        return true;
+        final confirm = widget.confirmDelete;
+        return confirm == null ? true : await confirm();
       },
       onDismissed: (_) => widget.onDelete?.call(),
       background: _SwipeBackground(

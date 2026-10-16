@@ -234,8 +234,8 @@ abstract final class TdThemeBuilder {
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: p.surfaceElevated,
         surfaceTintColor: Colors.transparent,
-        showDragHandle: true,
-        dragHandleColor: outline,
+        // Den Griff zeichnet `showTdSheet` selbst – sonst erscheinen zwei.
+        showDragHandle: false,
         shape: RoundedRectangleBorder(borderRadius: TdRadius.sheet),
         clipBehavior: Clip.antiAlias,
       ),

@@ -21,6 +21,13 @@ class AppTheme {
 
   static const String defaultTheme = 'Light';
 
+  /// Gespeicherter Name für „wie das System“: hell = [defaultTheme],
+  /// dunkel = [darkTheme]; die App folgt dem Gerät.
+  static const String systemTheme = 'System';
+  static const String darkTheme = 'Dark';
+
+  static bool isSystem(String name) => name == systemTheme;
+
   static ThemeData of(String name) =>
       themes[name] ?? themes[defaultTheme]!;
 }

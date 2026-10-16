@@ -13,254 +13,310 @@ import '../../blocs/auth/auth_state.dart';
 import '../../blocs/list/list_bloc.dart';
 import '../../blocs/list/list_event.dart';
 import '../../blocs/list/list_state.dart';
+import '../../design/td_design.dart';
 import '../../models/list_model.dart';
-import '../../widgets/lists/list_item_widget.dart';
-import '../../widgets/lists/create_list_dialog.dart';
-import '../../widgets/lists/join_list_dialog.dart';
+import '../../widgets/lists/list_card.dart';
+import '../../widgets/lists/list_sheets.dart';
+import '../../widgets/lists/list_visuals.dart';
 
+/// Übersicht aller Listen. Als [panel] ist sie die linke Spalte neben
+/// einer geöffneten Liste (iPad/Mac).
 class ListsScreen extends StatefulWidget {
-  const ListsScreen({super.key});
+  const ListsScreen({super.key, this.panel = false, this.selectedListId});
+
+  final bool panel;
+  final String? selectedListId;
 
   @override
   State<ListsScreen> createState() => _ListsScreenState();
 }
 
 class _ListsScreenState extends State<ListsScreen> {
+  List<ListModel>? _lists;
+
   @override
   void initState() {
     super.initState();
-    _loadLists();
+    final s = context.read<ListBloc>().state;
+    if (s is ListLoadSuccess) _lists = s.lists;
+    if (s is! ListLoadSuccess && s is! ListLoading) _load();
   }
 
-  void _loadLists() {
-    final authState = context.read<AuthBloc>().state;
-    if (authState is AuthAuthenticated) {
-      context.read<ListBloc>().add(
-        ListLoadRequested(userId: authState.user.id),
-      );
+  void _load() {
+    final auth = context.read<AuthBloc>().state;
+    if (auth is AuthAuthenticated) {
+      context.read<ListBloc>().add(ListLoadRequested(userId: auth.user.id));
     }
   }
 
-  void _showCreateListDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => const CreateListDialog(),
+  void _open(ListModel list) {
+    context.go(
+      list.type == ListType.todo ? '/todo/${list.id}' : '/shopping/${list.id}',
     );
-  }
-
-  void _showJoinListDialog() {
-    showDialog(context: context, builder: (context) => const JoinListDialog());
-  }
-
-  void _navigateToList(ListModel list) {
-    if (list.type == ListType.todo) {
-      context.go('/todo/${list.id}');
-    } else {
-      context.go('/shopping/${list.id}');
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    if (l10n == null) {
-      return const SizedBox.shrink();
-    }
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.myLists),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _showCreateListDialog,
-            tooltip: l10n.createList,
-          ),
-          IconButton(
-            icon: const Icon(Icons.join_full),
-            onPressed: _showJoinListDialog,
-            tooltip: l10n.joinList,
-          ),
-        ],
-      ),
-      body: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, authState) {
-          if (authState is AuthAuthenticated) {
-            return BlocBuilder<ListBloc, ListState>(
-              builder: (context, listState) {
-                if (listState is ListLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (listState is ListLoadSuccess) {
-                  final lists = listState.lists;
+    if (l10n == null) return const SizedBox.shrink();
+    final auth = context.watch<AuthBloc>().state;
+    final uid = auth is AuthAuthenticated ? auth.user.id : '';
 
-                  if (lists.isEmpty) {
-                    return Center(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.list_outlined,
-                              size: 80,
-                              color: Theme.of(context).colorScheme.outline,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              l10n.noLists,
-                              style: Theme.of(context).textTheme.headlineSmall,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              l10n.createOrJoinList,
-                              style: Theme.of(context).textTheme.bodyLarge
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 24),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: ElevatedButton.icon(
-                                    onPressed: _showCreateListDialog,
-                                    icon: const Icon(Icons.add),
-                                    label: Text(l10n.createList),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: OutlinedButton.icon(
-                                    onPressed: _showJoinListDialog,
-                                    icon: const Icon(Icons.join_full),
-                                    label: Text(l10n.joinList),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
+    return BlocConsumer<ListBloc, ListState>(
+      listener: (context, state) {
+        if (state is ListLoadSuccess) _lists = state.lists;
+        if (widget.panel) return;
+        switch (state) {
+          case ListLeaveSuccess():
+            TdToast.show(context, l10n.listLeft, variant: TdToastVariant.info);
+          case ListDeleteSuccess():
+            TdToast.show(
+              context,
+              l10n.listDeleted,
+              variant: TdToastVariant.info,
+              icon: Icons.delete_outline_rounded,
+            );
+          case ListLeaveFailure(:final message):
+          case ListDeleteFailure(:final message):
+            TdToast.show(context, message, variant: TdToastVariant.error);
+          default:
+            break;
+        }
+      },
+      builder: (context, state) {
+        final lists = _lists;
+        Widget body;
+        if (state is ListLoadFailure && lists == null) {
+          body = Center(
+            child: TdEmptyState(
+              icon: Icons.cloud_off_rounded,
+              title: l10n.loadError,
+              message: state.message,
+              action: TdButton.secondary(
+                label: l10n.tryAgain,
+                icon: Icons.refresh_rounded,
+                onPressed: _load,
+              ),
+            ),
+          );
+        } else if (lists == null) {
+          body = const Center(child: CircularProgressIndicator());
+        } else if (lists.isEmpty) {
+          body = Center(
+            child: SingleChildScrollView(
+              child: TdEmptyState(
+                icon: Icons.playlist_add_rounded,
+                title: l10n.noLists,
+                message: l10n.createOrJoinList,
+                action: Wrap(
+                  spacing: TdSpace.sm,
+                  runSpacing: TdSpace.sm,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    TdButton.primary(
+                      label: l10n.createList,
+                      icon: Icons.add_rounded,
+                      onPressed: () => showCreateListSheet(context),
+                    ),
+                    TdButton.secondary(
+                      label: l10n.joinList,
+                      icon: Icons.group_add_rounded,
+                      onPressed: () => showJoinListSheet(context),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        } else {
+          body = _ListsBody(
+            lists: lists,
+            uid: uid,
+            panel: widget.panel,
+            selectedListId: widget.selectedListId,
+            onOpen: _open,
+          );
+        }
 
-                  // Gruppiere Listen nach Typ
-                  final todoLists = lists
-                      .where((list) => list.type == ListType.todo)
-                      .toList();
-                  final shoppingLists = lists
-                      .where((list) => list.type == ListType.shopping)
-                      .toList();
-
-                  return ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      if (todoLists.isNotEmpty) ...[
-                        _buildSectionHeader(l10n.todoLists, todoLists.length),
-                        const SizedBox(height: 8),
-                        ...todoLists.map(
-                          (list) => ListItemWidget(
-                            list: list,
-                            currentUserId: authState.user.id,
-                            onTap: () => _navigateToList(list),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-                      if (shoppingLists.isNotEmpty) ...[
-                        _buildSectionHeader(
-                          l10n.shoppingLists,
-                          shoppingLists.length,
-                        ),
-                        const SizedBox(height: 8),
-                        ...shoppingLists.map(
-                          (list) => ListItemWidget(
-                            list: list,
-                            currentUserId: authState.user.id,
-                            onTap: () => _navigateToList(list),
-                          ),
-                        ),
-                      ],
-                    ],
-                  );
-                } else if (listState is ListLoadFailure) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+        if (widget.panel) {
+          return Scaffold(
+            body: SafeArea(
+              bottom: false,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      TdSpace.lg,
+                      TdSpace.md,
+                      TdSpace.sm,
+                      TdSpace.sm,
+                    ),
+                    child: Row(
                       children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 80,
-                          color: Theme.of(context).colorScheme.error,
+                        Expanded(
+                          child: Text(
+                            l10n.navLists,
+                            style: context.text.headlineSmall,
+                          ),
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          l10n.loadError,
-                          style: Theme.of(context).textTheme.headlineSmall,
+                        TdIconButton(
+                          icon: Icons.group_add_rounded,
+                          tooltip: l10n.joinList,
+                          size: 38,
+                          onPressed: () => showJoinListSheet(context),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          listState.message,
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _loadLists,
-                          child: Text(l10n.tryAgain),
+                        const SizedBox(width: TdSpace.sm),
+                        TdIconButton(
+                          icon: Icons.add_rounded,
+                          tooltip: l10n.createList,
+                          filled: true,
+                          size: 38,
+                          onPressed: () => showCreateListSheet(context),
                         ),
                       ],
                     ),
-                  );
-                }
+                  ),
+                  Expanded(child: body),
+                ],
+              ),
+            ),
+          );
+        }
 
-                return const Center(child: CircularProgressIndicator());
-              },
-            );
-          }
-
-          return const Center(child: CircularProgressIndicator());
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showCreateListDialog,
-        icon: const Icon(Icons.add),
-        label: Text(l10n.createList),
-      ),
+        return Scaffold(
+          body: SafeArea(bottom: false, child: body),
+          floatingActionButton: lists == null || lists.isEmpty
+              ? null
+              : FloatingActionButton.extended(
+                  heroTag: 'fab-lists',
+                  onPressed: () => showCreateListSheet(context),
+                  icon: const Icon(Icons.add_rounded),
+                  label: Text(l10n.newList),
+                ),
+        );
+      },
     );
   }
+}
 
-  Widget _buildSectionHeader(String title, int count) {
-    return Row(
-      children: [
-        Text(
-          title,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(width: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            count.toString(),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-              fontWeight: FontWeight.bold,
+class _ListsBody extends StatelessWidget {
+  const _ListsBody({
+    required this.lists,
+    required this.uid,
+    required this.panel,
+    required this.selectedListId,
+    required this.onOpen,
+  });
+
+  final List<ListModel> lists;
+  final String uid;
+  final bool panel;
+  final String? selectedListId;
+  final ValueChanged<ListModel> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final todo = lists.where((l) => l.type == ListType.todo).toList();
+    final shopping = lists.where((l) => l.type == ListType.shopping).toList();
+    final wide = !panel && context.tdLayout != TdLayoutSize.compact;
+
+    Widget section(String title, List<ListModel> items, int offset) {
+      if (items.isEmpty) return const SizedBox.shrink();
+      final cards = [
+        for (final (i, l) in items.indexed)
+          TdFadeSlideIn(
+            key: ValueKey(l.id),
+            index: offset + i,
+            child: ListCard(
+              list: l,
+              currentUserId: uid,
+              selected: l.id == selectedListId,
+              dense: panel,
+              onTap: () => onOpen(l),
             ),
           ),
-        ),
+      ];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              TdSpace.xs,
+              panel ? TdSpace.md : TdSpace.xl,
+              0,
+              TdSpace.md,
+            ),
+            child: Row(
+              children: [
+                Text(
+                  title,
+                  style: panel
+                      ? context.text.titleMedium
+                      : context.text.titleLarge,
+                ),
+                const SizedBox(width: TdSpace.sm),
+                CountPill(count: items.length),
+              ],
+            ),
+          ),
+          if (wide)
+            GridView.count(
+              crossAxisCount: context.tdLayout == TdLayoutSize.expanded ? 3 : 2,
+              shrinkWrap: true,
+              primary: false,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: TdSpace.md,
+              crossAxisSpacing: TdSpace.md,
+              childAspectRatio: 1.9,
+              children: cards,
+            )
+          else
+            for (final c in cards)
+              Padding(
+                padding: const EdgeInsets.only(bottom: TdSpace.md),
+                child: c,
+              ),
+        ],
+      );
+    }
+
+    return ListView(
+      padding: EdgeInsets.fromLTRB(
+        panel ? TdSpace.md : TdSpace.page,
+        panel ? 0 : TdSpace.lg,
+        panel ? TdSpace.md : TdSpace.page,
+        120,
+      ),
+      children: [
+        if (!panel)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.myLists, style: context.text.headlineLarge),
+                    const SizedBox(height: TdSpace.xs),
+                    Text(
+                      l10n.listCountSummary(lists.length),
+                      style: context.text.bodyMedium?.copyWith(
+                        color: context.td.muted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              TdIconButton(
+                icon: Icons.group_add_rounded,
+                tooltip: l10n.joinList,
+                onPressed: () => showJoinListSheet(context),
+              ),
+            ],
+          ),
+        section(l10n.todoLists, todo, 0),
+        section(l10n.shoppingLists, shopping, todo.length),
       ],
     );
   }

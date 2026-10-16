@@ -6,6 +6,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/shopping_item_model.dart';
+import '../utils/stream_utils.dart';
 
 abstract class ShoppingRepository {
   Future<List<ShoppingItemModel>> getItems(String userId);
@@ -158,6 +159,25 @@ class FirebaseShoppingRepository implements ShoppingRepository {
     return query.docs
         .map((doc) => ShoppingItemModel.fromJson(doc.data()))
         .toList();
+  }
+
+  /// Offene Artikel mehrerer Einkaufslisten (Startseite „Heute“).
+  Stream<List<ShoppingItemModel>> openItemsForListsStream(
+    List<String> listIds,
+  ) {
+    return combineLatestLists([
+      for (final ids in chunked(listIds))
+        _firestore
+            .collection('shopping_items')
+            .where('listId', whereIn: ids)
+            .where('isPurchased', isEqualTo: false)
+            .snapshots()
+            .map(
+              (s) => s.docs
+                  .map((d) => ShoppingItemModel.fromJson(d.data()))
+                  .toList(),
+            ),
+    ]);
   }
 
   Stream<List<ShoppingItemModel>> getItemsStream(String listId) {

@@ -11,37 +11,52 @@ import 'package:togetherdo/l10n/app_localizations.dart';
 import '../../design/td_design.dart';
 import '../../fairness/fairness.dart';
 import '../../models/todo_model.dart';
+import '../../repositories/attachment_repository.dart';
+import '../../repositories/chat_repository.dart';
 import '../../repositories/todo_repository.dart';
+import '../../services/attachment_service.dart';
 import '../../services/review_service.dart';
+import '../attachments/attachment_section.dart';
 import '../fairness/fairness_widgets.dart';
 
-/// Öffnet das Sheet zum Anlegen ([todo] = null) oder Bearbeiten einer
-/// Aufgabe. [listTodos] = alle Aufgaben der Liste (für „wer ist dran“).
+/// Öffnet das Sheet zum Anlegen ([todo] = null), Bearbeiten oder – ohne
+/// Bearbeitungsrecht – Ansehen einer Aufgabe. [listTodos] = alle Aufgaben
+/// der Liste (für „wer ist dran“).
 Future<void> showTaskEditorSheet(
   BuildContext context, {
   required String listId,
   required List<FairnessMember> members,
   required List<TodoModel> listTodos,
   required String currentUserId,
+  required String currentUserName,
   TodoModel? todo,
+  bool canEdit = true,
 }) {
   final l10n = AppLocalizations.of(context)!;
+  final title = todo == null
+      ? l10n.newTodoTitle
+      : (canEdit ? l10n.editTodoTitle : l10n.taskDetails);
   return showTdSheet<void>(
     context,
-    title: todo == null ? l10n.newTodoTitle : l10n.editTodoTitle,
+    title: title,
     builder: (_) => TaskEditorForm(
       listId: listId,
       members: members,
       listTodos: listTodos,
       currentUserId: currentUserId,
+      currentUserName: currentUserName,
       todo: todo,
+      canEdit: canEdit,
       repository: context.read<TodoRepository>(),
+      chatRepository: context.read<ChatRepository>(),
+      attachmentRepository: context.read<AttachmentRepository>(),
+      attachmentService: context.read<AttachmentService>(),
     ),
   );
 }
 
 /// Formular: Titel, Beschreibung, Fälligkeit, Zuständig (mit Vorschlag),
-/// Aufwand, Priorität, Kategorie.
+/// Aufwand, Priorität, Kategorie, Anhänge.
 class TaskEditorForm extends StatefulWidget {
   const TaskEditorForm({
     super.key,
@@ -50,7 +65,12 @@ class TaskEditorForm extends StatefulWidget {
     required this.listTodos,
     required this.currentUserId,
     required this.repository,
+    this.currentUserName = '',
     this.todo,
+    this.canEdit = true,
+    this.chatRepository,
+    this.attachmentRepository,
+    this.attachmentService,
     this.now,
   });
 
@@ -58,8 +78,17 @@ class TaskEditorForm extends StatefulWidget {
   final List<FairnessMember> members;
   final List<TodoModel> listTodos;
   final String currentUserId;
+  final String currentUserName;
   final TodoRepository repository;
   final TodoModel? todo;
+
+  /// Ohne Bearbeitungsrecht: Felder nur lesen, Anhänge trotzdem möglich.
+  final bool canEdit;
+  final ChatRepository? chatRepository;
+
+  /// Ohne beides bleibt der Abschnitt „Anhänge“ aus (Tests, Vorschau).
+  final AttachmentRepository? attachmentRepository;
+  final AttachmentService? attachmentService;
 
   /// Nur für Tests.
   final DateTime? now;
@@ -79,8 +108,12 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
   String? _assigneeId;
   FairnessSuggestion? _suggestion;
   bool _saving = false;
+  final AttachmentStaging _staging = AttachmentStaging();
 
   bool get _isNew => widget.todo == null;
+  bool get _editable => widget.canEdit;
+  bool get _withAttachments =>
+      widget.attachmentRepository != null && widget.attachmentService != null;
 
   @override
   void initState() {
@@ -112,6 +145,7 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
     _title.dispose();
     _description.dispose();
     _category.dispose();
+    _staging.dispose();
     super.dispose();
   }
 
@@ -161,7 +195,7 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
     try {
       final old = widget.todo;
       if (old == null) {
-        await widget.repository.addTodo(
+        final created = await widget.repository.addTodo(
           title: title,
           description: _description.text.trim(),
           dueDate: _due,
@@ -173,6 +207,7 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
           assignedToUserName: assignee?.name,
           effort: _effort,
         );
+        await _uploadStaged(created.id);
       } else {
         await widget.repository.updateTodo(
           old.copyWith(
@@ -201,6 +236,60 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
     }
   }
 
+  /// Vorgemerkte Anhänge einer neuen Aufgabe hochladen.
+  Future<void> _uploadStaged(String todoId) async {
+    final service = widget.attachmentService;
+    final repo = widget.attachmentRepository;
+    if (service == null || repo == null) return;
+    for (final file in _staging.value) {
+      final model = await service.upload(
+        file: file,
+        listId: widget.listId,
+        todoId: todoId,
+        userId: widget.currentUserId,
+        userName: widget.currentUserName,
+      );
+      await repo.add(model);
+    }
+  }
+
+  Future<void> _delete() async {
+    final todo = widget.todo;
+    if (todo == null) return;
+    final l10n = AppLocalizations.of(context)!;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteTodoTitle),
+        content: Text(l10n.deleteTodoContent(todo.title)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: ctx.td.danger),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    setState(() => _saving = true);
+    try {
+      await widget.chatRepository?.deleteAllMessages(todo.id);
+      await widget.repository.deleteTodo(todo.id);
+      if (mounted) Navigator.of(context).maybePop();
+    } catch (e) {
+      debugPrint('Aufgabe löschen fehlgeschlagen: $e');
+      if (mounted) {
+        setState(() => _saving = false);
+        TdToast.show(context, l10n.saveFailed, variant: TdToastVariant.error);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -212,27 +301,51 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
                   : DateFormat.yMMMEd(locale))
               .format(_due!);
     final suggested = _suggestion?.member;
+    final editable = _editable;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        TdTextField(
-          controller: _title,
-          label: l10n.todoTitle,
-          hint: l10n.exampleTodo,
-          autofocus: _isNew,
-          textCapitalization: TextCapitalization.sentences,
-          textInputAction: TextInputAction.next,
-        ),
-        const SizedBox(height: TdSpace.lg),
-        TdTextField(
-          controller: _description,
-          label: l10n.todoDescription,
-          hint: l10n.exampleDescription,
-          maxLines: 3,
-          textCapitalization: TextCapitalization.sentences,
-        ),
+        if (!editable) ...[
+          Text(_title.text, style: context.text.headlineSmall),
+          if (_description.text.isNotEmpty) ...[
+            const SizedBox(height: TdSpace.sm),
+            Text(_description.text, style: context.text.bodyMedium),
+          ],
+          const SizedBox(height: TdSpace.sm),
+          Tooltip(
+            message: l10n.readOnlyMode,
+            triggerMode: TooltipTriggerMode.tap,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TdTag(
+                  label: l10n.readOnly,
+                  icon: Icons.lock_outline_rounded,
+                  filled: false,
+                ),
+              ],
+            ),
+          ),
+        ] else ...[
+          TdTextField(
+            controller: _title,
+            label: l10n.todoTitle,
+            hint: l10n.exampleTodo,
+            autofocus: _isNew,
+            textCapitalization: TextCapitalization.sentences,
+            textInputAction: TextInputAction.next,
+          ),
+          const SizedBox(height: TdSpace.lg),
+          TdTextField(
+            controller: _description,
+            label: l10n.todoDescription,
+            hint: l10n.exampleDescription,
+            maxLines: 3,
+            textCapitalization: TextCapitalization.sentences,
+          ),
+        ],
         const SizedBox(height: TdSpace.xl),
         _Label(l10n.dueLabel),
         Wrap(
@@ -243,9 +356,9 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
               label: dueText,
               icon: Icons.event_rounded,
               selected: _due != null,
-              onTap: _pickDue,
+              onTap: editable ? _pickDue : null,
             ),
-            if (_due != null)
+            if (_due != null && editable)
               TdChip(
                 label: l10n.removeDueDate,
                 icon: Icons.close_rounded,
@@ -267,7 +380,7 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
               label: l10n.nobody,
               icon: Icons.groups_rounded,
               selected: _assigneeId == null,
-              onTap: () => setState(() => _assigneeId = null),
+              onTap: editable ? () => setState(() => _assigneeId = null) : null,
             ),
             for (final m in widget.members)
               TdChip(
@@ -276,11 +389,13 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
                 leading: MemberAvatar(member: m, size: 20),
                 color: avatarDataOf(m).resolveColor(),
                 selected: _assigneeId == m.id,
-                onTap: () => setState(() => _assigneeId = m.id),
+                onTap: editable
+                    ? () => setState(() => _assigneeId = m.id)
+                    : null,
               ),
           ],
         ),
-        if (suggested != null) ...[
+        if (suggested != null && editable) ...[
           const SizedBox(height: TdSpace.sm),
           InkWell(
             borderRadius: TdRadius.control,
@@ -322,7 +437,7 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
                 label: effortLabel(l10n, e),
                 leading: TdWeightTag(weight: tdWeightOf(e)),
                 selected: _effort == e,
-                onTap: () => setState(() => _effort = e),
+                onTap: editable ? () => setState(() => _effort = e) : null,
               ),
           ],
         ),
@@ -341,43 +456,83 @@ class _TaskEditorFormState extends State<TaskEditorForm> {
                 },
                 dense: true,
                 selected: _priority == p,
-                onTap: () => setState(() => _priority = p),
+                onTap: editable ? () => setState(() => _priority = p) : null,
               ),
           ],
         ),
-        const SizedBox(height: TdSpace.lg),
-        TdTextField(
-          controller: _category,
-          label: l10n.todoCategory,
-          hint: l10n.exampleCustomCategory,
-          textCapitalization: TextCapitalization.sentences,
-        ),
+        if (editable) ...[
+          const SizedBox(height: TdSpace.lg),
+          TdTextField(
+            controller: _category,
+            label: l10n.todoCategory,
+            hint: l10n.exampleCustomCategory,
+            textCapitalization: TextCapitalization.sentences,
+          ),
+        ] else if (_category.text.isNotEmpty) ...[
+          const SizedBox(height: TdSpace.lg),
+          _Label(l10n.todoCategory),
+          Row(
+            children: [
+              TdTag(label: _category.text, icon: Icons.sell_outlined),
+            ],
+          ),
+        ],
+        if (_withAttachments) ...[
+          const SizedBox(height: TdSpace.xl),
+          AttachmentSection(
+            listId: widget.listId,
+            todoId: widget.todo?.id,
+            staging: _staging,
+            currentUserId: widget.currentUserId,
+            currentUserName: widget.currentUserName,
+            canEdit: widget.canEdit,
+            service: widget.attachmentService!,
+            repository: widget.attachmentRepository!,
+          ),
+        ],
         const SizedBox(height: TdSpace.xxl),
-        Row(
-          children: [
-            Expanded(
-              child: TdButton.secondary(
-                label: l10n.cancel,
-                onPressed: () => Navigator.of(context).maybePop(),
-              ),
-            ),
-            const SizedBox(width: TdSpace.md),
-            Expanded(
-              flex: 2,
-              child: ValueListenableBuilder(
-                valueListenable: _title,
-                builder: (context, value, _) => TdButton.primary(
-                  key: const ValueKey('task-save'),
-                  label: _isNew ? l10n.add : l10n.save,
-                  icon: _isNew ? Icons.add_rounded : Icons.check_rounded,
-                  expanded: true,
-                  loading: _saving,
-                  onPressed: value.text.trim().isEmpty ? null : _save,
+        if (!editable)
+          TdButton.secondary(
+            label: l10n.close,
+            expanded: true,
+            onPressed: () => Navigator.of(context).maybePop(),
+          )
+        else
+          Row(
+            children: [
+              if (!_isNew && widget.chatRepository != null) ...[
+                TdIconButton(
+                  icon: Icons.delete_outline_rounded,
+                  tooltip: l10n.delete,
+                  color: context.td.danger,
+                  size: 52,
+                  onPressed: _saving ? null : _delete,
+                ),
+                const SizedBox(width: TdSpace.md),
+              ],
+              Expanded(
+                child: TdButton.secondary(
+                  label: l10n.cancel,
+                  onPressed: () => Navigator.of(context).maybePop(),
                 ),
               ),
-            ),
-          ],
-        ),
+              const SizedBox(width: TdSpace.md),
+              Expanded(
+                flex: 2,
+                child: ValueListenableBuilder(
+                  valueListenable: _title,
+                  builder: (context, value, _) => TdButton.primary(
+                    key: const ValueKey('task-save'),
+                    label: _isNew ? l10n.add : l10n.save,
+                    icon: _isNew ? Icons.add_rounded : Icons.check_rounded,
+                    expanded: true,
+                    loading: _saving,
+                    onPressed: value.text.trim().isEmpty ? null : _save,
+                  ),
+                ),
+              ),
+            ],
+          ),
       ],
     );
   }

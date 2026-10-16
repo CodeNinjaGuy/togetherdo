@@ -81,7 +81,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
-  String get readOnlyMode => 'Read-Only Mode: You can only view this list. Only the owner can edit items.';
+  String get readOnlyMode => 'Read-only: you can view this list and tick things off. Only the owner can edit.';
 
   @override
   String get delete => 'Delete';
@@ -635,7 +635,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get membersCanEditSubtitle => 'Other members can edit todos and shopping lists';
 
   @override
-  String get newTodoTitle => 'New Todo';
+  String get newTodoTitle => 'New task';
 
   @override
   String get todoTitle => 'Title';
@@ -1376,6 +1376,272 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voiceRemoveEntry => 'Remove entry';
+
+  @override
+  String get navToday => 'Today';
+
+  @override
+  String get navLists => 'Lists';
+
+  @override
+  String get navCalendar => 'Calendar';
+
+  @override
+  String get navProfile => 'Profile';
+
+  @override
+  String get calendarComingSoon => 'The family calendar arrives with the next update.';
+
+  @override
+  String get comingSoon => 'Coming soon';
+
+  @override
+  String get mailReminders => 'Email reminders';
+
+  @override
+  String greetingMorning(String name) {
+    return 'Good morning, $name';
+  }
+
+  @override
+  String greetingDay(String name) {
+    return 'Hello, $name';
+  }
+
+  @override
+  String greetingEvening(String name) {
+    return 'Good evening, $name';
+  }
+
+  @override
+  String get tagline => 'Done together, shared fairly.';
+
+  @override
+  String teamCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people',
+      one: 'Just you',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get statOpen => 'Open today';
+
+  @override
+  String get statDoneWeek => 'Done this week';
+
+  @override
+  String get statFairness => 'Your share';
+
+  @override
+  String get sectionToday => 'Due today';
+
+  @override
+  String get sectionForYou => 'For you';
+
+  @override
+  String get sectionShopping => 'Shopping';
+
+  @override
+  String get sectionFairness => 'Shared fairly';
+
+  @override
+  String openToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tasks open',
+      one: '1 task open',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get allDone => 'All done. Nice!';
+
+  @override
+  String get emptyTodayTitle => 'Nothing due today';
+
+  @override
+  String get emptyTodayMessage => 'No tasks due. Take a break or plan ahead.';
+
+  @override
+  String itemsLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items left',
+      one: '1 item left',
+      zero: 'all bought',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get showAll => 'All';
+
+  @override
+  String get chooseList => 'Which list?';
+
+  @override
+  String memberCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count members',
+      one: '1 member',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String listCountSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lists',
+      one: '1 list',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get more => 'More';
+
+  @override
+  String get listDeleted => 'List deleted';
+
+  @override
+  String get todoListDescription => 'Share tasks, tick them off, stay fair';
+
+  @override
+  String get shoppingListDescription => 'Collect items, scan, shop';
+
+  @override
+  String get joinListDescription => 'Enter the 6-digit code you received.';
+
+  @override
+  String get overdue => 'overdue';
+
+  @override
+  String get dueToday => 'today';
+
+  @override
+  String doneBy(String name) {
+    return 'Done by $name';
+  }
+
+  @override
+  String get onlyMembersCanComplete => 'Only list members can tick this off.';
+
+  @override
+  String get taskDeleted => 'Task deleted';
+
+  @override
+  String get progress => 'Progress';
+
+  @override
+  String doneOf(int done, int total) {
+    return '$done of $total done';
+  }
+
+  @override
+  String get allDoneTitle => 'All done';
+
+  @override
+  String get allDoneMessage => 'No open tasks in this list.';
+
+  @override
+  String get taskDetails => 'Task';
+
+  @override
+  String get chatSubtitle => 'Task chat';
+
+  @override
+  String get chatEmptyMessage => 'Write the first message or send a photo.';
+
+  @override
+  String get yesterday => 'Yesterday';
+
+  @override
+  String get attachmentSendImage => 'Send image';
+
+  @override
+  String get attachments => 'Attachments';
+
+  @override
+  String get attachmentAdd => 'Add attachment';
+
+  @override
+  String get attachmentTakePhoto => 'Take photo';
+
+  @override
+  String get attachmentChooseFromPhotos => 'Choose from photos';
+
+  @override
+  String get attachmentChooseFile => 'Choose file (PDF)';
+
+  @override
+  String get attachmentDelete => 'Delete attachment';
+
+  @override
+  String attachmentDeleteConfirm(String name) {
+    return 'Really delete “$name”?';
+  }
+
+  @override
+  String get attachmentOpen => 'Open';
+
+  @override
+  String get attachmentTooLarge => 'The file is too large (images up to 10 MB, PDF up to 20 MB).';
+
+  @override
+  String get attachmentUnsupported => 'Only photos and PDF files can be attached.';
+
+  @override
+  String get attachmentUploadFailed => 'The attachment could not be uploaded.';
+
+  @override
+  String get attachmentDeleteFailed => 'The attachment could not be deleted.';
+
+  @override
+  String get attachmentPermissionMessage => 'Please allow access to the camera or photos in Settings.';
+
+  @override
+  String get showPassword => 'Show password';
+
+  @override
+  String get hidePassword => 'Hide password';
+
+  @override
+  String get promiseLists => 'Tasks and shopping for everyone at home';
+
+  @override
+  String get promiseFair => 'Shared fairly: whose turn is it?';
+
+  @override
+  String get promiseScan => 'Scan barcodes, speak, attach photos';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get theme_dark => 'Dark';
+
+  @override
+  String get theme_system => 'Match device';
+
+  @override
+  String get aboutApp => 'App';
+
+  @override
+  String get version => 'Version';
+
+  @override
+  String get account => 'Account';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).
