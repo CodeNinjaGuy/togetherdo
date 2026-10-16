@@ -3,21 +3,19 @@
  * Written by Martin Bundschuh.
  */
 
-// Cloud Functions für ToGetherDo (Region europe-west3).
+// Push-Benachrichtigungen (Region europe-west3).
 //
-// Diese Quelle bildet das Verhalten der zuletzt ausgerollten Fassung
-// (`functions/lib/index.js`, Stand 2025-07-13) eins zu eins nach:
-// Mitglieder kommen aus `lists/{id}.allUserIds`, Chat-Nachrichten liegen unter
+// Bildet das Verhalten der 2025-07-13 ausgerollten Fassung
+// (`functions/lib/index.js`) nach: Mitglieder kommen aus
+// `lists/{id}.allUserIds`, Chat-Nachrichten liegen unter
 // `todos/{todoId}/chatMessages`, Push nur bei eingeschalteter Einstellung.
+// Ergänzt: stilles Löschen (Kontolöschung) und Anmeldepflicht beim Test-Push.
 
 import { onDocumentCreated, onDocumentUpdated, onDocumentDeleted } from 'firebase-functions/v2/firestore';
-import { onCall } from 'firebase-functions/v2/https';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
-
-admin.initializeApp();
-
-const db = admin.firestore();
-const messaging = admin.messaging();
+import { FieldPath } from 'firebase-admin/firestore';
+import { db, messaging, SILENT_DELETE_FIELD } from './common';
 
 const NotificationTypes = {
   TODO_CREATED: 'todo_created',
@@ -77,7 +75,7 @@ async function getFilteredMemberTokens(
   for (const chunk of chunks) {
     const snap = await db
       .collection('users')
-      .where(admin.firestore.FieldPath.documentId(), 'in', chunk)
+      .where(FieldPath.documentId(), 'in', chunk)
       .get();
 
     snap.forEach((doc) => {
@@ -190,6 +188,8 @@ export const onTodoCompleted = onDocumentUpdated({ region: 'europe-west3', docum
 export const onTodoDeleted = onDocumentDeleted({ region: 'europe-west3', document: 'todos/{todoId}' }, async (event) => {
   const d = event.data?.data();
   if (!d) return;
+  // Beim Aufräumen einer Kontolöschung keine Push-Flut auslösen.
+  if (d[SILENT_DELETE_FIELD] === true) return;
   const { deletedByUserId, userId, listId, title } = d;
   const members = await getListMembers(listId);
   await handleEvent({
@@ -298,6 +298,7 @@ export const onShoppingItemPurchased = onDocumentUpdated({ region: 'europe-west3
 export const onShoppingItemDeleted = onDocumentDeleted({ region: 'europe-west3', document: 'shopping_items/{itemId}' }, async (event) => {
   const d = event.data?.data();
   if (!d) return;
+  if (d[SILENT_DELETE_FIELD] === true) return;
   const { deletedByUserId, userId, listId, name } = d;
   const members = await getListMembers(listId);
   await handleEvent({
@@ -341,8 +342,15 @@ export const onShoppingListMemberRemoved = onDocumentUpdated({ region: 'europe-w
 });
 
 export const sendTestNotification = onCall({ region: 'europe-west3' }, async (request) => {
-  const { fcmToken, title = 'Test Nachricht', body = 'Das ist eine Test-Benachrichtigung!' } = request.data;
-  if (!fcmToken) throw new Error('FCM Token erforderlich');
+  // Nur angemeldet und nur an das eigene, gespeicherte Gerät – sonst könnte
+  // jeder mit der Projekt-ID beliebigen Geräten Nachrichten schicken.
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Anmeldung erforderlich');
+  const { fcmToken, title = 'Test Nachricht', body = 'Das ist eine Test-Benachrichtigung!' } = request.data ?? {};
+  if (!fcmToken) throw new HttpsError('invalid-argument', 'FCM Token erforderlich');
+  const userDoc = await db.collection('users').doc(request.auth.uid).get();
+  if (userDoc.data()?.fcmToken !== fcmToken) {
+    throw new HttpsError('permission-denied', 'Nur an das eigene Gerät');
+  }
   const message: admin.messaging.Message = {
     token: fcmToken,
     notification: { title, body },
