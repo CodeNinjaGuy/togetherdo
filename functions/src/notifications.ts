@@ -15,7 +15,7 @@ import { onDocumentCreated, onDocumentUpdated, onDocumentDeleted } from 'firebas
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
 import { FieldPath } from 'firebase-admin/firestore';
-import { db, messaging, SILENT_DELETE_FIELD } from './common';
+import { db, messaging, SILENT_DELETE_FIELD, deleteStoragePrefix, deleteTodoSubcollections, todoStoragePrefixes } from './common';
 
 const NotificationTypes = {
   TODO_CREATED: 'todo_created',
@@ -193,6 +193,11 @@ export const onTodoCompleted = onDocumentUpdated({ region: 'europe-west3', docum
 export const onTodoDeleted = onDocumentDeleted({ region: 'europe-west3', document: 'todos/{todoId}' }, async (event) => {
   const d = event.data?.data();
   if (!d) return;
+  // Anhänge, Chat und Dateien der Aufgabe mitlöschen (keine Waisen).
+  if (event.data) await deleteTodoSubcollections(event.data.ref);
+  if (typeof d.listId === 'string') {
+    for (const prefix of todoStoragePrefixes(d.listId, event.params.todoId)) await deleteStoragePrefix(prefix);
+  }
   // Beim Aufräumen einer Kontolöschung keine Push-Flut auslösen.
   if (d[SILENT_DELETE_FIELD] === true) return;
   const { deletedByUserId, userId, listId, title } = d;

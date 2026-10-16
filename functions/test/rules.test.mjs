@@ -405,6 +405,95 @@ describe('chatMessages', () => {
   });
 });
 
+describe('todo attachments (Anhänge)', () => {
+  const att = (id, userId, extra = {}) => ({
+    id,
+    todoId: 'T1',
+    listId: 'L1',
+    name: 'rechnung.pdf',
+    path: `todos/L1/T1/${id}-rechnung.pdf`,
+    url: 'https://firebasestorage.googleapis.com/x',
+    contentType: 'application/pdf',
+    size: 1234,
+    uploadedBy: userId,
+    uploadedByName: 'Max',
+    createdAt: now,
+    ...extra,
+  });
+  test('Mitglied hängt an und liest', async () => {
+    await assertSucceeds(setDoc(doc(db(member), 'todos/T1/attachments/A1'), att('A1', member)));
+    await assertSucceeds(getDocs(collection(db(member), 'todos/T1/attachments')));
+    await assertSucceeds(getDocs(collection(db(owner), 'todos/T1/attachments')));
+  });
+  test('Mitglied ohne allowEdit hängt an (Liste RO)', async () => {
+    await assertSucceeds(
+      setDoc(doc(db(viewer), 'todos/TRO/attachments/A2'), {
+        ...att('A2', viewer),
+        todoId: 'TRO',
+        listId: 'RO',
+        path: 'todos/RO/TRO/A2-rechnung.pdf',
+      }),
+    );
+  });
+  test('Fremder weder lesen noch anhängen; falscher Pfad, Typ, Größe, Urheber', async () => {
+    await assertFails(getDocs(collection(db(stranger), 'todos/T1/attachments')));
+    await assertFails(setDoc(doc(db(stranger), 'todos/T1/attachments/A3'), att('A3', stranger)));
+    await assertFails(setDoc(doc(db(member), 'todos/T1/attachments/A4'), att('A4', owner)));
+    await assertFails(setDoc(doc(db(member), 'todos/T1/attachments/A5'), att('A5', member, { path: 'todos/RO/T1/x.pdf' })));
+    await assertFails(setDoc(doc(db(member), 'todos/T1/attachments/A6'), att('A6', member, { contentType: 'application/zip' })));
+    await assertFails(setDoc(doc(db(member), 'todos/T1/attachments/A7'), att('A7', member, { size: 25 * 1024 * 1024 })));
+    await assertFails(setDoc(doc(db(member), 'todos/T1/attachments/A8'), att('A8', member, { listId: 'RO' })));
+  });
+  test('löschen: Urheber ja, Besitzer ja, anderes Mitglied ohne allowEdit nein', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const f = ctx.firestore();
+      await setDoc(doc(f, 'todos/T1/attachments/B1'), att('B1', member));
+      await setDoc(doc(f, 'todos/T1/attachments/B2'), att('B2', member));
+      await setDoc(doc(f, 'todos/TRO/attachments/B3'), {
+        ...att('B3', owner),
+        todoId: 'TRO',
+        listId: 'RO',
+        path: 'todos/RO/TRO/B3-rechnung.pdf',
+      });
+    });
+    await assertSucceeds(deleteDoc(doc(db(member), 'todos/T1/attachments/B1')));
+    await assertSucceeds(deleteDoc(doc(db(owner), 'todos/T1/attachments/B2')));
+    await assertFails(deleteDoc(doc(db(viewer), 'todos/TRO/attachments/B3')));
+    await assertFails(deleteDoc(doc(db(stranger), 'todos/TRO/attachments/B3')));
+  });
+  test('nicht veränderbar', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'todos/T1/attachments/C1'), att('C1', member));
+    });
+    await assertFails(updateDoc(doc(db(member), 'todos/T1/attachments/C1'), { name: 'anders.pdf' }));
+  });
+});
+
+describe('chatMessages mit Bild', () => {
+  const msg = (id, extra = {}) => ({
+    id,
+    todoId: 'T1',
+    userId: member,
+    userName: 'Max',
+    message: '',
+    timestamp: now,
+    isRead: false,
+    ...extra,
+  });
+  test('Bild mit https-Adresse und Pfad erlaubt', async () => {
+    await assertSucceeds(
+      setDoc(doc(db(member), 'todos/T1/chatMessages/P1'), msg('P1', {
+        imageUrl: 'https://firebasestorage.googleapis.com/bild.jpg',
+        imagePath: 'chats/L1/T1/bild.jpg',
+      })),
+    );
+  });
+  test('Bild ohne https oder mit überlangem Pfad verboten', async () => {
+    await assertFails(setDoc(doc(db(member), 'todos/T1/chatMessages/P2'), msg('P2', { imageUrl: 'javascript:alert(1)' })));
+    await assertFails(setDoc(doc(db(member), 'todos/T1/chatMessages/P3'), msg('P3', { imagePath: 'x'.repeat(600) })));
+  });
+});
+
 describe('shopping_items', () => {
   test('Mitglied ohne allowEdit darf abhaken, aber nicht umbenennen oder löschen', async () => {
     await assertSucceeds(

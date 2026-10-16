@@ -47,19 +47,56 @@ export async function deleteQueryInBatches(
   }
 }
 
-/** Löscht ein Todo samt seinem Chat. */
-export async function deleteTodoWithChat(
+/** Bucket der App (`<projekt>.firebasestorage.app`, wie in firebase_options). */
+export function appBucket() {
+  const projectId = process.env.GCLOUD_PROJECT ?? JSON.parse(process.env.FIREBASE_CONFIG ?? '{}').projectId;
+  return admin.storage().bucket(`${projectId}.firebasestorage.app`);
+}
+
+/** Löscht alle Dateien unter einem Storage-Pfad (Anhänge, Chat-Bilder).
+ *  Ein fehlender Bucket (Emulator ohne Storage) blockiert nichts. */
+export async function deleteStoragePrefix(prefix: string): Promise<void> {
+  try {
+    await appBucket().deleteFiles({ prefix, force: true });
+  } catch (e) {
+    console.warn(`Storage ${prefix} nicht aufgeräumt:`, (e as Error).message);
+  }
+}
+
+/** Storage-Pfade einer Aufgabe: Anhänge und Chat-Bilder. */
+export function todoStoragePrefixes(listId: string, todoId: string): string[] {
+  return [`todos/${listId}/${todoId}/`, `chats/${listId}/${todoId}/`];
+}
+
+/** Löscht Chat und Anhang-Beschreibungen einer Aufgabe (Unter-Sammlungen). */
+export async function deleteTodoSubcollections(
   todoRef: admin.firestore.DocumentReference,
 ): Promise<void> {
   await deleteQueryInBatches(todoRef.collection('chatMessages'));
-  await todoRef.delete();
+  await deleteQueryInBatches(todoRef.collection('attachments'));
 }
 
-/** Löscht alle Todos (mit Chats) und Einkaufsartikel einer Liste. */
+/** Löscht ein Todo samt Chat, Anhängen und Dateien. */
+export async function deleteTodoWithChat(
+  todoRef: admin.firestore.DocumentReference,
+): Promise<void> {
+  const snap = await todoRef.get();
+  const listId = snap.data()?.listId as string | undefined;
+  await deleteTodoSubcollections(todoRef);
+  await todoRef.delete();
+  if (listId) {
+    for (const prefix of todoStoragePrefixes(listId, todoRef.id)) await deleteStoragePrefix(prefix);
+  }
+}
+
+/** Löscht alle Todos (mit Chats und Anhängen), Einkaufsartikel und
+ *  Dateien einer Liste. */
 export async function deleteListContent(listId: string): Promise<void> {
   await deleteQueryInBatches(
     db.collection('todos').where('listId', '==', listId),
-    (doc) => deleteQueryInBatches(doc.ref.collection('chatMessages')).then(() => undefined),
+    (doc) => deleteTodoSubcollections(doc.ref),
   );
   await deleteQueryInBatches(db.collection('shopping_items').where('listId', '==', listId));
+  await deleteStoragePrefix(`todos/${listId}/`);
+  await deleteStoragePrefix(`chats/${listId}/`);
 }

@@ -5,6 +5,14 @@
 // Profilbilder liegen unter avatars/{uid}.jpg. Nur die Person selbst darf
 // ihr Bild schreiben oder löschen; angemeldete Nutzer dürfen Bilder lesen
 // (Anzeige bei Mitgliedern geteilter Listen, Chat, Zuweisungen).
+//
+// Anhänge an Aufgaben: todos/{listId}/{todoId}/{datei} (Bilder ≤ 10 MB,
+// PDF ≤ 20 MB), Bilder im Chat: chats/{listId}/{todoId}/{datei} (≤ 10 MB).
+// Lesen und Hochladen dürfen Mitglieder der Liste (Mitgliedschaft aus
+// Firestore `lists/{listId}.allUserIds`); löschen darf, wer hochgeladen
+// hat (Metadatum `uploadedBy`), oder wer die Liste bearbeiten darf.
+//
+// Tests: functions/test/storage.rules.test.mjs (Storage- + Firestore-Emulator).
 rules_version = '2';
 
 service firebase.storage {
@@ -19,6 +27,69 @@ service firebase.storage {
 
       allow delete: if request.auth != null
         && fileName == request.auth.uid + '.jpg';
+    }
+
+    // ------------------------------------------------------------ Anhänge
+    function listDoc(listId) {
+      return firestore.get(/databases/(default)/documents/lists/$(listId));
+    }
+
+    function isListMember(listId) {
+      return request.auth != null
+        && firestore.exists(/databases/(default)/documents/lists/$(listId))
+        && request.auth.uid in listDoc(listId).data.allUserIds;
+    }
+
+    function canEditList(listId) {
+      let list = listDoc(listId).data;
+      return list.ownerId == request.auth.uid
+        || (request.auth.uid in list.memberIds && list.get('allowEdit', true) != false);
+    }
+
+    function isImage() {
+      return request.resource.contentType.matches('image/(jpeg|png|webp|heic)')
+        && request.resource.size <= 10 * 1024 * 1024;
+    }
+
+    function isPdf() {
+      return request.resource.contentType == 'application/pdf'
+        && request.resource.size <= 20 * 1024 * 1024;
+    }
+
+    function uploadedBySelf() {
+      return request.resource.metadata != null
+        && 'uploadedBy' in request.resource.metadata
+        && request.resource.metadata.uploadedBy == request.auth.uid;
+    }
+
+    // Nur neue Dateien; Überschreiben ist nicht vorgesehen (Namen sind
+    // eindeutig, siehe AttachmentService).
+    function isNewFile() {
+      return resource == null;
+    }
+
+    function mayDelete(listId) {
+      return isListMember(listId)
+        && ((resource.metadata != null
+             && 'uploadedBy' in resource.metadata
+             && resource.metadata.uploadedBy == request.auth.uid)
+            || canEditList(listId));
+    }
+
+    match /todos/{listId}/{todoId}/{fileName} {
+      allow read: if isListMember(listId);
+      allow create: if isNewFile() && isListMember(listId)
+        && (isImage() || isPdf()) && uploadedBySelf();
+      allow update: if false;
+      allow delete: if mayDelete(listId);
+    }
+
+    match /chats/{listId}/{todoId}/{fileName} {
+      allow read: if isListMember(listId);
+      allow create: if isNewFile() && isListMember(listId)
+        && isImage() && uploadedBySelf();
+      allow update: if false;
+      allow delete: if mayDelete(listId);
     }
 
     // Alles andere bleibt gesperrt.

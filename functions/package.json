@@ -9,8 +9,9 @@
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
     "test:rules": "node --test test/rules.test.mjs",
+    "test:storage": "node --test test/storage.rules.test.mjs",
     "test:functions": "node --test --test-concurrency=1 test/functions.test.mjs",
-    "test:emulator": "firebase emulators:exec --only auth,firestore,functions,storage --project demo-togetherdo 'npm run test:rules && npm run test:functions'"
+    "test:emulator": "firebase emulators:exec --only auth,firestore,functions,storage --project demo-togetherdo 'npm run test:rules && npm run test:storage && npm run test:functions'"
   },
   "engines": {
     "node": "22"

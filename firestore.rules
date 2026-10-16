@@ -17,6 +17,8 @@
 // - `produkte/{ean}` ist der gemeinsame Zwischenspeicher des Strichcode-
 //   Scanners: Angemeldete lesen und legen an; Open-Facts-Daten (Quelle
 //   off/obf/opf) werden nie überschrieben, Löschen ist verboten.
+// - Anhänge (`todos/{id}/attachments`): anhängen darf jedes Mitglied,
+//   löschen die hochladende Person oder wer die Liste bearbeiten darf.
 // - Alles, was hier nicht erlaubt ist (z. B. `shares`, `rateLimits`), ist verboten.
 //
 // Tests: functions/test/rules.test.mjs (Firestore-Emulator).
@@ -172,11 +174,53 @@ service cloud.firestore {
 
       allow delete: if signedIn() && canEditList(resource.data.listId);
 
+      function todoListId() {
+        return get(/databases/$(database)/documents/todos/$(todoId)).data.listId;
+      }
+
+      // Bild im Chat (Storage `chats/{listId}/{todoId}/…`): optional,
+      // nur https-Adresse und Pfad in begrenzter Länge.
+      function validChatImage(d) {
+        return (d.get('imageUrl', null) == null
+                || (d.imageUrl is string && d.imageUrl.size() <= 1000
+                    && d.imageUrl.matches('^https?://.*')))
+          && (d.get('imagePath', null) == null
+              || (d.imagePath is string && d.imagePath.size() <= 500));
+      }
+
+      // Anhänge (Fotos/PDF) einer Aufgabe. Die Datei liegt in Storage,
+      // hier nur die Beschreibung. Anhängen darf jedes Mitglied, löschen
+      // nur, wer hochgeladen hat, oder wer die Liste bearbeiten darf.
+      match /attachments/{attachmentId} {
+        function validAttachment(d) {
+          return d.keys().hasOnly(['id', 'todoId', 'listId', 'name', 'path', 'url',
+                                   'contentType', 'size', 'uploadedBy',
+                                   'uploadedByName', 'createdAt'])
+            && d.id == attachmentId
+            && d.todoId == todoId
+            && d.listId == todoListId()
+            && d.uploadedBy == request.auth.uid
+            && d.name is string && d.name.size() >= 1 && d.name.size() <= 200
+            && d.path is string && d.path.size() <= 500
+            && d.path.matches('^todos/' + d.listId + '/' + todoId + '/.*')
+            && d.url is string && d.url.size() <= 1000
+            && d.contentType.matches('^(image/(jpeg|png|webp|heic)|application/pdf)$')
+            && d.size is int && d.size > 0 && d.size <= 20 * 1024 * 1024;
+        }
+
+        allow read: if signedIn() && isListMember(todoListId());
+        allow create: if signedIn()
+          && isListMember(todoListId())
+          && validAttachment(request.resource.data);
+        allow update: if false;
+        allow delete: if signedIn()
+          && isListMember(todoListId())
+          && (resource.data.uploadedBy == request.auth.uid
+              || canEditList(todoListId()));
+      }
+
       // Chat pro Todo
       match /chatMessages/{messageId} {
-        function todoListId() {
-          return get(/databases/$(database)/documents/todos/$(todoId)).data.listId;
-        }
 
         allow read: if signedIn() && isListMember(todoListId());
 
@@ -186,7 +230,8 @@ service cloud.firestore {
           && request.resource.data.todoId == todoId
           && request.resource.data.id == messageId
           && request.resource.data.message is string
-          && request.resource.data.message.size() <= 4000;
+          && request.resource.data.message.size() <= 4000
+          && validChatImage(request.resource.data);
 
         // Gelesen-Markierung durch Mitglieder; Text bleibt unverändert.
         allow update: if signedIn()
