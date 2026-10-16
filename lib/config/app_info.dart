@@ -6,4 +6,4 @@
 /// Sichtbare Versionsnummer der App, z. B. für den User-Agent bei
 /// Open Food Facts. Beim Versionssprung zusammen mit `pubspec.yaml`
 /// (`version:`) anheben.
-const String appVersion = '1.4.0';
+const String appVersion = '2.0.0';
