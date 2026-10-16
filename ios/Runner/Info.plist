@@ -35,6 +35,10 @@
 	<string>TogetherDo uses the camera to scan barcodes for your shopping list and to take a new profile picture.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>TogetherDo accesses your photos only when you choose a picture for your profile.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>TogetherDo uses the microphone only when you dictate items for your shopping list.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>TogetherDo turns what you say into shopping list items. Speech recognition runs on your device or via Apple.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIApplicationSupportsTimeSensitiveNotifications</key>

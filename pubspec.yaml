@@ -79,6 +79,9 @@ dependencies:
   mobile_scanner: ^7.4.2
   http: ^1.6.0
 
+  # Spracheingabe (Erkennung auf dem Gerät/System)
+  speech_to_text: ^7.5.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -2347,6 +2347,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Voice input'**
   String get voiceInput;
+
+  /// No description provided for @unit_cup.
+  ///
+  /// In en, this message translates to:
+  /// **'Cup'**
+  String get unit_cup;
+
+  /// No description provided for @unit_jar.
+  ///
+  /// In en, this message translates to:
+  /// **'Jar'**
+  String get unit_jar;
+
+  /// No description provided for @voiceListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening …'**
+  String get voiceListening;
+
+  /// No description provided for @voiceTapToSpeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap and speak, e.g. “2 kg tomatoes and 1 liter of milk”'**
+  String get voiceTapToSpeak;
+
+  /// No description provided for @voiceNothingUnderstood.
+  ///
+  /// In en, this message translates to:
+  /// **'I didn\'t catch that. Please try again.'**
+  String get voiceNothingUnderstood;
+
+  /// No description provided for @voiceUseResult.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Use 1 entry} other{Use {count} entries}}'**
+  String voiceUseResult(int count);
+
+  /// No description provided for @voiceAddAll.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Add 1 item} other{Add {count} items}}'**
+  String voiceAddAll(int count);
+
+  /// No description provided for @voiceRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Speak again'**
+  String get voiceRetry;
+
+  /// No description provided for @voiceStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get voiceStop;
+
+  /// No description provided for @voiceMicDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone not allowed'**
+  String get voiceMicDenied;
+
+  /// No description provided for @voiceMicDeniedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'ToGetherDo isn\'t allowed to use the microphone or speech recognition yet. Allow access in Settings to dictate items.'**
+  String get voiceMicDeniedMessage;
+
+  /// No description provided for @voiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input unavailable'**
+  String get voiceUnavailable;
+
+  /// No description provided for @voiceUnavailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech recognition isn\'t available on this device.'**
+  String get voiceUnavailableMessage;
+
+  /// No description provided for @voiceRecognized.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get voiceRecognized;
+
+  /// No description provided for @voiceDemoSpeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo sentence'**
+  String get voiceDemoSpeak;
+
+  /// No description provided for @voiceItemsAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item added} other{{count} items added}}'**
+  String voiceItemsAdded(int count);
+
+  /// No description provided for @voiceRemoveEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove entry'**
+  String get voiceRemoveEntry;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

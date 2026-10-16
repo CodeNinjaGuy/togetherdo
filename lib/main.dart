@@ -153,6 +153,8 @@ class TogetherDoApp extends StatelessWidget {
   }
 }
 
+const String _debugStart = String.fromEnvironment('TD_START');
+
 class TogetherDoAppView extends StatelessWidget {
   TogetherDoAppView({super.key});
 
@@ -249,7 +251,11 @@ class TogetherDoAppView extends StatelessWidget {
   }
 
   final GoRouter _router = GoRouter(
-    initialLocation: '/login',
+    // Debug-Builds können mit `--dart-define=TD_START=/design/einkauf`
+    // direkt auf einer Design-Route starten (Screenshots im Simulator).
+    initialLocation: kDebugMode && _debugStart.startsWith('/design/')
+        ? _debugStart
+        : '/login',
     redirect: (context, state) {
       // Prüfe Auth-Status
       final authBloc = context.read<AuthBloc>();

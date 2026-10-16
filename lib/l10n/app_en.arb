@@ -409,5 +409,43 @@
   "increaseQuantity": "More",
   "addManually": "Enter manually",
   "useProduct": "Use",
-  "voiceInput": "Voice input"
+  "voiceInput": "Voice input",
+  "unit_cup": "Cup",
+  "unit_jar": "Jar",
+  "voiceListening": "Listening …",
+  "voiceTapToSpeak": "Tap and speak, e.g. “2 kg tomatoes and 1 liter of milk”",
+  "voiceNothingUnderstood": "I didn't catch that. Please try again.",
+  "voiceUseResult": "{count, plural, =1{Use 1 entry} other{Use {count} entries}}",
+  "@voiceUseResult": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceAddAll": "{count, plural, =1{Add 1 item} other{Add {count} items}}",
+  "@voiceAddAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceRetry": "Speak again",
+  "voiceStop": "Done",
+  "voiceMicDenied": "Microphone not allowed",
+  "voiceMicDeniedMessage": "ToGetherDo isn't allowed to use the microphone or speech recognition yet. Allow access in Settings to dictate items.",
+  "voiceUnavailable": "Voice input unavailable",
+  "voiceUnavailableMessage": "Speech recognition isn't available on this device.",
+  "voiceRecognized": "Got it",
+  "voiceDemoSpeak": "Demo sentence",
+  "voiceItemsAdded": "{count, plural, =1{1 item added} other{{count} items added}}",
+  "@voiceItemsAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceRemoveEntry": "Remove entry"
 }

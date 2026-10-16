@@ -409,5 +409,43 @@
   "increaseQuantity": "Mehr",
   "addManually": "Von Hand eingeben",
   "useProduct": "Übernehmen",
-  "voiceInput": "Spracheingabe"
+  "voiceInput": "Spracheingabe",
+  "unit_cup": "Becher",
+  "unit_jar": "Glas",
+  "voiceListening": "Ich höre zu …",
+  "voiceTapToSpeak": "Tippe und sprich, z.B. „2 kg Tomaten und 1 Liter Milch“",
+  "voiceNothingUnderstood": "Ich habe nichts verstanden. Versuch es noch einmal.",
+  "voiceUseResult": "{count, plural, =1{1 Eintrag übernehmen} other{{count} Einträge übernehmen}}",
+  "@voiceUseResult": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceAddAll": "{count, plural, =1{1 Artikel hinzufügen} other{{count} Artikel hinzufügen}}",
+  "@voiceAddAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceRetry": "Noch einmal sprechen",
+  "voiceStop": "Fertig",
+  "voiceMicDenied": "Mikrofon nicht erlaubt",
+  "voiceMicDeniedMessage": "ToGetherDo darf Mikrofon oder Spracherkennung noch nicht verwenden. Erlaube den Zugriff in den Einstellungen, um Artikel zu diktieren.",
+  "voiceUnavailable": "Spracheingabe nicht verfügbar",
+  "voiceUnavailableMessage": "Auf diesem Gerät steht keine Spracherkennung zur Verfügung.",
+  "voiceRecognized": "Verstanden",
+  "voiceDemoSpeak": "Demo-Satz",
+  "voiceItemsAdded": "{count, plural, =1{1 Artikel hinzugefügt} other{{count} Artikel hinzugefügt}}",
+  "@voiceItemsAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceRemoveEntry": "Eintrag entfernen"
 }

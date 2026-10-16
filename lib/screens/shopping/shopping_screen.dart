@@ -17,9 +17,11 @@ import '../../repositories/list_repository.dart';
 import '../../repositories/product_repository.dart';
 import '../../repositories/shopping_repository.dart';
 import '../../services/scanner_session.dart';
+import '../../services/speech_service.dart';
 import '../../widgets/shopping/shopping_item_sheet.dart';
 import '../../widgets/shopping/shopping_item_widget.dart';
 import '../../widgets/shopping/shopping_quick_actions.dart';
+import '../../widgets/shopping/voice_input_sheet.dart';
 import 'barcode_scanner_screen.dart';
 
 class ShoppingScreen extends StatefulWidget {
@@ -37,6 +39,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
   late final FirebaseShoppingRepository _shoppingRepository;
   late final FirebaseListRepository _listRepository;
   late final Future<ListModel?> _listFuture;
+  final SpeechService _speech = DeviceSpeechService();
 
   @override
   void initState() {
@@ -112,14 +115,59 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
     );
   }
 
+  /// Mikrofon im Sheet: ein Eintrag füllt die Felder.
+  Future<ShoppingItemDraft?> _voiceForSheet() async {
+    final drafts = await showVoiceInputSheet(
+      context,
+      speech: _speech,
+      singleEntry: true,
+    );
+    return drafts?.firstOrNull;
+  }
+
+  /// Mikrofon als Schnellaktion: ein Eintrag → Sheet vorausgefüllt,
+  /// mehrere → nach Bestätigung direkt in die Liste.
+  Future<void> _voiceQuickAdd() async {
+    final drafts = await showVoiceInputSheet(
+      context,
+      speech: _speech,
+      addDirectly: true,
+    );
+    if (drafts == null || drafts.isEmpty || !mounted) return;
+    if (drafts.length == 1) {
+      await _addManually(initial: drafts.first);
+      return;
+    }
+    final l10n = AppLocalizations.of(context)!;
+    var added = 0;
+    for (final d in drafts) {
+      if (await _saveDraft(d, l10n, quiet: true)) added++;
+    }
+    if (!mounted || added == 0) return;
+    TdToast.show(
+      context,
+      l10n.voiceItemsAdded(added),
+      variant: TdToastVariant.success,
+      icon: Icons.mic_rounded,
+    );
+  }
+
   Future<void> _addManually({ShoppingItemDraft? initial}) async {
     final draft = await showShoppingItemSheet(
       context,
       initial: initial,
       onScan: barcodeScannerSupported ? _pickProduct : null,
+      onVoice: speechInputSupported ? _voiceForSheet : null,
     );
     if (draft == null || !mounted) return;
-    final l10n = AppLocalizations.of(context)!;
+    await _saveDraft(draft, AppLocalizations.of(context)!);
+  }
+
+  Future<bool> _saveDraft(
+    ShoppingItemDraft draft,
+    AppLocalizations l10n, {
+    bool quiet = false,
+  }) async {
     try {
       await _shoppingRepository.addItem(
         name: draft.name,
@@ -131,20 +179,24 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
         ean: draft.ean,
         imageUrl: draft.imageUrl,
       );
-      if (!mounted) return;
-      TdToast.show(
-        context,
-        l10n.scanAdded(draft.name),
-        variant: TdToastVariant.success,
-        icon: Icons.add_shopping_cart_rounded,
-      );
+      if (!mounted) return true;
+      if (!quiet) {
+        TdToast.show(
+          context,
+          l10n.scanAdded(draft.name),
+          variant: TdToastVariant.success,
+          icon: Icons.add_shopping_cart_rounded,
+        );
+      }
+      return true;
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) return false;
       TdToast.show(
         context,
         '${l10n.loadError}: $e',
         variant: TdToastVariant.error,
       );
+      return false;
     }
   }
 
@@ -154,6 +206,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
       initial: ShoppingItemDraft.fromItem(item),
       isEdit: true,
       onScan: barcodeScannerSupported ? _pickProduct : null,
+      onVoice: speechInputSupported ? _voiceForSheet : null,
     );
     if (draft == null || !mounted) return;
     final l10n = AppLocalizations.of(context)!;
@@ -282,6 +335,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
               ? ShoppingQuickActions(
                   onAdd: () => _addManually(),
                   onScan: barcodeScannerSupported ? _openScanner : null,
+                  onVoice: speechInputSupported ? _voiceQuickAdd : null,
                 )
               : null,
         );

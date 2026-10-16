@@ -1167,6 +1167,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voiceInput => 'Voice input';
+
+  @override
+  String get unit_cup => 'Cup';
+
+  @override
+  String get unit_jar => 'Jar';
+
+  @override
+  String get voiceListening => 'Listening …';
+
+  @override
+  String get voiceTapToSpeak => 'Tap and speak, e.g. “2 kg tomatoes and 1 liter of milk”';
+
+  @override
+  String get voiceNothingUnderstood => 'I didn\'t catch that. Please try again.';
+
+  @override
+  String voiceUseResult(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Use $count entries',
+      one: 'Use 1 entry',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String voiceAddAll(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count items',
+      one: 'Add 1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get voiceRetry => 'Speak again';
+
+  @override
+  String get voiceStop => 'Done';
+
+  @override
+  String get voiceMicDenied => 'Microphone not allowed';
+
+  @override
+  String get voiceMicDeniedMessage => 'ToGetherDo isn\'t allowed to use the microphone or speech recognition yet. Allow access in Settings to dictate items.';
+
+  @override
+  String get voiceUnavailable => 'Voice input unavailable';
+
+  @override
+  String get voiceUnavailableMessage => 'Speech recognition isn\'t available on this device.';
+
+  @override
+  String get voiceRecognized => 'Got it';
+
+  @override
+  String get voiceDemoSpeak => 'Demo sentence';
+
+  @override
+  String voiceItemsAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items added',
+      one: '1 item added',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get voiceRemoveEntry => 'Remove entry';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).

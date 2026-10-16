@@ -1167,6 +1167,81 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get voiceInput => 'Spracheingabe';
+
+  @override
+  String get unit_cup => 'Becher';
+
+  @override
+  String get unit_jar => 'Glas';
+
+  @override
+  String get voiceListening => 'Ich höre zu …';
+
+  @override
+  String get voiceTapToSpeak => 'Tippe und sprich, z.B. „2 kg Tomaten und 1 Liter Milch“';
+
+  @override
+  String get voiceNothingUnderstood => 'Ich habe nichts verstanden. Versuch es noch einmal.';
+
+  @override
+  String voiceUseResult(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Einträge übernehmen',
+      one: '1 Eintrag übernehmen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String voiceAddAll(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Artikel hinzufügen',
+      one: '1 Artikel hinzufügen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get voiceRetry => 'Noch einmal sprechen';
+
+  @override
+  String get voiceStop => 'Fertig';
+
+  @override
+  String get voiceMicDenied => 'Mikrofon nicht erlaubt';
+
+  @override
+  String get voiceMicDeniedMessage => 'ToGetherDo darf Mikrofon oder Spracherkennung noch nicht verwenden. Erlaube den Zugriff in den Einstellungen, um Artikel zu diktieren.';
+
+  @override
+  String get voiceUnavailable => 'Spracheingabe nicht verfügbar';
+
+  @override
+  String get voiceUnavailableMessage => 'Auf diesem Gerät steht keine Spracherkennung zur Verfügung.';
+
+  @override
+  String get voiceRecognized => 'Verstanden';
+
+  @override
+  String get voiceDemoSpeak => 'Demo-Satz';
+
+  @override
+  String voiceItemsAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Artikel hinzugefügt',
+      one: '1 Artikel hinzugefügt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get voiceRemoveEntry => 'Eintrag entfernen';
 }
 
 /// The translations for German, as used in Austria (`de_AT`).

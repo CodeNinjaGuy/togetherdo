@@ -4,3 +4,5 @@
  */
 "NSCameraUsageDescription" = "TogetherDo verwendet die Kamera, um Strichcodes für deine Einkaufsliste zu scannen und ein neues Profilbild aufzunehmen.";
 "NSPhotoLibraryUsageDescription" = "TogetherDo greift nur auf deine Fotos zu, wenn du ein Bild für dein Profil auswählst.";
+"NSMicrophoneUsageDescription" = "TogetherDo verwendet das Mikrofon nur, wenn du Artikel für deine Einkaufsliste diktierst.";
+"NSSpeechRecognitionUsageDescription" = "TogetherDo macht aus dem Gesagten Einträge für deine Einkaufsliste. Die Spracherkennung läuft auf deinem Gerät oder über Apple.";

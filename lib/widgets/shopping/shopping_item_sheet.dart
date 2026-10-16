@@ -80,6 +80,8 @@ List<String> shoppingUnits(AppLocalizations l10n) => [
   l10n.unit_bag,
   l10n.unit_bunch,
   l10n.unit_head,
+  l10n.unit_cup,
+  l10n.unit_jar,
 ];
 
 /// Öffnet das Sheet zum Anlegen oder Bearbeiten eines Einkaufsartikels.
@@ -94,7 +96,7 @@ Future<ShoppingItemDraft?> showShoppingItemSheet(
   ShoppingItemDraft? initial,
   bool isEdit = false,
   Future<ProductInfo?> Function()? onScan,
-  Widget? extraAction,
+  Future<ShoppingItemDraft?> Function()? onVoice,
 }) {
   final l10n = AppLocalizations.of(context)!;
   return showTdSheet<ShoppingItemDraft>(
@@ -104,7 +106,7 @@ Future<ShoppingItemDraft?> showShoppingItemSheet(
       initial: initial ?? const ShoppingItemDraft(),
       isEdit: isEdit,
       onScan: onScan,
-      extraAction: extraAction,
+      onVoice: onVoice,
       onSubmit: (draft) => Navigator.of(ctx).pop(draft),
     ),
   );
@@ -117,7 +119,7 @@ class ShoppingItemForm extends StatefulWidget {
     required this.onSubmit,
     this.isEdit = false,
     this.onScan,
-    this.extraAction,
+    this.onVoice,
   });
 
   final ShoppingItemDraft initial;
@@ -125,8 +127,9 @@ class ShoppingItemForm extends StatefulWidget {
   final bool isEdit;
   final Future<ProductInfo?> Function()? onScan;
 
-  /// Zusätzlicher Knopf neben dem Namen (z. B. Mikrofon).
-  final Widget? extraAction;
+  /// Spracheingabe: liefert einen Entwurf, der die Felder füllt.
+  /// `null` blendet das Mikrofon aus (Plattform ohne Spracherkennung).
+  final Future<ShoppingItemDraft?> Function()? onVoice;
 
   @override
   State<ShoppingItemForm> createState() => _ShoppingItemFormState();
@@ -213,6 +216,14 @@ class _ShoppingItemFormState extends State<ShoppingItemForm> {
     } finally {
       if (mounted) setState(() => _scanning = false);
     }
+  }
+
+  Future<void> _voice() async {
+    final onVoice = widget.onVoice;
+    if (onVoice == null) return;
+    final draft = await onVoice();
+    if (!mounted || draft == null) return;
+    applyDraft(draft);
   }
 
   void _removeProduct() => setState(() {
@@ -304,9 +315,18 @@ class _ShoppingItemFormState extends State<ShoppingItemForm> {
                 },
               ),
             ),
-            if (widget.extraAction != null) ...[
+            if (widget.onVoice != null) ...[
               const SizedBox(width: TdSpace.sm),
-              widget.extraAction!,
+              Padding(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: TdIconButton(
+                  icon: Icons.mic_rounded,
+                  tooltip: l10n.voiceInput,
+                  filled: true,
+                  size: 48,
+                  onPressed: _voice,
+                ),
+              ),
             ],
           ],
         ),

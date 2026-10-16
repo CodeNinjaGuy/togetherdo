@@ -19,8 +19,10 @@ import '../../models/shopping_item_model.dart';
 import '../../repositories/product_repository.dart';
 import '../../repositories/shopping_repository.dart';
 import '../../services/scanner_session.dart';
+import '../../services/speech_service.dart';
 import '../../widgets/shopping/shopping_item_sheet.dart';
 import '../../widgets/shopping/shopping_quick_actions.dart';
+import '../../widgets/shopping/voice_input_sheet.dart';
 import 'barcode_scanner_screen.dart';
 import 'shopping_screen.dart';
 
@@ -140,6 +142,12 @@ class _ShoppingDemoScreenState extends State<ShoppingDemoScreen> {
   );
   bool _dark = false;
 
+  SpeechService _speech(BuildContext context) => FakeSpeechService(
+    script: Localizations.localeOf(context).languageCode == 'en'
+        ? '2 kilos of tomatoes and a liter of milk and 6 eggs'
+        : '2 Kilo Tomaten und ein Liter Milch und 6 Eier',
+  );
+
   @override
   void initState() {
     super.initState();
@@ -214,8 +222,56 @@ class _ShoppingDemoScreenState extends State<ShoppingDemoScreen> {
     demo: true,
   );
 
-  Future<void> _add() async {
-    final draft = await showShoppingItemSheet(context, onScan: _pick);
+  Future<ShoppingItemDraft?> _voiceForSheet() async {
+    final drafts = await showVoiceInputSheet(
+      context,
+      speech: FakeSpeechService(
+        script: Localizations.localeOf(context).languageCode == 'en'
+            ? '2 kilos of tomatoes'
+            : '2 Kilo Tomaten',
+      ),
+      singleEntry: true,
+    );
+    return drafts?.firstOrNull;
+  }
+
+  Future<void> _voice() async {
+    final drafts = await showVoiceInputSheet(
+      context,
+      speech: _speech(context),
+      addDirectly: true,
+    );
+    if (drafts == null || drafts.isEmpty || !mounted) return;
+    if (drafts.length == 1) {
+      await _add(initial: drafts.first);
+      return;
+    }
+    for (final d in drafts) {
+      await _repo.addItem(
+        name: d.name,
+        quantity: d.quantity,
+        unit: d.unit ?? 'Stück',
+        userId: 'demo',
+        listId: _listId,
+      );
+    }
+    if (!mounted) return;
+    setState(() {});
+    TdToast.show(
+      context,
+      AppLocalizations.of(context)!.voiceItemsAdded(drafts.length),
+      variant: TdToastVariant.success,
+      icon: Icons.mic_rounded,
+    );
+  }
+
+  Future<void> _add({ShoppingItemDraft? initial}) async {
+    final draft = await showShoppingItemSheet(
+      context,
+      initial: initial,
+      onScan: _pick,
+      onVoice: _voiceForSheet,
+    );
     if (draft == null) return;
     await _repo.addItem(
       name: draft.name,
@@ -236,6 +292,7 @@ class _ShoppingDemoScreenState extends State<ShoppingDemoScreen> {
       initial: ShoppingItemDraft.fromItem(item),
       isEdit: true,
       onScan: _pick,
+      onVoice: _voiceForSheet,
     );
     if (draft == null) return;
     await _repo.updateItem(
@@ -305,7 +362,11 @@ class _ShoppingDemoScreenState extends State<ShoppingDemoScreen> {
         onAddFirst: _add,
         onScanFirst: _scan,
       ),
-      floatingActionButton: ShoppingQuickActions(onAdd: _add, onScan: _scan),
+      floatingActionButton: ShoppingQuickActions(
+        onAdd: _add,
+        onScan: _scan,
+        onVoice: _voice,
+      ),
     );
   }
 }
